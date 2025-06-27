@@ -94,7 +94,7 @@ int main(void) {
  //   configureDerivedQuantities();  // This must be the last configuration run.
 
     // Set PCB LED state if desired
-//    LATBbits.LATB2 = 0;   // Illuminate LED to show MCU power
+    LATBbits.LATB2 = 0;   // Illuminate LED to show MCU power
 //    LATBbits.LATB1 = 0;
 
     INTCON2bits.GIE  = 1;    //global interrupt enable
@@ -120,6 +120,8 @@ int main(void) {
     //uint16_t val=0;
     // Make RB11 digital input for pushbutton
     TRISBbits.TRISB11 = 1;
+    uint32_t blinkCounter=0;               // counter for LED blink
+    uint32_t blinkCounterMax = 500000;   // determines blink rate
     while(1) {
         // IMPORTANT NOTE ABOUT DELAYS IN THIS LOOP:
         // Substantial delays should not be put in the main while loop, as the design of the 
@@ -130,6 +132,16 @@ int main(void) {
         // stuck waiting for the master to read off its FIFO, the master write FIFO could then fill up as a result
         // and both cores would just wait for one another.
   //      __delay32(g_OscillatorFreq/2);
+        
+  //      LATBbits.LATB2 = 0;
+        // Blink LED 1
+        if(blinkCounter == blinkCounterMax) {
+            LATBbits.LATB2 = ~PORTBbits.RB2;
+            blinkCounter = 0;
+        }
+        else {
+            blinkCounter++;
+        }
        
 //        if(val==0) {
 //            startMotion();
