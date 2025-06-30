@@ -40,12 +40,9 @@ void setMotorOutput(int16_t pwmSignedDutyCycleInt) {
         pwmDutyCycleInt = gs_maxPWMInteger;
     }
     
-//    if(pwmDutyCycleInt > 0) {
-//        LATBbits.LATB1 = 1;
-//    }
     
     INTCON2bits.GIE = 0;                // disable global interrupts
-    LATBbits.LATB15 = dir;              // set direction
+    LATCbits.LATC5 = dir;              // set direction
     setOnCyclesPWM1(pwmDutyCycleInt);   // actual direct setting of motor output voltage
     INTCON2bits.GIE = 1;                //re-enable global interrupt 
     

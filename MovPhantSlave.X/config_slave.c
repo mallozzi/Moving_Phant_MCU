@@ -15,9 +15,14 @@ void configSlaveInitial() {
 // Some state variables
     gs_zeroPosOutput = true;                    // will get set when starting motion
     gs_outputEnabled = false;
-    
-    TRISBbits.TRISB15 = 0;                      // dir output
-    TRISBbits.TRISB14 = 0;                      // pwm output
+ 
+    // Configure Motor 1 and 2 Driver, direction outputs as digital output pins
+//    TRISBbits.TRISB15 = 0;                      // dir output
+//    TRISBbits.TRISB14 = 0;                      // pwm output
+    TRISCbits.TRISC4 = 0;                       // PWM_Driver1 (Motor 1)
+    TRISCbits.TRISC5 = 0;                       // DIR1  (Motor 1 direction)
+    TRISCbits.TRISC10 = 0;                       // PWM_Driver2 (Motor 2)
+    TRISCbits.TRISC11 = 0;                       // DIR2  (Motor 2 direction)
    
 }
 

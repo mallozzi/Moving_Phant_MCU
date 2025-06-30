@@ -49,9 +49,6 @@ int main(void) {
     // main loop continually monitors the master-slave FIFO and reacts accordingly
     //Register fifo_reg;
     Register fifoReg;
-//    Command fifoCmd;
-//    Variable fifoVar;
-//    uint16_t fifoVal;
 
     TRISBbits.TRISB1 = 0;
     ANSELBbits.ANSELB1 = 0;
@@ -80,13 +77,7 @@ int main(void) {
             
             
         }
-//        if(gs_startMotor) {
-//            setUpWaveform();
-//            
-//            
-//            gs_startMotor = false;    // stops code from entering this block until start requested again
-//        }
-    }
+    }  // main while loop
     return 0;
 }
 
@@ -96,6 +87,11 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM1Interrupt(void)
     // with whatever value is in g_pwm1Cycles. That variable gets updated elsewhere. It also controls the advancement through the
     // output waveform. Every g_waveformUpdatePeriod interrupts, the index into the waveform array g_outputWaveform is advanced.
     
+    // Performs two primary functions
+    //      1) Manages the waveform updates. Every gs_waveformUpdatePeriod interrupts, the demand from the waveform is loaded 
+    //         into gs_displacementDemand and the waveform index is advanced
+    //      2) Sets the motor output to whatever is in gs_pwm1Cycles. That value is set in the feedback loop code and ultimately
+    //         comes in through the master-secondary interface.
     
     
     static uint16_t outputCount=0;              // tracks the number of PWM1 interrupts since the output has been updated
@@ -105,20 +101,16 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM1Interrupt(void)
     static uint16_t wf_ind=0;
     
     if(gs_outputEnabled) {  // if output is enabled use waveform
-        // Every 50 PWM1 interrupts update the pwm output. For pwm period of 50 microseconds, this is once every 2.5 milliseconds
+        // Every outputUpdatePeriod interrupts update the pwm output. For pwm period of 50 microseconds, this is once every 2.5 milliseconds
         outputCount++;
         if(outputCount >= outputUpdatePeriod) {      // time to update output to motor with whatever is currently requested
             if(!gs_zeroPosOutput) {             
                 setMotorOutput(gs_pwm1Cycles);
                 outputCount = 0;
- //               LATBbits.LATB1 = 1;
             }
             else { // zero output has been requested
-             //   setMotorOutput(0);
                 gs_outputEnabled = false;
- //               while(SI1FIFOCSbits.SWFFULL);  // TEMP -- try waiting for FIFO to clear (testing delay)
                 sendBoolVarToPrimary(OUTPUT_ENABLED, false);
- //               LATBbits.LATB1 = 0;
             }
         }
 
@@ -140,8 +132,6 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM1Interrupt(void)
                 }
             }
             gs_displacementDemand = gs_outputWaveform[wf_ind];
-            
-//            LATBbits.LATB1 = 1;
 
             if(!SI1FIFOCSbits.SWFFULL) {  // FIFO should not fill up, but if a __delay command were put on the master side, it could happen
                 send32bVariableToPrimary(DISPLACEMENT_DEMAND, (uint16_t)gs_displacementDemand);

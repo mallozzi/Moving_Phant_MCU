@@ -172,17 +172,6 @@ int main(void) {
 
             }
         }
-        
-//        if(val==0 && PORTBbits.RB11 == 1) {
-//            sendCommandToSecondary(START_MOTION);
-//            val=1;
-//        }
-//        else if (val==1 && PORTBbits.RB11 == 0) {
-//            sendCommandToSecondary(STOP_MOTION);
-//            val=0;
-//        }
-        
-                // 2**** NEW VERSION OF MAIN CODE ****2
          
          // The purpose of starting the motor this way rather than calling a function from registerHandler is to allow
          // the I2c transmission to finish without having to wait for all the waveform configuration code to run.
@@ -202,49 +191,13 @@ int main(void) {
             sendCommandToSecondary(START_MOTION);
             g_startMotor = false;         // stops code from entering this block until start button pushed again
             
-            // TO DO: send command to slave
          }
          
          if(g_gotoLandmark) {
              gotoLandmark();
              g_gotoLandmark = false;
          }
-        
-  //      __delay32(g_OscillatorFreq/40);
-     
-         // 2**** END SECTION: NEW VERSION OF MAIN CODE ***2
-        
-        
-        
-        // 8**** THIS SECTION HAS THE MAIN CODE THAT NEEDS TO BE MODIFIED FOR MASTER-SLAVE OPERATION ****8
-//         __delay32(g_OscillatorFreq/256);
-//         
-//         
-//         
-//         // The purpose of starting the motor this way rather than calling a function from registerHandler is to allow
-//         // the I2c transmission to finish without having to wait for all the waveform configuration code to run.
-//         // Master does the configuration on its side, then sends a command to the secondary to do its configuration
-//         // and start the motion
-//         if(g_startMotor) {
-//            configureDerivedQuantities();
-//          //  setUpWaveform();
-//            g_resetWaveform = true;
-//            setZeroPosition();
-//            g_displacementDemand = 0;
-//            enableDriver(true);           
-//            g_zeroPosOutput = false;
-//            g_outputEnabled = true;
-//            g_startMotor = false;         // stops code from entering this block until start button pushed again
-//            
-//            // TO DO: send command to slave
-//         }
-//         
-//         if(g_gotoLandmark) {
-//             gotoLandmark();
-//             g_gotoLandmark = false;
-//         }
-     
-         // 8**** END SECTION ***8
+
     }  // while(1))
     
     return 0;

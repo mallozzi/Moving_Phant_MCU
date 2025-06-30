@@ -6,3 +6,15 @@ MovPhantSlave.X/build/default/production/config_slave.o
 MovPhantSlave.X/build/
 MovPhantSlave.X/dist/
 MovPhantMaster.X/dist/
+*.inx
+MovPhantMaster.X/defmplabxtrace.log
+MovPhantMaster.X/nbproject/Makefile-default.mk
+MovPhantMaster.X/nbproject/Makefile-genesis.properties
+MovPhantMaster.X/nbproject/Makefile-impl.mk
+MovPhantMaster.X/nbproject/Makefile-local-default.mk
+MovPhantMaster.X/nbproject/Makefile-variables.mk
+MovPhantSlave.X/nbproject/Makefile-default.mk
+MovPhantSlave.X/nbproject/Makefile-genesis.properties
+MovPhantSlave.X/nbproject/Makefile-impl.mk
+MovPhantSlave.X/nbproject/Makefile-local-default.mk
+MovPhantSlave.X/nbproject/Makefile-variables.mk
