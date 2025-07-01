@@ -3,7 +3,7 @@
 #include "globals.h"
 //#include "PWMcontrol.h"
 #include <stdbool.h>
-#include <p33CH128MP502.h>
+//#include <p33CH128MP502.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -225,10 +225,6 @@ void configureDerivedQuantities() {
     // Calculates the time between each step in the waveform playout. Depends upon configuration of the PWM and the number of interrupts.
     // This will determine how many points are in the waveform array
     g_waveformTimeStep_microS = (uint32_t)(g_maxPWMInteger + 1) * (uint32_t)g_waveformUpdatePeriod / (uint32_t)(g_OscillatorFreq*2 / 1000000);
-//    if(g_maxPWMInteger == 0) {
-//        LATBbits.LATB2 = 1;
-//    }    
-    // Set the number of points in the waveform array
     calcNumPoints();
 }
 
@@ -402,9 +398,6 @@ void calcNumPoints() {
     
     float period_microSec =  60.0 * 1000000.0 / (float)g_freqUser;
     g_numArrayVals = (uint16_t)( period_microSec / (float)g_waveformTimeStep_microS + 0.5 );
-//    if(period_microSec > 100000) {
-//        LATBbits.LATB2 = 1;
-//    }
 }
 
 

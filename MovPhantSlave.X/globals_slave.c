@@ -9,7 +9,8 @@
 int16_t gs_pwm1Cycles=0;                      // Duty cycle parameter for PWM1
 uint16_t gs_maxPWMInteger;                  // maximum PWM integer allowed
 
-bool gs_outputEnabled;              // true when motion output is enabled, false otherwise.
+bool gs_output1Enabled;              // true when motion output is enabled, false otherwise.
+bool gs_output2Enabled;              // true when motion output is enabled, false otherwise.
 
 // Waveform parameters
 volatile bool gs_resetWaveform = false;     // causes waveform array index to be reset to zero.

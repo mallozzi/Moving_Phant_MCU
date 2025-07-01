@@ -22,7 +22,8 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-void setMotorOutput(int16_t pwmSignedDutyCycleInt);
+void setMotorOutput1(int16_t pwmSignedDutyCycleInt);
+void setMotorOutput2(int16_t pwmSignedDutyCycleInt);
 
 #endif	/* MOTOR_CONTROL_H */
 

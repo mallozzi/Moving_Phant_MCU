@@ -24,7 +24,8 @@ extern "C" {
 // Registers
 enum reg {
     COMMAND,
-    OUTPUT_ENABLED,
+    OUTPUT1_ENABLED,
+    OUTPUT2_ENABLED,
     PWM_MOT1
 };
 

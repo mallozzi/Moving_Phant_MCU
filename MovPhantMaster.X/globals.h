@@ -34,10 +34,11 @@ extern unsigned long int g_OscillatorFreq; //Oscillator frequency
 enum DIG_STATE {LOW = 0, HIGH = 1}; 
 enum LOGICAL {FALSE,TRUE};
 
-extern bool g_outputEnabled;                // true when motion output is enabled, false otherwise.
+extern bool g_output1Enabled;               // true when motion output is enabled, false otherwise.
+extern bool g_output2Enabled;               // true when motion output is enabled, false otherwise.
 
 // PWM parameters
-extern int16_t g_pwm1Cycles;               // Signed duty cycle parameter for PWM1.
+extern int16_t g_pwm1Cycles;                // Signed duty cycle parameter for PWM1.
 //extern uint16_t g_maxPWMInteger;           // maximum PWM integer allowed
 
 // User configuration parameters

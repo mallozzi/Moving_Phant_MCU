@@ -95,7 +95,6 @@ int main(void) {
 
     // Set PCB LED state if desired
     LATBbits.LATB2 = 0;   // Illuminate LED to show MCU power
-//    LATBbits.LATB1 = 0;
 
     INTCON2bits.GIE  = 1;    //global interrupt enable
     
@@ -142,22 +141,7 @@ int main(void) {
         else {
             blinkCounter++;
         }
-       
-//        if(val==0) {
-//            startMotion();
-//     //       LATBbits.LATB2 = 0;
-//     //       sendBoolVarToSecondary(OUTPUT_ENABLED, true);
-//     //       send32bVariableToSecondary(WAVEFORM_TIMESTEP_MICROS, 7000);
-//            val=1;
-//        }
-//        else if (val==1) {
-//     //       LATBbits.LATB2 = 1;
-//            stopMotion();
-//           // sendBoolVarToSecondary(OUTPUT_ENABLED, false);
-//            //send32bVariableToSecondary(WAVEFORM_TIMESTEP_MICROS, 0x0F000010);
-//            val=0;
-//        }
-//        __delay32(g_OscillatorFreq/200);
+
         // Monitor Master-Secondary Read Fifo for incoming transmission
         while(!MSI1FIFOCSbits.RFEMPTY) {  // read until the read FIFO is empty
             if(!MSI1FIFOCSbits.RFEMPTY) {
@@ -183,8 +167,6 @@ int main(void) {
            // g_resetWaveform = true;
             setZeroPosition();
             g_displacementDemand = 0;           
- //           g_zeroPosOutput = false;
-            //g_outputEnabled = true;
             sendParamtersToSecondary();
             while(!MSI1FIFOCSbits.WFEMPTY);         // wait for secondary to finish reading the FIFO. 
             enableDriver(true);
@@ -260,7 +242,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
     setOnCyclesPWM2((uint16_t)pwmPosition);
     
     // ---------------  POSITION FEEDBACK CONTROL ------------------
-    if(g_outputEnabled) {
+    if(g_output1Enabled) {
         displacementError = displacement - g_displacementDemand;
         integralDisplacementError+= displacementError;
         // clip integral error
@@ -287,7 +269,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
             tmpCount=0;
         }
     }
-    else {  // g_outputEnabled
+    else {  // g_output1Enabled
 	// Decay output voltage gradually. Rate of decay in ms will depend upon T1 interrupt rate
         integralDisplacementError = 0;
         g_pwm1Cycles = (int16_t)( (int32_t)g_pwm1Cycles*93/100 );   
@@ -301,21 +283,6 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
     
     // --------------- END POSITION FEEDBACK CONTROL ------------------  
 
-    //LED output for development purposes
-//    if(g_pwm1Cycles > 11800) {
-//        LATBbits.LATB1 = 1;
-//        LATBbits.LATB2 = 0;
-//        
-//    }
-//    else if(g_pwm1Cycles < -11800) {
-//        LATBbits.LATB1 = 0;
-//        LATBbits.LATB2 = 1;
-//
-//    }
-//    else {
-//        LATBbits.LATB1 = 0;
-//        LATBbits.LATB2 = 0;
-//    }
     
     IFS0bits.T1IF = 0;
 

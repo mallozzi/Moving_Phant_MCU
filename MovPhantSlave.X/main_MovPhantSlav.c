@@ -47,7 +47,6 @@ int main(void) {
     startPWM1();
     
     // main loop continually monitors the master-slave FIFO and reacts accordingly
-    //Register fifo_reg;
     Register fifoReg;
 
     TRISBbits.TRISB1 = 0;
@@ -72,7 +71,6 @@ int main(void) {
             }
             else if (fifoReg == REG_BOOLVAR) {
                 receiveBoolVarFromPrimary();
-            //    sendBoolVarToPrimary(OUTPUT_ENABLED, gs_outputEnabled);
             }
             
             
@@ -81,12 +79,8 @@ int main(void) {
     return 0;
 }
 
-void __attribute__((__interrupt__,no_auto_psv)) _PWM1Interrupt(void)
-{
-    // The PWM1 interrupt is used to update the motor output. Every outputCount interrupts, the output to the motor is updated
-    // with whatever value is in g_pwm1Cycles. That variable gets updated elsewhere. It also controls the advancement through the
-    // output waveform. Every g_waveformUpdatePeriod interrupts, the index into the waveform array g_outputWaveform is advanced.
-    
+void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
+{   
     // Performs two primary functions
     //      1) Manages the waveform updates. Every gs_waveformUpdatePeriod interrupts, the demand from the waveform is loaded 
     //         into gs_displacementDemand and the waveform index is advanced
@@ -95,22 +89,27 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM1Interrupt(void)
     
     
     static uint16_t outputCount=0;              // tracks the number of PWM1 interrupts since the output has been updated
-    static uint16_t outputUpdatePeriod=50;      // number of PWM periods between an update to the output.   
-    static uint16_t waveformCount=0;            // tracks how many PWM1 periods between advances in the waveform array
-    
+    static uint16_t outputUpdatePeriod=50;      // number of PWM periods between an update to the output. Make it an even number.   
+    static uint16_t waveformCount=0;            // tracks how many PWM1 periods between advances in the waveform array    
     static uint16_t wf_ind=0;
     
-    if(gs_outputEnabled) {  // if output is enabled use waveform
-        // Every outputUpdatePeriod interrupts update the pwm output. For pwm period of 50 microseconds, this is once every 2.5 milliseconds
+    static uint16_t halfUpdatePeriod;
+    halfUpdatePeriod = outputUpdatePeriod / 2;
+    
+    // Motor 1 
+    if(gs_output1Enabled) {  // if output is enabled use waveform
+        // Every outputUpdatePeriod interrupts update the pwm output. For pwm period of 50 microseconds, this is once every 2.5 milliseconds.
+        // Within the loop, alternate updating motor 1 and motor 2 outputs, so that motor 1 is updated at the beginning of an
+        // ...update period, and motor 2 is updated halfway through the update period.
         outputCount++;
         if(outputCount >= outputUpdatePeriod) {      // time to update output to motor with whatever is currently requested
             if(!gs_zeroPosOutput) {             
-                setMotorOutput(gs_pwm1Cycles);
+                setMotorOutput1(gs_pwm1Cycles);
                 outputCount = 0;
             }
             else { // zero output has been requested
-                gs_outputEnabled = false;
-                sendBoolVarToPrimary(OUTPUT_ENABLED, false);
+                gs_output1Enabled = false;
+                sendBoolVarToPrimary(OUTPUT1_ENABLED, false);
             }
         }
 
@@ -125,9 +124,10 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM1Interrupt(void)
             if(wf_ind >= gs_numArrayVals) {                  // if end of array, cycle back to beginning
                 wf_ind = 0;
                 if(gs_playSingleWaveformOnly) {
-                    //setMotorOutput(0);
-                    sendBoolVarToPrimary(OUTPUT_ENABLED, false);
-                    gs_outputEnabled = false;
+                    sendBoolVarToPrimary(OUTPUT1_ENABLED, false);
+                    gs_output1Enabled = false;
+                    sendBoolVarToPrimary(OUTPUT2_ENABLED, false);
+                    gs_output2Enabled = false;
                     gs_playSingleWaveformOnly = false;        // reset for future waveforms. 
                 }
             }
@@ -142,16 +142,15 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM1Interrupt(void)
         }
 //        
     }
-    else {
-        //setMotorOutput(0);
+    else { // if gs_output1Enabled
         outputCount = 0;
         waveformCount = 0;
         wf_ind = 0;
-        setMotorOutput(gs_pwm1Cycles);  // if output is disabled, gs_pwm1Cycles will be decayed to zero in T1 interrupt loop in primary core
- //       LATBbits.LATB1 = 0;
+        setMotorOutput1(gs_pwm1Cycles);  // if output is disabled, gs_pwm1Cycles will be decayed to zero in T1 interrupt loop in primary core
     }
     
+   
     // Clear the PWM1 interrupt flag
-    IFS4bits.PWM1IF = 0;
+    IFS4bits.PWM2IF = 0;
     
 }

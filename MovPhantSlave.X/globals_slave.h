@@ -23,7 +23,8 @@ extern "C" {
 // *** VARIABLES THAT MUST BE SYNCRONIZED BETWEEN MASTER AND SECONDARY ***
 
 
-extern bool gs_outputEnabled;                       // true when motion output is enabled, false otherwise.
+extern bool gs_output1Enabled;                      // true when motion output is enabled, false otherwise.
+extern bool gs_output2Enabled;                      // true when motion output is enabled, false otherwise.
 
 // PWM parameters
 extern int16_t gs_pwm1Cycles;                       // Signed duty cycle parameter for PWM1.

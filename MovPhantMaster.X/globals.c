@@ -22,7 +22,8 @@ int16_t g_motorTestPwm = 3000;              // for motor test mode only - pwm in
 bool g_faultDetected;
 uint16_t g_errorFlags;
 
-bool g_outputEnabled = false;           // true when motion output is enabled, false otherwise.
+bool g_output1Enabled = false;           // true when motion output is enabled, false otherwise.
+bool g_output2Enabled = false;           // true when motion output is enabled, false otherwise.
 
 // User configuration parameters
 uint16_t g_maxDisplacementMM;           // Maximum peak-to-peak displacement in mm for translational motion

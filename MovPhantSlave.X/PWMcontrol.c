@@ -27,8 +27,8 @@ void configurePWM1() {
     PG2DC = 0; //width of pulse in clock cycles. Initial value of zero would give no output
     
     //Set up PWM1 interrupts. PWM interrupts come at the end of each PWM period.
-    IFS4bits.PWM2IF = 0; //Clear PWM1 interrupt flag
-    IEC4bits.PWM2IE = 1; //Enable PWM1 interrupt      ********************DON'T FORGET TO RE-ENABLE THE INTERRUPT !!!!!!!!!!!!!!! ****************
+    IFS4bits.PWM2IF = 0; //Clear PWM2 interrupt flag
+    IEC4bits.PWM2IE = 1; //Enable PWM2 interrupt      ********************DON'T FORGET TO RE-ENABLE THE INTERRUPT !!!!!!!!!!!!!!! ****************
     INTCON2bits.GIE = 1; //global interrupt enable   
     
     //Make sure PWM1 is disabled. It will get enabled by the startPWM1() function.
@@ -90,7 +90,7 @@ void configurePWM2() {
 //}
 
 void setOnCyclesPWM1(uint16_t nCyclesOn) {
-    // sets the number of cycles for the on portion of the pulse. If this is set to the same value that is in
+    // sets the number of cycles for the on portion of the pulse for Motor 1. If this is set to the same value that is in
     // the PG1PER register, a 100% duty cycle pulse is produced.
     // INPUT
     // nCyclesOn is the number of PWM clock cycles for the on portion of the pulse. Note that the PWM clock is not the same
@@ -102,7 +102,7 @@ void setOnCyclesPWM1(uint16_t nCyclesOn) {
 }
 
 void setOnCyclesPWM2(uint16_t nCyclesOn) {
-    // sets the number of cycles for the on portion of the pulse. If this is set to the same value that is in
+    // sets the number of cycles for the on portion of the pulse for Motor2. If this is set to the same value that is in
     // the PG1PER register, a 100% duty cycle pulse is produced.
     // INPUT
     // nCyclesOn is the number of PWM clock cycles for the on portion of the pulse. Note that the PWM clock is not the same

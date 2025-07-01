@@ -79,16 +79,10 @@ extern "C" {
 void enableDriver(bool enable);
 void startMotion();
 void stopMotion();
-//void setMotorOutput(int16_t pwmSignedDutyCycleInt);
-//void setOutputWaveform(int32_t* waveformArray);
 void setZeroPosition();
 void setLandmarkPosition();
 void gotoLandmark();
-//void setUpWaveform();
-//void designPosSineWaveform(int16_t mmDisplacementPP);
-//void designRampWaveform(int16_t mmStepSize);
-//void designVelSineWaveform(int16_t mmDisplacementPP);
-//void designVelPulseWaveform(int16_t mmDisplacement);
+
 
 
 

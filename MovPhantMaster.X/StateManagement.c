@@ -41,56 +41,6 @@ void stopMotion() {
     
 }
 
-//void setMotorOutput(int16_t pwmSignedDutyCycleInt) {
-    
-    // TO DO: CONNECT THIS TO SLAVE PROCESSOR
-    
-    
-//    // Sets the motor PWM and direction. Applies low-pass filter to output. Clips output to max possible if input is out of range.
-//    // INPUT
-//    // pwmSignedDutyCycleInt is the duty cycle integer for the PWM output. Negative values get converted to positive output with the 
-//    //      direction output set accordingly.
-//    static int16_t oldPwmVal = 0;
-//    static int16_t newPwmVal = 0;
-//    static uint8_t dir=1;
-//    static uint16_t pwmDutyCycleInt=0;
-//    static int16_t oldSignedPwmDutyCycleInt=0;
-//    
-//    // Low-pass filter the changes
-//    newPwmVal = MultiplyByFraction(oldPwmVal-oldSignedPwmDutyCycleInt, g_filtNumerator, g_filtDenominator) + oldSignedPwmDutyCycleInt;
-//    oldPwmVal = newPwmVal;
-//    oldSignedPwmDutyCycleInt = pwmSignedDutyCycleInt;
-//    
-//    // Convert negative values to a direction and create a positive duty cycle integer
-//    if(newPwmVal >= 0) {
-//        dir=0;              // which direction is positive vs negative depends upon how things are hooked up.
-//        pwmDutyCycleInt = (uint16_t)newPwmVal;
-//    }
-//    else {
-//        dir=1;
-//        pwmDutyCycleInt = (uint16_t)(-newPwmVal);
-//    }
-//    
-//    // Cut off duty cycle integer if it goes out of range
-//    if(pwmDutyCycleInt > g_maxPWMInteger) {
-//        pwmDutyCycleInt = g_maxPWMInteger;
-//    }
-//    
-//    INTCON2bits.GIE = 0;                // disable global interrupts
-//    LATBbits.LATB15 = dir;              // set direction
-//    setOnCyclesPWM1(pwmDutyCycleInt);   // actual direct setting of motor output voltage
-//    INTCON2bits.GIE = 1;                //re-enable global interrupt 
-    
-//}
-
-//void setOutputWaveform(int32_t* waveformArray) {
-//    // Sets the output waveform array to waveformArray. If the output waveform is not already set
-//    // to waveformArray, it frees the memory first the global variable containing the output waveform array.
-//    if(g_outputWaveform != NULL && g_outputWaveform != waveformArray) {
-//        free(g_outputWaveform);
-//    }
-//    g_outputWaveform = waveformArray;
-//}
 
 void setZeroPosition() {
     // Reads the current encoder position register and sets that as the new zero

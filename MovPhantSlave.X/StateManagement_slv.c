@@ -13,23 +13,19 @@
 void startMotion() {
     
     // Note: parameters from master must be transmitted before calling this function
-  //  LATBbits.LATB1 = 1;
     setUpWaveform();
     gs_zeroPosOutput = false;
     gs_resetWaveform = true;
     gs_displacementDemand=0;
     while(SI1FIFOCSbits.SWFFULL);  // wait until write FIFO is not full
-    sendBoolVarToPrimary(OUTPUT_ENABLED, true);
-    gs_outputEnabled=true;
-  //  LATBbits.LATB1 = 0;
+    sendBoolVarToPrimary(OUTPUT1_ENABLED, true);
+    sendBoolVarToPrimary(OUTPUT2_ENABLED, true);
+    gs_output1Enabled=true;
+    gs_output2Enabled=true;
 }
 
 void stopMotion() {
     // The purpose of this is to have a short function to call from an I2C command
-//    g_outputWaveform = g_zeroWaveform;
-//    gs_stopMotionIssued = true;
     gs_zeroPosOutput = true;
-    LATBbits.LATB1 = 0;
- //   g_velocityDemand = 0;
     
 }

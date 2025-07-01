@@ -39,19 +39,9 @@ void receiveVariableFromPrimary() {
             break;
         case MAX_PWM_INT:
             gs_maxPWMInteger = fifoVal;
-            if (gs_maxPWMInteger > 5000) {
-        //        LATBbits.LATB1 = 1;
-            }
-            else {
-         //       LATBbits.LATB1 = 0;
-            }
             break;
         case NUM_ARRAY_VALS:
             gs_numArrayVals = fifoVal;
-//            LATBbits.LATB1 = 1;
-//            if(gs_numArrayVals == 0) {
-//                LATBbits.LATB1 = 1;
-//            }
             break;
         case WAVEFORM_UPDATE_PERIOD:
             gs_waveformUpdatePeriod = fifoVal;
@@ -97,25 +87,12 @@ void receive32bVariableFromPrimary() {
     fifoVal = SRMWFDATA;                    // value in the variable data.
     var32 = var32 | ((uint32_t)fifoVal);
     
-    //LATBbits.LATB1 = 1;
     switch(whichVar) {
         case WAVEFORM_TIMESTEP_MICROS:
             gs_waveformTimeStep_microS = var32;
-//            if (gs_waveformTimeStep_microS == 0x0F000010) {
-//                LATBbits.LATB1 = 1;
-//            }
-//            else if(gs_waveformTimeStep_microS == 7000) {
-//                LATBbits.LATB1 = 0;
-//            }
             break;
         case DISPLACEMENT_DEMAND:
             gs_displacementDemand = (int32_t)var32;
-//            if (gs_displacementDemand > 0x00010000) {
-//                LATBbits.LATB1 = 1;
-//            }
-//            else {
-//                LATBbits.LATB1 = 0;
-//            }
             break;
     }
 }
@@ -134,14 +111,11 @@ void receiveBoolVarFromPrimary() {
     fifoVal = (bool)SRMWFDATA;                    // value in the variable data.
     
     switch(whichVar) {
-        case OUTPUT_ENABLED:
-            gs_outputEnabled = fifoVal;
-//            if(gs_outputEnabled) {
-//                LATBbits.LATB1 = 0;
-//            }
-//            else {
-//                LATBbits.LATB1 = 1;
-//            }
+        case OUTPUT1_ENABLED:
+            gs_output1Enabled = fifoVal;
+            break;
+        case OUTPUT2_ENABLED:
+            gs_output2Enabled = fifoVal;
             break;
         default:
             break;

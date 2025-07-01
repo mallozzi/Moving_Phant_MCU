@@ -14,7 +14,8 @@ void configSlaveInitial() {
     
 // Some state variables
     gs_zeroPosOutput = true;                    // will get set when starting motion
-    gs_outputEnabled = false;
+    gs_output1Enabled = false;
+    gs_output2Enabled = false;
  
     // Configure Motor 1 and 2 Driver, direction outputs as digital output pins
 //    TRISBbits.TRISB15 = 0;                      // dir output
@@ -92,17 +93,11 @@ void designPosSineWaveform(int16_t mmDisplacementPP) {
     int32_t posAmplitudePP;  // encoder units
     int32_t* waveformArray;
     
-//    if(gs_numArrayVals > 0) {
-//        LATBbits.LATB1 = 1;
-//    }
     posAmplitudePP = (int32_t)mmDisplacementPP * (int32_t)gs_encoderStepsPerMM;
     waveformArray = makePosSineWaveform(posAmplitudePP, gs_numArrayVals);
     setOutputWaveform(waveformArray);   
     gs_playSingleWaveformOnly = false;   // plays multiple waveforms
     
-//    if(gs_numArrayVals == 0) {
-//        LATBbits.LATB1 = 1;
-//    }
 }
 
 void designRampWaveform(int16_t mmStepSize) {

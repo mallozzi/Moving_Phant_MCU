@@ -19,8 +19,7 @@ void sendCommandToSecondary(Command whichCommand) {
 
 void sendVariableToSecondary(Variable whichVar, uint16_t value) {
     // Sends a single 16-bit variable to the secondary through the MS FIFO
- //   LATBbits.LATB2 = 1;
-    // Send register that identifies it as a 16-bit variable
+    // ...Send register that identifies it as a 16-bit variable
     while(MSI1FIFOCSbits.WFFULL);       //wait until write FIFO is not full
     MWSRFDATA = REG_VARIABLE;
     
@@ -29,7 +28,7 @@ void sendVariableToSecondary(Variable whichVar, uint16_t value) {
     
     while(MSI1FIFOCSbits.WFFULL);       //wait until write FIFO is not full
     MWSRFDATA = value;
- //   LATBbits.LATB2 = 0;
+
 }
 
 void send32bVariableToSecondary(Variable32 whichVar, uint32_t value) {
@@ -80,9 +79,6 @@ void sendParamtersToSecondary() {
     sendVariableToSecondary(MAX_PWM_INT, g_maxPWMInteger);
     __delay32(g_OscillatorFreq / 40000);  // 50 microsecond delay  
     
-//    if(g_numArrayVals == 0) {
-//        LATBbits.LATB2 = 1;
-//    }
     sendVariableToSecondary(NUM_ARRAY_VALS, g_numArrayVals);
     __delay32(g_OscillatorFreq / 40000);  
     
@@ -189,14 +185,10 @@ void receiveBoolVarFromSecondary() {
     fifoVal = (bool)MRSWFDATA;                    // value in the variable data.
     
     switch(whichVar) {
-        case OUTPUT_ENABLED:                // Dummy test - may not need anything yet
-            g_outputEnabled = fifoVal;
-//            if(g_outputEnabled) {
-//                LATBbits.LATB2 = 1;
-//            }
-//            else {
-//                LATBbits.LATB2 = 0;
-//            }
+        case OUTPUT1_ENABLED:                // Dummy test - may not need anything yet
+            g_output1Enabled = fifoVal;
+        case OUTPUT2_ENABLED:                // Dummy test - may not need anything yet
+            g_output2Enabled = fifoVal;
         default:
             break;
     }
