@@ -150,23 +150,14 @@ void receive32bVariableFromSecondary() {
     
     
     switch(whichVar) {
-        case DISPLACEMENT_DEMAND:
-            g_displacementDemand = (int32_t)var32;
-//            if (g_displacementDemand > 0x00010000) {
-//                LATBbits.LATB2 = 1;
-//            }
-//            else {
-//                LATBbits.LATB2 = 0;
-//            }
+        case DISPLACEMENT1_DEMAND:
+            g_displacement1Demand = (int32_t)var32;
+            break;
+        case DISPLACEMENT2_DEMAND:
+            g_displacement2Demand = (int32_t)var32;
             break;
         case WAVEFORM_TIMESTEP_MICROS:
             g_waveformTimeStep_microS = var32;
-//            if (g_waveformTimeStep_microS == 0x0F000010) {
-//                LATBbits.LATB2 = 1;
-//            }
-//            else if (g_waveformTimeStep_microS == 7000){
-//                LATBbits.LATB2 = 0;
-//            }
             break;
     }
 }

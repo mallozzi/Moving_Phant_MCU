@@ -16,7 +16,8 @@ void startMotion() {
     setUpWaveform();
     gs_zeroPosOutput = false;
     gs_resetWaveform = true;
-    gs_displacementDemand=0;
+    gs_displacement1Demand=0;
+    gs_displacement2Demand=0;
     while(SI1FIFOCSbits.SWFFULL);  // wait until write FIFO is not full
     sendBoolVarToPrimary(OUTPUT1_ENABLED, true);
     sendBoolVarToPrimary(OUTPUT2_ENABLED, true);

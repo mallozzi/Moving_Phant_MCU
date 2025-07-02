@@ -91,8 +91,11 @@ void receive32bVariableFromPrimary() {
         case WAVEFORM_TIMESTEP_MICROS:
             gs_waveformTimeStep_microS = var32;
             break;
-        case DISPLACEMENT_DEMAND:
-            gs_displacementDemand = (int32_t)var32;
+        case DISPLACEMENT1_DEMAND:
+            gs_displacement1Demand = (int32_t)var32;
+            break;
+        case DISPLACEMENT2_DEMAND:
+            gs_displacement2Demand = (int32_t)var32;
             break;
     }
 }

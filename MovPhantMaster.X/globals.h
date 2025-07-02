@@ -79,18 +79,25 @@ extern uint16_t g_timer1Prescale;          // Pre-scale factor in Timer1 configu
 //extern float g_velReadsPerWfUpdate;        // number of times velocity is read per waveform update period (one index advancement) -- non integer 
 
 
-// motor control feedback parameters
-//extern volatile uint16_t g_velocity;
-//extern volatile int16_t g_velDemand;
-//extern volatile uint16_t g_tmp;
+// motor 1 control feedback parameters
 extern volatile uint16_t g_propConstNum;        // Numerator of proportionality constant for Proportional Feedback component
 extern volatile uint16_t g_propConstDenom;      // Denominator of proportionality constant for Proportional Feedback component
 extern volatile uint16_t g_intConstNum;         // Numerator of proportionality constant for Integral Feedback component
 extern volatile uint16_t g_intConstDenom;       // Denominator of proportionality constant for Integral Feedback component
 extern volatile uint16_t g_derivConstNum;       // Numerator of proportionality constant for Derivative Feedback component
 extern volatile uint16_t g_derivConstDenom;     // Denominator of proportionality constant for Derivative Feedback component
-extern volatile int32_t g_displacementDemand;   // Demand for encoder displacement (relative)
-//extern volatile int16_t g_velocityDemand;       // demand requested for motor velocity. Units are number of encoder steps per encoder read period. Negative for reverse direction
+extern volatile int32_t g_displacement1Demand;   // Demand for encoder displacement (relative)
+
+// motor 2 control feedback parameters
+// TO DO: MAKE THESE ALL FOR MOTOR 2
+//extern volatile uint16_t g_propConstNum;        // Numerator of proportionality constant for Proportional Feedback component
+//extern volatile uint16_t g_propConstDenom;      // Denominator of proportionality constant for Proportional Feedback component
+//extern volatile uint16_t g_intConstNum;         // Numerator of proportionality constant for Integral Feedback component
+//extern volatile uint16_t g_intConstDenom;       // Denominator of proportionality constant for Integral Feedback component
+//extern volatile uint16_t g_derivConstNum;       // Numerator of proportionality constant for Derivative Feedback component
+//extern volatile uint16_t g_derivConstDenom;     // Denominator of proportionality constant for Derivative Feedback component
+extern volatile int32_t g_displacement2Demand;   // Demand for encoder displacement (relative)
+
 
 // Quadrature Encoder parameters
 extern uint32_t g_encoderZeroPos;          // quadrature encoder zero position. This is a short-term reference position

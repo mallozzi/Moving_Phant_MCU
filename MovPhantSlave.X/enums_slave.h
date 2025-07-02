@@ -53,7 +53,8 @@ typedef enum {
 
 typedef enum {
     WAVEFORM_TIMESTEP_MICROS,
-    DISPLACEMENT_DEMAND
+    DISPLACEMENT1_DEMAND,
+    DISPLACEMENT2_DEMAND
 }Variable32;
 
 

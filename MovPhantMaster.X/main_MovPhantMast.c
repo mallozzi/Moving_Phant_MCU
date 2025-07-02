@@ -166,7 +166,8 @@ int main(void) {
           //  setUpWaveform();
            // g_resetWaveform = true;
             setZeroPosition();
-            g_displacementDemand = 0;           
+            g_displacement1Demand = 0;   
+            g_displacement2Demand = 0;      
             sendParamtersToSecondary();
             while(!MSI1FIFOCSbits.WFEMPTY);         // wait for secondary to finish reading the FIFO. 
             enableDriver(true);
@@ -243,7 +244,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
     
     // ---------------  POSITION FEEDBACK CONTROL ------------------
     if(g_output1Enabled) {
-        displacementError = displacement - g_displacementDemand;
+        displacementError = displacement - g_displacement1Demand;
         integralDisplacementError+= displacementError;
         // clip integral error
         if(integralDisplacementError > integralErrorLimit) {
@@ -273,11 +274,11 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
 	// Decay output voltage gradually. Rate of decay in ms will depend upon T1 interrupt rate
         integralDisplacementError = 0;
         g_pwm1Cycles = (int16_t)( (int32_t)g_pwm1Cycles*93/100 );   
-        g_displacementDemand = 0;   // This probably doesn't matter anymore and should probably just be set in the secondary and removed from here.
+        g_displacement1Demand = 0;   // This probably doesn't matter anymore and should probably just be set in the secondary and removed from here.
       //  LATBbits.LATB2 = 0;
     }
     
-    // This is done even if output disabled because g_displacementDemand will set the future output. The pwm1 cycles are
+    // This is done even if output disabled because g_displacement1Demand will set the future output. The pwm1 cycles are
     // decayed down in the else code above if the output gets turned off.
     sendVariableToSecondary(PWM1_CYCLES, (uint16_t)g_pwm1Cycles);  // send to secondary core
     

@@ -19,7 +19,8 @@ uint16_t gs_numArrayVals;                   // number of array values in output 
 uint16_t gs_freqUser;                       // frequency requested by user in cycles / min
 uint16_t gs_motionAmplitudeMM;              // amplitude of motion in mm
 
-volatile int32_t gs_displacementDemand;     // Demand for encoder displacement (relative)
+volatile int32_t gs_displacement1Demand;    // Demand for encoder displacement (relative) for motor 1
+volatile int32_t gs_displacement2Demand;    // Demand for encoder displacement (relative) for motor 2
 
 uint16_t gs_reverseDirection;               // 1 to move opposite direction, 0 for forward
 uint16_t gs_waveformType;                   // stores which type of waveform is selected

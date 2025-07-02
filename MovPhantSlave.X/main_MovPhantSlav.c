@@ -88,26 +88,29 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
     //         comes in through the master-secondary interface.
     
     
-    static uint16_t outputCount=0;              // tracks the number of PWM1 interrupts since the output has been updated
-    static uint16_t outputUpdatePeriod=50;      // number of PWM periods between an update to the output. Make it an even number.   
-    static uint16_t waveformCount=0;            // tracks how many PWM1 periods between advances in the waveform array    
-    static uint16_t wf_ind=0;
+    static uint16_t interruptCount=0;               // tracks the number of PWM1 interrupts since the output has been updated
     
-    static uint16_t halfUpdatePeriod;
-    halfUpdatePeriod = outputUpdatePeriod / 2;
+    // motorUpdateHalfInteral is the number of pwm interrupts between motor 1 and motor 2 output updates. So twice this number is the 
+    // number of interrupts between each update of one of the motor outputs. For a pwm interrupt interval of 50 microseconds, 
+    // setting this number to 25 means each motor gets updated every 2.5 ms, and they take turns getting updated with 1.25 ms 
+    // between a motor 1 and motor 2 update.
+    static uint16_t motorUpdateHalfInterval=25;     // number of PWM periods between an update to the output. Make it an even number.   
+    static uint16_t waveform1Count=0;                // tracks how many PWM1 periods between advances in the waveform array    
+    static uint16_t wf1_ind=0;                      // array index into waveform 1
+    static uint16_t wf2_ind=0;                      // array index into waveform 2
+    
     
     // Motor 1 
     if(gs_output1Enabled) {  // if output is enabled use waveform
         // Every outputUpdatePeriod interrupts update the pwm output. For pwm period of 50 microseconds, this is once every 2.5 milliseconds.
         // Within the loop, alternate updating motor 1 and motor 2 outputs, so that motor 1 is updated at the beginning of an
         // ...update period, and motor 2 is updated halfway through the update period.
-        outputCount++;
-        if(outputCount >= outputUpdatePeriod) {      // time to update output to motor with whatever is currently requested
-            if(!gs_zeroPosOutput) {             
+        if(interruptCount == motorUpdateHalfInterval) {      // time to update output to motor with whatever is currently requested
+            if(!gs_zeroPosOutput) { // normal condition - no call to zero the output position            
                 setMotorOutput1(gs_pwm1Cycles);
-                outputCount = 0;
+     //           interruptCount = 0;
             }
-            else { // zero output has been requested
+            else { // zero output has been requested  
                 gs_output1Enabled = false;
                 sendBoolVarToPrimary(OUTPUT1_ENABLED, false);
             }
@@ -115,42 +118,123 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
 
         // increment the waveform index in the waveform array every 10 milliseconds. For a pwm period of 50 microseconds, this means 
         // we need to update every waveformUpdatePeriod=200 interrupts
-        waveformCount++;
-        if(waveformCount >= gs_waveformUpdatePeriod) {       // time to update what is requested (next element in waveform array)           
-            if(gs_resetWaveform) {                           // if motor has been off, reset the waveform index for the initial run
-                wf_ind = 0;
+        waveform1Count++;
+        if(waveform1Count >= gs_waveformUpdatePeriod) {         // time to update what is requested (next element in waveform array)           
+            // NOTE: I BELIEVE THIS IS NO LONGER NECESSARY SINCE WE RESET THE WAVEFORM INDEX (wf1_ind) UPON TERMINATION OF THE LOOP. DOUBLE CHECK AND DELETE
+            if(gs_resetWaveform) {                              // if motor has been off, reset the waveform index for the initial run 
+                wf1_ind = 0;
                 gs_resetWaveform = false;
             }
-            if(wf_ind >= gs_numArrayVals) {                  // if end of array, cycle back to beginning
-                wf_ind = 0;
-                if(gs_playSingleWaveformOnly) {
+            if(wf1_ind >= gs_numArrayVals) {                    // if end of array, cycle back to beginning
+                wf1_ind = 0;
+                if(gs_playSingleWaveformOnly) {                 // if playing a single waveform only, set things up to stop
                     sendBoolVarToPrimary(OUTPUT1_ENABLED, false);
                     gs_output1Enabled = false;
                     sendBoolVarToPrimary(OUTPUT2_ENABLED, false);
-                    gs_output2Enabled = false;
-                    gs_playSingleWaveformOnly = false;        // reset for future waveforms. 
+                    gs_output2Enabled = false;                  // TO DO: REVIEW THIS LINE 
+                    gs_playSingleWaveformOnly = false;          // reset for future waveforms. 
                 }
             }
-            gs_displacementDemand = gs_outputWaveform[wf_ind];
-
+            gs_displacement1Demand = gs_outputWaveform[wf1_ind]; // Update demand from waveform array
+            
+            // Make sure MS FIFO is not full, then send the displacement demand back to the primary core for use in feedback calculation
             if(!SI1FIFOCSbits.SWFFULL) {  // FIFO should not fill up, but if a __delay command were put on the master side, it could happen
-                send32bVariableToPrimary(DISPLACEMENT_DEMAND, (uint16_t)gs_displacementDemand);
+                send32bVariableToPrimary(DISPLACEMENT1_DEMAND, (uint16_t)gs_displacement1Demand);
             }
             
-            wf_ind++;
-            waveformCount = 0;
+            wf1_ind++;
+            waveform1Count = 0;
         }
 //        
     }
-    else { // if gs_output1Enabled
-        outputCount = 0;
-        waveformCount = 0;
-        wf_ind = 0;
+    else { // if gs_output1Enabled is false
+        interruptCount = 0;
+        waveform1Count = 0;
+        wf1_ind = 0;
         setMotorOutput1(gs_pwm1Cycles);  // if output is disabled, gs_pwm1Cycles will be decayed to zero in T1 interrupt loop in primary core
     }
     
-   
+    // Motor 2
+    
+    
+    interruptCount++;                  
     // Clear the PWM1 interrupt flag
     IFS4bits.PWM2IF = 0;
     
 }
+
+
+
+//void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
+//{   
+//    // Performs two primary functions
+//    //      1) Manages the waveform updates. Every gs_waveformUpdatePeriod interrupts, the demand from the waveform is loaded 
+//    //         into gs_displacementDemand and the waveform index is advanced
+//    //      2) Sets the motor output to whatever is in gs_pwm1Cycles. That value is set in the feedback loop code and ultimately
+//    //         comes in through the master-secondary interface.
+//    
+//    
+//    static uint16_t outputCount=0;              // tracks the number of PWM1 interrupts since the output has been updated
+//    static uint16_t outputUpdatePeriod=50;      // number of PWM periods between an update to the output. Make it an even number.   
+//    static uint16_t waveformCount=0;            // tracks how many PWM1 periods between advances in the waveform array    
+//    static uint16_t wf_ind=0;
+//    
+//    
+//    // Motor 1 
+//    if(gs_output1Enabled) {  // if output is enabled use waveform
+//        // Every outputUpdatePeriod interrupts update the pwm output. For pwm period of 50 microseconds, this is once every 2.5 milliseconds.
+//        // Within the loop, alternate updating motor 1 and motor 2 outputs, so that motor 1 is updated at the beginning of an
+//        // ...update period, and motor 2 is updated halfway through the update period.
+//        outputCount++;
+//        if(outputCount >= outputUpdatePeriod) {      // time to update output to motor with whatever is currently requested
+//            if(!gs_zeroPosOutput) {             
+//                setMotorOutput1(gs_pwm1Cycles);
+//                outputCount = 0;
+//            }
+//            else { // zero output has been requested
+//                gs_output1Enabled = false;
+//                sendBoolVarToPrimary(OUTPUT1_ENABLED, false);
+//            }
+//        }
+//
+//        // increment the waveform index in the waveform array every 10 milliseconds. For a pwm period of 50 microseconds, this means 
+//        // we need to update every waveformUpdatePeriod=200 interrupts
+//        waveformCount++;
+//        if(waveformCount >= gs_waveformUpdatePeriod) {       // time to update what is requested (next element in waveform array)           
+//            if(gs_resetWaveform) {                           // if motor has been off, reset the waveform index for the initial run
+//                wf_ind = 0;
+//                gs_resetWaveform = false;
+//            }
+//            if(wf_ind >= gs_numArrayVals) {                  // if end of array, cycle back to beginning
+//                wf_ind = 0;
+//                if(gs_playSingleWaveformOnly) {
+//                    sendBoolVarToPrimary(OUTPUT1_ENABLED, false);
+//                    gs_output1Enabled = false;
+//                    sendBoolVarToPrimary(OUTPUT2_ENABLED, false);
+//                    gs_output2Enabled = false;
+//                    gs_playSingleWaveformOnly = false;        // reset for future waveforms. 
+//                }
+//            }
+//            gs_displacementDemand = gs_outputWaveform[wf_ind];
+//
+//            if(!SI1FIFOCSbits.SWFFULL) {  // FIFO should not fill up, but if a __delay command were put on the master side, it could happen
+//                send32bVariableToPrimary(DISPLACEMENT_DEMAND, (uint16_t)gs_displacementDemand);
+//            }
+//            
+//            wf_ind++;
+//            waveformCount = 0;
+//        }
+////        
+//    }
+//    else { // if gs_output1Enabled
+//        outputCount = 0;
+//        waveformCount = 0;
+//        wf_ind = 0;
+//        setMotorOutput1(gs_pwm1Cycles);  // if output is disabled, gs_pwm1Cycles will be decayed to zero in T1 interrupt loop in primary core
+//    }
+//    
+//   
+//    // Clear the PWM1 interrupt flag
+//    IFS4bits.PWM2IF = 0;
+//    
+//}

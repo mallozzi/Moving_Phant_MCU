@@ -76,7 +76,8 @@ void configureInitial() {
     //write zero position offset to position counter
     POS1HLD = 0x7FFF;
     POS1CNTL = 0;                   // this will transfer msb to POS1CNTH
-    g_displacementDemand = 0;       // Set the demand to the current position so that no initial output is created from feedback loop
+    g_displacement1Demand = 0;       // Set the demand to the current position so that no initial output is created from feedback loop
+    g_displacement2Demand = 0;       // Set the demand to the current position so that no initial output is created from feedback loop
     g_encoderStepsPerMM = 500;
     g_maxDisplacementMM = 50;       // This will be overwritten by software
  

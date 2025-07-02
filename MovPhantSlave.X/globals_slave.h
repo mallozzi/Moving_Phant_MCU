@@ -43,7 +43,8 @@ extern uint32_t gs_waveformTimeStep_microS;         // Time between each element
 extern uint16_t gs_freqUser;                        // frequency requested by user in cycles / min
 
 // motor control feedback parameters
-extern volatile int32_t gs_displacementDemand;      // Demand for encoder displacement (relative)
+extern volatile int32_t gs_displacement1Demand;     // Demand for encoder displacement (relative)for motor 1
+extern volatile int32_t gs_displacement2Demand;     // Demand for encoder displacement (relative) for motor 2
 
 
 
