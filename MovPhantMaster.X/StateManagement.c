@@ -60,7 +60,6 @@ void setLandmarkPosition() {
     posLowByte = POS1CNTL; // Should load POS1CNTH into POS1HLD
     posHighByte = POS1HLD;
     g_landmarkPosition = (posHighByte << 16) + posLowByte;
- //   g_encoderZeroPos = (posHighByte << 16) + posLowByte;  
 }
 
 void gotoLandmark() {

@@ -20,6 +20,7 @@ extern "C" {
 
 #include <stdbool.h>
 
+extern unsigned long int g_OscillatorFreq;  //Oscillator frequency
 extern uint16_t g_firmwareRev;              // Revision number of firmware
 
 extern uint16_t g_maxPWMInteger;            // maximum PWM integer allowed
@@ -28,7 +29,9 @@ extern uint16_t g_maxPWMInteger;            // maximum PWM integer allowed
 extern bool g_motorTestMode;                // true to put in test mode to just spin a motor
 extern int16_t g_motorTestPwm;              // for motor test mode only - pwm integer to send to motor
 
-extern unsigned long int g_OscillatorFreq; //Oscillator frequency
+extern uint16_t g_pingVar;                  // used to confirm round-trip FIFO ping to secondary core
+extern uint32_t g_secondaryQuadEncPos;      // quadrature encoder position read from secondary core
+extern int16_t g_secondaryQuadEncVel;       // quadrature encoder velocity read from secondary core
 
 
 enum DIG_STATE {LOW = 0, HIGH = 1}; 
@@ -39,7 +42,7 @@ extern bool g_output2Enabled;               // true when motion output is enable
 
 // PWM parameters
 extern int16_t g_pwm1Cycles;                // Signed duty cycle parameter for PWM1.
-//extern uint16_t g_maxPWMInteger;           // maximum PWM integer allowed
+extern int16_t g_pwm2Cycles;                // Signed duty cycle parameter for PWM1.
 
 // User configuration parameters
 extern uint16_t g_maxDisplacementMM;         // Maximum peak-to-peak displacement in mm for translational motion. Not used by secondary

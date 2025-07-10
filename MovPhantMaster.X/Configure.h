@@ -22,11 +22,10 @@ extern "C" {
 #include <stdint.h>
 
 void configureInitial();
-void configureAnalogToDigital();
-void configureEncoderInputs();
 void configurePPS();
+void configureAnalogToDigital();
 void configureDerivedQuantities();
-void configureDirection();
+//void configureDirection();
 void configureI2C();
 void configureQuadEncoder();
 //int32_t* makePosSineWaveform(int32_t amplitudeEnc, uint16_t numValues);

@@ -42,8 +42,12 @@
 
 #pragma config CPRB1 = SLV1                 // LED1 pin
 //#pragma config CPRB2 = SLV1                 // LED2 pin
-#pragma config CPRB14 = SLV1                // PWM1 pin
-#pragma config CPRB15 = SLV1                // DIR pin
+#pragma config CPRC4 = SLV1                 // PWM_Driver1 pin (motor 1)
+#pragma config CPRC5 = SLV1                 // DIR1 pin (motor 1)
+#pragma config CPRC10 = SLV1                // PWM_Driver2 pin (motor 2)
+#pragma config CPRC11 = SLV1                // DIR2 pin (motor 2)
+#pragma config CPRB11 = SLV1                // Quad Encode A module RB11 port
+#pragma config CPRB13 = SLV1                // Quad Encode B module RB13 port
 
 #include "globals.h"
 #include "Configure.h"
@@ -83,15 +87,13 @@ int main(void) {
  // Initial Configuration
     configurePPS();       // must be done very early - review carefully if doing any config prior to this.
     configureInitial();
-    configureDirection();
-    configureEncoderInputs();
+ //   configureDirection();
     configurePWM2();
     configurePWM3();
     configureTimer1();
     configureAnalogToDigital();
     configureI2C();
     configureQuadEncoder();
- //   configureDerivedQuantities();  // This must be the last configuration run.
 
     // Set PCB LED state if desired
     LATBbits.LATB2 = 0;   // Illuminate LED to show MCU power
@@ -114,6 +116,7 @@ int main(void) {
   //  BoolVariable testBool = true;
     // Launch feedback loop with no output
     g_pwm1Cycles = 0;  // begin with no output
+    g_pwm2Cycles = 0;  // begin with no output
     startTimer1(g_feedbackUpdatePeriod);
     
     //uint16_t val=0;
@@ -150,10 +153,12 @@ int main(void) {
                 if(fifoReg == REG_VARIABLE_32)  {               // command
                     receive32bVariableFromSecondary();
                 }
+                else if(fifoReg == REG_VARIABLE) {
+                    receiveVariableFromSecondary();
+                }
                 else if(fifoReg == REG_BOOLVAR) {
                    receiveBoolVarFromSecondary();
                 }
-
             }
         }
          
@@ -191,74 +196,89 @@ int main(void) {
 void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
 {
     // The Timer1 interrupt is used to update the feedback loop. Position and velocity are read at each interrupt and the output adjusted accordingly.
-    // The output is set by updating the g_pwm1Cycles variable. 
+    // The output is set by updating the g_pwmxCycles variable. 
     
-  //  static uint16_t count=0;
-    static uint16_t speedRegister;
-    static int16_t velocity;                        // signed velocity in units of encoder steps per interrupt period
+    // variables used to temporarily hold quadrature encoder bytes while reading
     static uint16_t posLowByte;
     static uint32_t posHighByte;
-    static uint32_t position;                       //absolute encoder position reading with large zero offset
-    static int32_t displacement;                    //position relative to zero position
-    static int16_t pwmPosition;                    // pwm output corresponding to the position
     
-    // Position feedback control parameters
-    static int32_t displacementError;               // error signal in units of encoder steps.
-    static int32_t integralDisplacementError = 0;   // integral of displacement error signal.
+    //feedback control parameters for motor 1
+    static uint16_t speed1Register;
+    static int16_t velocity1;                       // signed velocity in units of encoder steps per interrupt period
+    static uint32_t position1;                      //absolute encoder position reading with large zero offset
+    static int32_t displacement1;                   //position relative to zero position
+    static int16_t pwmPosition1;                    // pwm output corresponding to the position
+    
+    //feedback control parameters for motor 2
+    static uint16_t speed2Register;
+    static int16_t velocity2;                       // signed velocity in units of encoder steps per interrupt period
+    static uint32_t position2;                      //absolute encoder position reading with large zero offset
+    static int32_t displacement2;                   //position relative to zero position
+    static int16_t pwmPosition2;                    // pwm output corresponding to the position
+    
+    // Position feedback error parameters for motor 1
+    static int32_t displacement1Error;              // error signal in units of encoder steps.
+    static int32_t integralDisplacement1Error = 0;  // integral of displacement error signal.
+    
+    // Position feedback error parameters for motor 2
+    static int32_t displacement2Error;              // error signal in units of encoder steps.
+    static int32_t integralDisplacement2Error = 0;  // integral of displacement error signal.
+   
+    // other feedback error variables
     static int32_t integralErrorLimit = 30000;      // value at which integral error signal is clipped
-    static uint16_t tmpCount = 0;                 // development variable for diagnostics
+    static uint16_t tmpCount = 0;                   // development variable for diagnostics
     
     
     // Read velocity register. When direction is positive, velocity counter counts backward.
-    speedRegister = VEL1CNT;   
-    velocity = (int16_t) speedRegister;
-    if (speedRegister >= 0x7FFF) {   // speed was actually negative
+    speed1Register = VEL1CNT;   
+    velocity1 = (int16_t) speed1Register;
+    if (speed1Register >= 0x7FFF) {   // speed was actually negative
         // take the two's complement negative
-        speedRegister = ~speedRegister + 1;   // two's complement
-        velocity = -(int16_t)speedRegister;
+        speed1Register = ~speed1Register + 1;   // two's complement
+        velocity1 = -(int16_t)speed1Register;
     }
     // Set velocity PWM output
-    setOnCyclesPWM3((uint16_t)(velocity + g_pwm3ZeroOffset));
+    setOnCyclesPWM3((uint16_t)(velocity1 + g_pwm3ZeroOffset));
     
     // Read position register and update pwm position output
     posLowByte = POS1CNTL; // Should load POS1CNTH into POS1HLD
     posHighByte = POS1HLD;
-    position = (posHighByte<<16) + posLowByte;
-    if(position >= g_encoderZeroPos) {
-        displacement = (int32_t)(position - g_encoderZeroPos);
+    position1 = (posHighByte<<16) + posLowByte;
+    if(position1 >= g_encoderZeroPos) {
+        displacement1 = (int32_t)(position1 - g_encoderZeroPos);
     }
     else {
-        displacement = -(int32_t)(g_encoderZeroPos - position);
+        displacement1 = -(int32_t)(g_encoderZeroPos - position1);
     }
     // Convert displacement to a pwm output for external position signal output. Clip if out of bounds
-    pwmPosition = ( __builtin_divsd(displacement, g_encoderToPwmDenom) + (int32_t)g_pwm2ZeroOffset );
-    if(pwmPosition < 0) {
-        pwmPosition = 0;
+    pwmPosition1 = ( __builtin_divsd(displacement1, g_encoderToPwmDenom) + (int32_t)g_pwm2ZeroOffset );
+    if(pwmPosition1 < 0) {
+        pwmPosition1 = 0;
     }
-    else if (pwmPosition > (int16_t)g_maxPWMInteger) {
-        pwmPosition = (int16_t) g_maxPWMInteger;
+    else if (pwmPosition1 > (int16_t)g_maxPWMInteger) {
+        pwmPosition1 = (int16_t) g_maxPWMInteger;
     }
     
     // set the position PWM output
-    setOnCyclesPWM2((uint16_t)pwmPosition);
+    setOnCyclesPWM2((uint16_t)pwmPosition1);
     
     // ---------------  POSITION FEEDBACK CONTROL ------------------
     if(g_output1Enabled) {
-        displacementError = displacement - g_displacement1Demand;
-        integralDisplacementError+= displacementError;
+        displacement1Error = displacement1 - g_displacement1Demand;
+        integralDisplacement1Error+= displacement1Error;
         // clip integral error
-        if(integralDisplacementError > integralErrorLimit) {
-            integralDisplacementError = integralErrorLimit;
+        if(integralDisplacement1Error > integralErrorLimit) {
+            integralDisplacement1Error = integralErrorLimit;
         }
-        if(integralDisplacementError < -integralErrorLimit) {
-            integralDisplacementError = -integralErrorLimit;
+        if(integralDisplacement1Error < -integralErrorLimit) {
+            integralDisplacement1Error = -integralErrorLimit;
         }
 
         if(!g_motorTestMode) {
             // Set output = Proportional term + Integral term + Derivative Term
-            g_pwm1Cycles = -MultiplyByFraction((int16_t)displacementError, g_propConstNum, g_propConstDenom) 
-                          - MultiplyByFraction((int16_t)integralDisplacementError, g_intConstNum, g_intConstDenom)
-                          - MultiplyByFraction(velocity, g_derivConstNum, g_derivConstDenom);
+            g_pwm1Cycles = -MultiplyByFraction((int16_t)displacement1Error, g_propConstNum, g_propConstDenom) 
+                          - MultiplyByFraction((int16_t)integralDisplacement1Error, g_intConstNum, g_intConstDenom)
+                          - MultiplyByFraction(velocity1, g_derivConstNum, g_derivConstDenom);
         }
         else {  // motor test mode - spin motor at constant pwm
             g_pwm1Cycles = g_motorTestPwm;
@@ -272,7 +292,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
     }
     else {  // g_output1Enabled
 	// Decay output voltage gradually. Rate of decay in ms will depend upon T1 interrupt rate
-        integralDisplacementError = 0;
+        integralDisplacement1Error = 0;
         g_pwm1Cycles = (int16_t)( (int32_t)g_pwm1Cycles*93/100 );   
         g_displacement1Demand = 0;   // This probably doesn't matter anymore and should probably just be set in the secondary and removed from here.
       //  LATBbits.LATB2 = 0;

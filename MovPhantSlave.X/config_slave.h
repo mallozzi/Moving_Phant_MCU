@@ -20,7 +20,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 void configSlaveInitial();
-
+void configureSecondaryPPS();
+void configureQuadEncoder();
 void setOutputWaveform(int32_t* waveformArray);
 
 void setUpWaveform();

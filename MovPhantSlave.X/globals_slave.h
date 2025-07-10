@@ -28,6 +28,7 @@ extern bool gs_output2Enabled;                      // true when motion output i
 
 // PWM parameters
 extern int16_t gs_pwm1Cycles;                       // Signed duty cycle parameter for PWM1.
+extern int16_t gs_pwm2Cycles;                       // Signed duty cycle parameter for PWM2.
 extern uint16_t gs_maxPWMInteger;                   // maximum PWM integer allowed
 
 // Waveform Management
@@ -49,9 +50,7 @@ extern volatile int32_t gs_displacement2Demand;     // Demand for encoder displa
 
 
 // Quadrature Encoder parameters
-//extern uint32_t g_encoderZeroPos;                 // quadrature encoder zero position. This is a short-term reference position
 extern uint16_t gs_encoderStepsPerMM;               // Number of encoder steps per mm of travel
-//extern uint32_t g_landmarkPosition;               // Position of Landmark in encoder units
 
 // Commands and other output-related variables
 extern volatile bool gs_zeroPosOutput;              // variable to cause zero voltage output when true

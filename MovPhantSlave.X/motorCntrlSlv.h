@@ -24,6 +24,8 @@ extern "C" {
 
 void setMotorOutput1(int16_t pwmSignedDutyCycleInt);
 void setMotorOutput2(int16_t pwmSignedDutyCycleInt);
+uint32_t readQuadEncoderPos();
+int16_t readEncoderVelocity();
 
 #endif	/* MOTOR_CONTROL_H */
 

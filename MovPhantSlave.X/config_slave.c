@@ -7,6 +7,22 @@
 #include "globals_slave.h"
 
 void configSlaveInitial() {
+    
+    // Start by making all I/O pins digital outputs in their low state
+    ANSELA = 0;
+    TRISA = 0;
+    LATA = 0;
+    ANSELB = 0;
+    TRISB = 0;
+    LATB = 0;
+    ANSELC = 0;
+    TRISC = 0;
+    LATC = 0;
+    ANSELD = 0;
+    TRISD = 0;
+    LATD = 0;
+    
+    
     gs_numArrayVals = 400;                      // number of array values in output waveform. Will be overwritten
     
     gs_filtNumerator = 97;                      // low-pass PWM filter parameter defined as integer numerator and denominator
@@ -16,15 +32,42 @@ void configSlaveInitial() {
     gs_zeroPosOutput = true;                    // will get set when starting motion
     gs_output1Enabled = false;
     gs_output2Enabled = false;
+    
  
     // Configure Motor 1 and 2 Driver, direction outputs as digital output pins
-//    TRISBbits.TRISB15 = 0;                      // dir output
-//    TRISBbits.TRISB14 = 0;                      // pwm output
     TRISCbits.TRISC4 = 0;                       // PWM_Driver1 (Motor 1)
     TRISCbits.TRISC5 = 0;                       // DIR1  (Motor 1 direction)
-    TRISCbits.TRISC10 = 0;                       // PWM_Driver2 (Motor 2)
-    TRISCbits.TRISC11 = 0;                       // DIR2  (Motor 2 direction)
+    TRISCbits.TRISC10 = 0;                      // PWM_Driver2 (Motor 2)
+    TRISCbits.TRISC11 = 0;                      // DIR2  (Motor 2 direction)
+    
+    // Quadrature encoder inputs. No analog capability on these pins, so no need to set ANSELB
+    TRISBbits.TRISB11 = 1;                      // Quad Encoder 2 A channel
+    TRISBbits.TRISB13 = 1;                      // Quad Encoder 2 B channel
    
+}
+
+void configureSecondaryPPS() {
+        // Unlock control register
+    __builtin_write_RPCON(0x0000);
+    
+    // Assign RB11 to Quadrature Input A and RB13 to Quadrature Input B
+    RPINR14bits.QEIA1R = 43;
+    RPINR14bits.QEIB1R = 45;
+    
+    // Lock control register
+    __builtin_write_RPCON(0x0800);
+}
+
+void configureQuadEncoder() {
+    
+    QEI1CONbits.QEIEN = 1;      // Enable quad encoder module
+    QEI1CONbits.PIMOD = 0;      // Index input does not affect counter
+    
+    // Initialize counter to approximately halfway through its full range to avoid rolling over
+    // counter is 32 bits, so halfway through in hex is 0x7FFF FFFF
+    POS1CNTH = 0x0100;          // This line seems unnecessary and may be a relic of testing. Test without it at some point
+    POS1HLD = 0x7FFF;           // Write high bit to Position 1 Counter Hold Register
+    POS1CNTL = 0x0002;    
 }
 
 void setOutputWaveform(int32_t* waveformArray) {
@@ -43,27 +86,6 @@ void setUpWaveform() {
     // integer is 12799, and the input clocking is set up so that this corresponds to 50 microseconds per interrupt time, then a value
     // of g_waveformUpdatePeriod of 200 gives 10 ms update time.
     // 
-//    uint16_t thresh1 = 60;  // period of 1 sec
-//    uint16_t thresh2 = 8;   // period of 7.5 sec
-//    uint16_t thresh3 = 4;   //period of 15 sec
-//    uint16_t thresh4 = 2;   // period of 30 sec
-//    if(gs_freqUser > thresh1) {
-//        gs_waveformUpdatePeriod = 100;  // targets 5 ms update period assuming PWM1 max integer of 12799
-//    }
-//    else if(gs_freqUser > thresh2)
-//    {
-//        gs_waveformUpdatePeriod = 200;  // targets 10 ms update period assuming PWM1 max integer of 12799
-//    }
-//    else if(gs_freqUser > thresh3) {
-//        gs_waveformUpdatePeriod = 400; // targets 20 ms update period assuming PWM1 max integer of 12799
-//    }
-//    else if(gs_freqUser > thresh4) {
-//        gs_waveformUpdatePeriod = 800; // targets 40 ms update period assuming PWM1 max integer of 12799
-//    }
-//    else {
-//        gs_waveformUpdatePeriod = 1600; // targets 80 ms update period assuming PWM1 max integer of 12799
-//    }
-//    configureDerivedQuantities();
     
     // free memory from previous waveform
     if(gs_outputWaveform != NULL) {

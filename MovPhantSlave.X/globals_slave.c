@@ -6,11 +6,12 @@
 
 // *** VARIABLES THAT MUST BE THE SAME IN MASTER AND SLAVE ***
 //PWM parameters
-int16_t gs_pwm1Cycles=0;                      // Duty cycle parameter for PWM1
+int16_t gs_pwm1Cycles=0;                    // Duty cycle parameter for PWM1
+int16_t gs_pwm2Cycles=0;                    // Duty cycle parameter for PWM2
 uint16_t gs_maxPWMInteger;                  // maximum PWM integer allowed
 
-bool gs_output1Enabled;              // true when motion output is enabled, false otherwise.
-bool gs_output2Enabled;              // true when motion output is enabled, false otherwise.
+bool gs_output1Enabled;                     // true when motion output is enabled, false otherwise.
+bool gs_output2Enabled;                     // true when motion output is enabled, false otherwise.
 
 // Waveform parameters
 volatile bool gs_resetWaveform = false;     // causes waveform array index to be reset to zero.
@@ -28,9 +29,7 @@ uint32_t gs_waveformTimeStep_microS;        // Time between each element of the 
 
 
 // Quadrature Encoder parameters
-//uint32_t g_encoderZeroPos;                  // quadrature encoder zero position
 uint16_t gs_encoderStepsPerMM;               // Number of encoder steps per mm of travel
-//uint32_t g_landmarkPosition;                // Position of Landmark in encoder units
 
 // Commands and other output-related variables
 volatile bool gs_zeroPosOutput;             // variable to cause zero voltage output when true

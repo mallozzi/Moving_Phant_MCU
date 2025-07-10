@@ -12,13 +12,19 @@ void configureInitial() {
 // Initial configuration. It is assumed that this method is called before other configurations are done, as it broadly sets a lot of
 // config states to a rational starting value, assuming they will later be set by other configuration calls.
     
-    // Start by making all I/O pins digital outputs in their low state, for safety 
+    // Start by making all I/O pins digital outputs in their low state 
     ANSELA = 0;
     TRISA = 0;
     LATA = 0;
     ANSELB = 0;
     TRISB = 0;
     LATB = 0;
+    ANSELC = 0;
+    TRISC = 0;
+    LATC = 0;
+    ANSELD = 0;
+    TRISD = 0;
+    LATD = 0;
     
     INTCON1bits.NSTDIS = 1;  //1 to disable nested interrupts
     IPC4bits.SI2C1IP = 5;    // give I2c a higher interrup priority than Timer1, which has a natural IP of 4
@@ -44,30 +50,36 @@ void configureInitial() {
     g_startMotor = false;
     g_gotoLandmark = false;
     
+    // Quadrature encoder inputs. Not analog pins, so no need to set that
+    // Set digital input pins for Quad Enc 1 (motor 1). Motor 2 quad enc is on secondary core
+    TRISBbits.TRISB6 = 1;
+    TRISBbits.TRISB7 = 1;
+    
     // Set low-pass filter parameters
- //   g_filtNumerator=97;            // low-pass PWM filter parameter defined as integer numerator and denominator
+ //   g_filtNumerator=97;               // low-pass PWM filter parameter defined as integer numerator and denominator
  //   g_filtDenominator=100; 
     
-    
+    // PWM parameters
+    g_maxPWMInteger = 12799;            // maximum PWM integer allowed
     //PWM velocity and position output parameters
  //   g_zeroPosOutput = false;
    // g_playSingleWaveformOnly = false;
     g_pwm2ZeroOffset = 6756;
     g_pwm3ZeroOffset = 6758;
-    g_encoderToPwmDenom = 50;  // Encoder has 4000 steps per turn of motor (not geared output shaft). 
-                               // Note this gets overwritten in configureDerivedQuantities()
+    g_encoderToPwmDenom = 50;           // Encoder has 4000 steps per turn of motor (not geared output shaft). 
+                                        // Note this gets overwritten in configureDerivedQuantities()
     
     // Timer1 interrupt period sets the update rate of the feedback loop
     //With instruction cycle at 64 MIPS and prescaler set to 256:1, 2500 is every 10 milliseconds.
     g_feedbackUpdatePeriod = 2500;
     
     // Waveform parameters
-    g_waveformType = 0;             // 0-sine wave; 1-Pulse
-    g_waveformUpdatePeriod = 200;   // Number of PWM1 periods between each waveform index advance
-    //g_numArrayVals = 400;           // number of array values in output waveform. Will be overwritten
-    g_motionAmplitudeMM = 1;        // motion amplitude in mm. Small default value to avoid physical damage
-    g_reverseDirection = 0;         // 0 for forward motion sign, 1 for reverse motion sign
-    g_freqUser = 20;                // cycles per minute. Will be overwritten by software.
+    g_waveformType = 0;                 // 0-sine wave; 1-Pulse
+    g_waveformUpdatePeriod = 200;       // Number of PWM1 periods between each waveform index advance
+    //g_numArrayVals = 400;             // number of array values in output waveform. Will be overwritten
+    g_motionAmplitudeMM = 1;            // motion amplitude in mm. Small default value to avoid physical damage
+    g_reverseDirection = 0;             // 0 for forward motion sign, 1 for reverse motion sign
+    g_freqUser = 20;                    // cycles per minute. Will be overwritten by software.
     
     // Quadrature Encoder
     g_encoderZeroPos = 0x7FFF;      // set to halfway to max 32-bit unsigned. Leaves plenty of room in either direction without rollover
@@ -116,13 +128,6 @@ void configureAnalogToDigital() {
  
 }
 
-void configureEncoderInputs() {
-
-    // Set digital input pins
-    TRISBbits.TRISB6 = 1;
-    TRISBbits.TRISB7 = 1;
-}
-
 void configurePPS() {
     // Configure Peripheral Pin Select. This must be done before any application code is executed
     
@@ -139,11 +144,11 @@ void configurePPS() {
 
 
 
-void configureDirection() {
-    // direction output pin is RB15
-    TRISBbits.TRISB15 = 0;      // set to digital output
-    LATBbits.LATB15 = 1;        // set initially to positive direction (arbitrary)
-}
+//void configureDirection() {
+//    // direction output pin is RB15
+//    TRISBbits.TRISB15 = 0;      // set to digital output
+//    LATBbits.LATB15 = 1;        // set initially to positive direction (arbitrary)
+//}
 
 void configureQuadEncoder() {
     QEI1CONbits.QEIEN = 1;  // Enable quad encoder module
@@ -151,15 +156,15 @@ void configureQuadEncoder() {
     
     // Initialize counter to approximately halfway through its full range to avoid rolling over
     // counter is 32 bits, so halfway through in hex is 0x7FFF FFFF
-    POS1CNTH = 0x0100;
-    POS1HLD = 0x7FFF;  // Write high bit to Position 1 Counter Hold Register
-    POS1CNTL = 0x0002;
+    POS1CNTH = 0x0100;      // This line seems unnecessary and may be a relic of testing. Test without it at some point
+    POS1HLD = 0x7FFF;       // Write high bit to Position 1 Counter Hold Register
+    POS1CNTL = 0x0002;      // This write transfers POS1HLD into POS1CNTLH
     
     // Here POS1CNTH should be 0x7FFF
-    POS1HLD = 0x0300;  // reset it to some other number
-    
- //   uint16_t aa = POS1CNTL;  // Reading this should load POS1CNTH to POS1HLD
-    
+    // TO DO: this line was not commented in Mov1a prototype....I believe it was a relic of a test and
+    // should be deleted once things are working
+//    POS1HLD = 0x0300;  // reset it to some other number
+       
 
 }
 
@@ -228,168 +233,6 @@ void configureDerivedQuantities() {
     g_waveformTimeStep_microS = (uint32_t)(g_maxPWMInteger + 1) * (uint32_t)g_waveformUpdatePeriod / (uint32_t)(g_OscillatorFreq*2 / 1000000);
     calcNumPoints();
 }
-
-//int32_t* makePosSineWaveform(int32_t amplitudeEncPP, uint16_t numValues) {
-//    // Allocates a sine waveform of a given amplitude number of values numValues. Also allocates the global zero waveform of the same length.
-//    // INPUTS
-//    // amplitudeEncPP is the peak-to-peak amplitude of the waveform in units of encoder steps
-//    // numValues is the number of values in the array.
-//    uint16_t ii;
-//    float x;
-//    float step = 2*3.14159265359 / numValues;
-//    float amplitude;                            // true encoder amplitude rather than peak-to-peak
-//    
-//    amplitude = (float)amplitudeEncPP / 2.0;
-//    if(g_zeroWaveform != NULL) {
-//        free(g_zeroWaveform);
-//    }
-//    
-//    // Allocate memory. Note: to use dynamic memory allocation, a heap must be 
-//    //  ...created in the linker. See notes on project
-//    int32_t* waveformArray = (int32_t*)malloc(numValues*sizeof(int32_t));
-//    for(ii=0; ii<numValues; ii++) {
-//        x = amplitude * sin(ii*step);
-//        waveformArray[ii] = (int32_t)(x+0.5);
-//    }
-//    
-////    g_zeroWaveform = makeZeroWaveform(numValues);  // create corresponding zero waveform
-//    g_numArrayVals = numValues;
-//    
-//    return waveformArray;  
-//}
-//
-//
-//int32_t* makeVelSineWaveform(int32_t posAmplitude, uint16_t numValues) {
-//    // Allocates a sine waveform of a given amplitude number of values numValues. Also allocates the global zero waveform of the same length.
-//    // This is designed as a velocity-controlled waveform, so the amplitude is estimated so that the position
-//    // displacement is the posAmplitude input.
-//    // INPUTS
-//    // posAmplitude is the target position displacement (0-peak) in units of encoder steps 
-//    uint16_t ii;
-//    float x;
-//    float step = 2*3.14159265359 / numValues;
-//    float amplitude;
-//    
-//    // scale amplitude to make the position amplitude (0-peak) equal to the posAmplitude input
-//    // A half sine wave has average value of 2/pi = 0.636953.
-//     amplitude = (float)posAmplitude / numValues / g_velReadsPerWfUpdate / 0.635953;
-//    //amplitude = (float)posAmplitude / numValues / 0.635953;
-//    
-//    
-//    if(g_zeroWaveform != NULL) {
-//        free(g_zeroWaveform);
-//    }
-//    
-//    // Allocate memory. Note: to use dynamic memory allocation, a heap must be 
-//    //  ...created in the linker. See notes on project
-//    int32_t* waveformArray = (int32_t*)malloc(numValues*sizeof(int32_t));
-//    for(ii=0; ii<numValues; ii++) {
-//        x = amplitude * sin(ii*step);
-//        waveformArray[ii] = (int32_t)(x+0.5);
-//    }
-//    
-// //   g_zeroWaveform = makeZeroWaveform(numValues);  // create corresponding zero waveform
-//    g_numArrayVals = numValues;
-//    
-//    return waveformArray;  
-//}
-//
-//int32_t* makeRampWaveform(int32_t stepSize, uint16_t numValues) {
-//    // Creates a waveform meant to move the motor a defined amount. The last 10%
-//    // of the waveform sits steady to allow the motor to settle.
-//    // INPUTS
-//    // stepSize is the number of encoder steps to move the motor
-//    // numValues is the number of values in the array
-//    uint16_t ii;
-//    float rampValue;
-//    float rampIncrement;
-//    uint16_t settleInd;         // index where ramping is finished to allow settling time
-//    
-//    if(g_zeroWaveform != NULL) {
-//        free(g_zeroWaveform);
-//    }
-//
-//    // Allocate memory. Note: to use dynamic memory allocation, a heap must be 
-//    //  ...created in the linker. See notes on project
-//    int32_t* waveformArray = (int32_t*)malloc(numValues*sizeof(int32_t));
-//    
-//    settleInd = (uint16_t)(numValues * 0.9);        // float operation instead of multiplying by 9/10 in case someone makes very long array causing overflow
-//    rampIncrement = (float)(stepSize) / settleInd;
-//    rampValue = 0;
-//    
-//    for(ii=0; ii<numValues; ii++) {
-//        if(ii < settleInd) {
-//            waveformArray[ii] = rampValue;
-//            rampValue+= rampIncrement;
-//        }
-//        else {
-//            waveformArray[ii] = rampValue;          // constant for last portion of array
-//        }
-//    }
-//    
-// //   g_zeroWaveform = makeZeroWaveform(numValues);
-//    g_numArrayVals = numValues;
-// //   g_playSingleWaveformOnly = true;
-//    return waveformArray;
-//}
-//
-//int32_t* makeWideVelPulseWaveform(int32_t totalSteps, uint16_t numValues) {
-//    // Allocates an inverted cosine waveform of a given amplitude number of values numValues. 
-//    // Waveform is one period, starting and ending at 0. The waveform is intended as a velocity
-//    // waveform, with the total number of steps targeted to be equal to the totalSteps input
-//    // Also allocates the global zero waveform of the same length.
-//    // INPUTS
-//    // totalSteps is the total encoder steps to take in units of encoder steps. This will be used as a target
-//    //      target in calculating the pulse amplitude, assuming this is a velocity waveform
-//    uint16_t ii;
-//    float x;
-//    float step = 2*3.14159265359 / numValues;
-//    float amplitude;
-//    
-//    //amplitude = (float)totalSteps / (g_velReadsPerWfUpdate * numValues);
-//    amplitude = (float)totalSteps / ( numValues);
-//    
-//    if(g_zeroWaveform != NULL) {
-//        free(g_zeroWaveform);
-//    }
-//    
-//    // Allocate memory. Note: to use dynamic memory allocation, a heap must be 
-//    //  ...created in the linker. See notes on project
-//    int32_t* waveformArray = (int32_t*)malloc(numValues*sizeof(int32_t));
-//    for(ii=0; ii<numValues; ii++) {
-//        x = -amplitude * (cos(ii*step)-1.0);
-//        waveformArray[ii] = (int32_t)(x+0.5);
-//    }
-//    
-////    g_zeroWaveform = makeZeroWaveform(numValues);  // create corresponding zero waveform
-//    g_numArrayVals = numValues;
-//    return waveformArray;  
-//}
-//
-//int32_t* makeZeroWaveform(uint16_t numValues) {
-//    // Creates a waveform of zeros that is useful in bringing output to zero gracefully. Returns a pointer to the 
-//    // newly-allocated array of zeros
-//    
-//    uint16_t ii;
-//    int32_t* waveformArray = (int32_t*)malloc(numValues*sizeof(int32_t));
-//    for(ii=0; ii<numValues; ii++) {
-//        waveformArray[ii] = 0;
-//    }
-//    
-//    return waveformArray;
-//}
-//
-//int32_t* makeConstWaveform(int32_t value, uint16_t numValues) {
-//    // Creates a waveform of constant values 
-//    
-//    uint16_t ii;
-//    int32_t* waveformArray = (int32_t*)malloc(numValues*sizeof(int32_t));
-//    for(ii=0; ii<numValues; ii++) {
-//        waveformArray[ii] = value;
-//    }
-//    
-//    return waveformArray;
-//}
 
 void calcNumPoints() {
     // Calculate the number of points in one period of the waveform (one pass through the waveform array). The intention is that the caller

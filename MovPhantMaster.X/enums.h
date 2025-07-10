@@ -18,21 +18,26 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
+//NOTE: THESE ENUMS SHOULD EXACTLY MATCH THE ENUMS IN THE SECONDARY CORE
+
 typedef enum {
     REG_COMMAND,
     REG_VARIABLE,           // 16-bit variable
     REG_VARIABLE_32,        // 32-bit variable
-    REG_BOOLVAR             // boolean variable
+    REG_BOOLVAR,            // boolean variable
+    REG_PING                // ping request    
 } Register;
 
 typedef enum {
     START_MOTION,
     STOP_MOTION,
+    READ_QUAD_ENC,        
     SEND_VARIABLES
 } Command;
 
 typedef enum {
     PWM1_CYCLES,
+    PWM2_CYCLES,
     MAX_PWM_INT,
     NUM_ARRAY_VALS,
     WAVEFORM_UPDATE_PERIOD,
@@ -40,7 +45,9 @@ typedef enum {
     MOTION_AMPLITUDE_MM,
     REVERSE_DIRECTION,
     FREQ_USER,
-    ENCODER_STEPS_PER_MM
+    ENCODER_STEPS_PER_MM,
+    QUAD_ENC_VEL,
+    PING_VAR
 } Variable;
 
 typedef enum {
@@ -52,7 +59,8 @@ typedef enum {
 typedef enum {
     WAVEFORM_TIMESTEP_MICROS,
     DISPLACEMENT1_DEMAND,
-    DISPLACEMENT2_DEMAND
+    DISPLACEMENT2_DEMAND,
+    QUAD_ENC_POS
 }Variable32;
 
 

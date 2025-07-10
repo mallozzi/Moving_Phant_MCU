@@ -13,26 +13,22 @@ uint16_t g_maxPWMInteger;        // maximum PWM integer allowed
 // ****  END SECTION
 
 // For bare motor testing only - spin a motor axle by outputting fixed PWM signal
-bool g_motorTestMode = false;                // true to put in test mode to just spin a motor
-int16_t g_motorTestPwm = 3000;              // for motor test mode only - pwm integer to send to motor
+bool g_motorTestMode = false;           // true to put in test mode to just spin a motor
+int16_t g_motorTestPwm = 3000;          // for motor test mode only - pwm integer to send to motor
 
-
+uint16_t g_pingVar;                     // used to confirm round-trip FIFO ping to secondary core
+uint32_t g_secondaryQuadEncPos;         // quadrature encoder position read from secondary core
+int16_t g_secondaryQuadEncVel;          // quadrature encoder velocity read from secondary core
 
 
 bool g_faultDetected;
 uint16_t g_errorFlags;
 
-bool g_output1Enabled = false;           // true when motion output is enabled, false otherwise.
-bool g_output2Enabled = false;           // true when motion output is enabled, false otherwise.
+bool g_output1Enabled = false;          // true when motion output is enabled, false otherwise.
+bool g_output2Enabled = false;          // true when motion output is enabled, false otherwise.
 
 // User configuration parameters
 uint16_t g_maxDisplacementMM;           // Maximum peak-to-peak displacement in mm for translational motion
-
-// Waveform arrays
-//int32_t* g_outputWaveform = NULL;       // pointer to whatever array is currently being used to determine output. It could represent speed or position
-//int32_t* g_zeroWaveform = NULL;         // waveform of zeros useful for bringing output to zero gradually
-//volatile bool g_resetWaveform = false;  // causes waveform array index to be reset to zero.
-//volatile bool g_stopMotionIssued=false; // causes motion to stop the next time a waveform has been completed
 
 // Waveform parameters
 uint16_t g_numArrayVals;                // number of array values in output waveform
@@ -47,6 +43,7 @@ uint16_t g_waveformUpdatePeriod;        // number of PWM1 interrupts between wav
 
 //PWM parameters
 int16_t g_pwm1Cycles;                   // Duty cycle parameter for PWM1
+int16_t g_pwm2Cycles;                   // Duty cycle parameter for PWM1
 //int16_t* g_pwmArray=NULL;
               // maximum PWM integer allowed
 

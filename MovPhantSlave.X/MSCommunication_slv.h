@@ -25,6 +25,7 @@ void processCommandFromPrimary();
 void receiveVariableFromPrimary();
 void receive32bVariableFromPrimary();
 void receiveBoolVarFromPrimary();
+void processPingRequest();
 
 void sendVariableToPrimary(Variable whichVar, uint16_t value);
 void send32bVariableToPrimary(Variable32 whichVar, uint32_t value);

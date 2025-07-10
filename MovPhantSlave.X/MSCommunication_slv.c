@@ -10,6 +10,8 @@
 
 void processCommandFromPrimary() {
     Command fifoCmd;
+    static uint32_t var32;
+    static int16_t var16;
     while(SI1FIFOCSbits.SRFEMPTY);          // wait for next FIFO data to come through
         fifoCmd = SRMWFDATA;
         if(fifoCmd == START_MOTION) {
@@ -17,6 +19,12 @@ void processCommandFromPrimary() {
         }
         else if (fifoCmd == STOP_MOTION) {
             stopMotion();
+        }
+        else if (fifoCmd == READ_QUAD_ENC) {
+            var32 = readQuadEncoderPos();
+            send32bVariableToPrimary(QUAD_ENC_POS, var32);
+            var16 = readEncoderVelocity();
+            sendVariableToPrimary(QUAD_ENC_VEL, (uint16_t)var16);
         }
 }
 
@@ -36,6 +44,9 @@ void receiveVariableFromPrimary() {
     switch(whichVar) {
         case PWM1_CYCLES:
             gs_pwm1Cycles = (int16_t)fifoVal;
+            break;
+        case PWM2_CYCLES:
+            gs_pwm2Cycles = (int16_t)fifoVal;
             break;
         case MAX_PWM_INT:
             gs_maxPWMInteger = fifoVal;
@@ -123,6 +134,18 @@ void receiveBoolVarFromPrimary() {
         default:
             break;
     }
+}
+
+void processPingRequest() {
+    // Processes a ping request from the primary core. A ping request sends a single 16-bit integer.
+    // This function reads that value and sends it right back to the primary, where the response
+    // is to set a global variable g_pingVal that can be compared to what was sent.
+    
+    uint16_t fifoVal;
+
+    while(SI1FIFOCSbits.SRFEMPTY);          // wait for next FIFO data to come through
+    fifoVal = SRMWFDATA;                    // reads the value sent and then sends it back
+    sendVariableToPrimary(PING_VAR, fifoVal);
 }
 
 void sendVariableToPrimary(Variable whichVar, uint16_t value) {

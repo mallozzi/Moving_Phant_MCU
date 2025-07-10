@@ -28,7 +28,7 @@ void sendCommandToSecondary(Command whichCommand);
 void sendVariableToSecondary(Variable whichVar, uint16_t value);
 void send32bVariableToSecondary(Variable32 whichVar, uint32_t value);
 void sendBoolVarToSecondary(BoolVariable whichVar, bool boolVal);
-//void sendBoolVarToSecondary(BoolVariable whichVar, bool boolVal);
+void sendPingRequestToSecondary(uint16_t pingVal);
 void sendParamtersToSecondary();
 
 void receiveVariableFromSecondary();

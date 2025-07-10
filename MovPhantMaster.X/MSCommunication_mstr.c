@@ -71,6 +71,23 @@ void sendBoolVarToSecondary(BoolVariable whichVar, bool boolVal) {
     MWSRFDATA = (uint16_t)boolVal;
 }
 
+void sendPingRequestToSecondary(uint16_t pingVal) {
+    // Sends the value pingVal to the secondary. The protocol is that the ping request
+    // includes the value pingVal, an arbitrary integer to identify the ping request. The
+    // secondary reads this value and sends it back as a single-byte ping variable. The 
+    // primary receives that variable and sets the local variable g_pingVal with this value
+    // which can be checked against the transmitted pingVal to match, verifying the ping.
+    // This ping is used to ensure that an earlier FIFO transmission has occurred.
+    
+    // ...Send register that identifies it as a ping variable
+    while(MSI1FIFOCSbits.WFFULL);       //wait until write FIFO is not full
+    MWSRFDATA = REG_PING;
+    
+    while(MSI1FIFOCSbits.WFFULL);       //wait until write FIFO is not full
+    MWSRFDATA = pingVal;
+    
+}
+
 void sendParamtersToSecondary() {
     // Sends global parameters to secondary core.
     
@@ -119,7 +136,11 @@ void receiveVariableFromSecondary() {
     fifoVal = MRSWFDATA;                    // value in the variable data.
     
     switch(whichVar) {
-        case PWM1_CYCLES:            // Dummy test - may not need anything yet
+        case PING_VAR:                      // return value from a master-requested ping to secondary
+            g_pingVar = (uint16_t)fifoVal;  // g_pingVar can be tested to make sure it matches what was sent
+            break;
+        case QUAD_ENC_VEL:                      // return value from a master-requested ping to secondary
+            g_secondaryQuadEncVel = (int16_t)fifoVal;  // g_pingVar can be tested to make sure it matches what was sent
             break;
         default:
             break;
@@ -158,6 +179,9 @@ void receive32bVariableFromSecondary() {
             break;
         case WAVEFORM_TIMESTEP_MICROS:
             g_waveformTimeStep_microS = var32;
+            break;
+        case QUAD_ENC_POS:
+            g_secondaryQuadEncPos = var32;
             break;
     }
 }

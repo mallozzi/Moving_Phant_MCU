@@ -88,3 +88,32 @@ void setMotorOutput2(int16_t pwmSignedDutyCycleInt) {
     INTCON2bits.GIE = 1;                //re-enable global interrupt 
     
 }
+
+uint32_t readQuadEncoderPos() {
+    // Reads the quadrature encoder position and returns a 32 bit unsigned integer
+    // variables used to temporarily hold quadrature encoder bytes while reading
+    static uint16_t posLowByte;
+    static uint32_t posHighByte;
+    static uint32_t position;
+    
+    // Read position register and update pwm position output
+    posLowByte = POS1CNTL; // Should load POS1CNTH into POS1HLD
+    posHighByte = POS1HLD;
+    position = (posHighByte<<16) + posLowByte;
+    
+    return position;
+}
+
+int16_t readEncoderVelocity() {
+    static int16_t velocity;
+    static uint16_t speedRegister;
+    speedRegister = VEL1CNT;   
+    velocity = (int16_t) speedRegister;
+    if (speedRegister >= 0x7FFF) {   // speed was actually negative
+        // take the two's complement negative
+        speedRegister = ~speedRegister + 1;   // two's complement
+        velocity = -(int16_t)speedRegister;
+    }
+    
+    return velocity;
+}
