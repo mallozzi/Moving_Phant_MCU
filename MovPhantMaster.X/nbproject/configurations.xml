@@ -13,6 +13,7 @@
       <itemPath>globals.h</itemPath>
       <itemPath>paramManagerMaster.h</itemPath>
       <itemPath>registerHandler.h</itemPath>
+      <itemPath>motorCntrlMstr.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

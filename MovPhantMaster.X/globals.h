@@ -51,35 +51,30 @@ extern uint16_t g_maxDisplacementMM;         // Maximum peak-to-peak displacemen
 extern int32_t* g_outputWaveform;           // pointer to whatever array is currently being used to determine output. It could represent speed or position
 extern int32_t* g_zeroWaveform;             // waveform of zeros useful for bringing output to zero gradually
 
-// Waveform Management
-//extern volatile bool g_resetWaveform;       // causes waveform array index to be reset to zero.
-//extern volatile bool g_stopMotionIssued;    // causes motion to stop the next time a waveform has been completed
 
 // Other waveform properties
-extern uint16_t g_numArrayVals;             // number of array values in output waveform
-extern uint16_t g_waveformUpdatePeriod;     // number of PWM1 interrupts between waveform index updates
-extern uint16_t g_waveformType;             // stores which type of waveform is selected
-extern uint16_t g_motionAmplitudeMM;        // amplitude of motion in mm
-extern uint16_t g_reverseDirection;         // 1 to move opposite direction, 0 for forward
-extern uint32_t g_waveformTimeStep_microS;  // Time between each element of the waveform array in microseconds
-extern uint16_t g_freqUser;                 // frequency requested by user in cycles / min
+extern uint16_t g_numArrayVals;                 // number of array values in output waveform
+extern uint16_t g_waveformUpdatePeriod;         // number of PWM1 interrupts between waveform index updates
+extern uint16_t g_waveformType;                 // stores which type of waveform is selected
+extern uint16_t g_motionAmplitudeMM;            // amplitude of motion in mm
+extern uint16_t g_reverseDirection;             // 1 to move opposite direction, 0 for forward
+extern uint32_t g_waveformTimeStep_microS;      // Time between each element of the waveform array in microseconds
+extern uint16_t g_freqUser;                     // frequency requested by user in cycles / min
 
-extern uint16_t g_errorFlags;               // Each bit is an error flag. See globals.c
+extern uint16_t g_errorFlags;                   // Each bit is an error flag. See globals.c
 extern bool g_faultDetected;
 
 
 // Velocity and Position PWM outputs
-extern uint16_t g_pwm2ZeroOffset;           // offset for position output. This will be the pwm output for zero speed
-extern uint16_t g_pwm3ZeroOffset;           // offset for velocity output. This will be the pwm output for zero speed
-extern int16_t g_encoderToPwmDenom;         // divisor for position encoder steps to pwm output for position output pwm (pwm2))
-
-//extern int16_t g_filtNumerator;            // low-pass PWM filter parameter defined as integer numerator and denominator
-//extern int16_t g_filtDenominator; 
+extern uint16_t g_pwm1ZeroOffset;               // offset for motor 1 position output. This will be the pwm output for zero position
+extern uint16_t g_pwm2ZeroOffset;               // offset for position output. This will be the pwm output for zero speed
+extern uint16_t g_pwm3ZeroOffset;               // offset for velocity output. This will be the pwm output for zero speed
+extern int16_t g_encoderToPwmDenom;             // divisor for position encoder steps to pwm output for position output pwm (pwm2))
 
 // Timer1 interrupt period sets the update rate of the feedback loop
-extern uint16_t g_feedbackUpdatePeriod;
-extern uint16_t g_timer1Prescale;          // Pre-scale factor in Timer1 configuration, needed for other calculations
-//extern float g_velReadsPerWfUpdate;        // number of times velocity is read per waveform update period (one index advancement) -- non integer 
+extern uint16_t g_feedbackHalfUpdatePeriod;     // Timer1 interrupt period in units of Timer1 cycles. Feedback output for each motor is updated every two of these periods
+extern uint16_t g_timer1Prescale;               // Pre-scale factor in Timer1 configuration, needed for other calculations
+//extern float g_velReadsPerWfUpdate;           // number of times velocity is read per waveform update period (one index advancement) -- non integer 
 
 
 // motor 1 control feedback parameters

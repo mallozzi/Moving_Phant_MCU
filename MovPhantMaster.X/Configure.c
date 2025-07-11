@@ -29,6 +29,9 @@ void configureInitial() {
     INTCON1bits.NSTDIS = 1;  //1 to disable nested interrupts
     IPC4bits.SI2C1IP = 5;    // give I2c a higher interrup priority than Timer1, which has a natural IP of 4
     
+    // LED 1 Pin RD10
+    TRISDbits.TRISD10 = 0;
+    
     // Configure the fault input and sleep output pins
     // RA0 is fault input from driver
     TRISAbits.TRISA0 = 1;       // digital input
@@ -55,15 +58,10 @@ void configureInitial() {
     TRISBbits.TRISB6 = 1;
     TRISBbits.TRISB7 = 1;
     
-    // Set low-pass filter parameters
- //   g_filtNumerator=97;               // low-pass PWM filter parameter defined as integer numerator and denominator
- //   g_filtDenominator=100; 
-    
     // PWM parameters
     g_maxPWMInteger = 12799;            // maximum PWM integer allowed
     //PWM velocity and position output parameters
- //   g_zeroPosOutput = false;
-   // g_playSingleWaveformOnly = false;
+    g_pwm1ZeroOffset = 6756;
     g_pwm2ZeroOffset = 6756;
     g_pwm3ZeroOffset = 6758;
     g_encoderToPwmDenom = 50;           // Encoder has 4000 steps per turn of motor (not geared output shaft). 
@@ -71,7 +69,7 @@ void configureInitial() {
     
     // Timer1 interrupt period sets the update rate of the feedback loop
     //With instruction cycle at 64 MIPS and prescaler set to 256:1, 2500 is every 10 milliseconds.
-    g_feedbackUpdatePeriod = 2500;
+    g_feedbackHalfUpdatePeriod = 2500;
     
     // Waveform parameters
     g_waveformType = 0;                 // 0-sine wave; 1-Pulse
@@ -103,7 +101,6 @@ void configureInitial() {
     
 //    INTCON1bits.NSTDIS = 1;  //disable nested interrupts
  //   IPC4bits.SI2C1IP = 3;    // give I2c a higher interrupt priority than Timer1, which has a natural IP of 4
-    
     
     // Initialize error flags
     g_errorFlags = 0;
@@ -141,14 +138,6 @@ void configurePPS() {
     // Lock control register
     __builtin_write_RPCON(0x0800);
 }
-
-
-
-//void configureDirection() {
-//    // direction output pin is RB15
-//    TRISBbits.TRISB15 = 0;      // set to digital output
-//    LATBbits.LATB15 = 1;        // set initially to positive direction (arbitrary)
-//}
 
 void configureQuadEncoder() {
     QEI1CONbits.QEIEN = 1;  // Enable quad encoder module
@@ -222,9 +211,6 @@ void configureDerivedQuantities() {
         g_waveformUpdatePeriod = 1600; // targets 80 ms update period assuming PWM1 max integer of 12799
     }
     
-    // Non-integer number of times the velocity is read in one advancement of the waveform index.
- //   g_velReadsPerWfUpdate = (float)(g_maxPWMInteger + 1) * g_waveformUpdatePeriod / (4 * (float)g_feedbackUpdatePeriod * g_timer1Prescale);
-    
     // Configures the PWM-output-to-position encoder
     g_encoderToPwmDenom = (int16_t)(  (float)(g_maxDisplacementMM) * (float)(g_encoderStepsPerMM) / (float)g_maxPWMInteger + 0.5);
     
@@ -243,96 +229,3 @@ void calcNumPoints() {
     float period_microSec =  60.0 * 1000000.0 / (float)g_freqUser;
     g_numArrayVals = (uint16_t)( period_microSec / (float)g_waveformTimeStep_microS + 0.5 );
 }
-
-
-//void configurePPS() {
-//    // Configure Peripheral Pin Select. This must be done before any application code is executed
-//    
-//    // Unlock control register
-//    __builtin_write_RPCON(0x0000);
-//    
-//    // Set the remappable pin inputs for Input Capture:
-//    RPINR3bits.ICM1R = 45;      // SCCP Capture 1 to RP45, which corresponds to pin RB13
-//    RPINR4bits.ICM2R = 44;      // SCCP Capture 2 to RP44, which corresponds to pin RB12
-//    RPINR5bits.ICM3R = 43;      // SCCP Capture 3 to RP43, which corresponds to pin RB11
-//    RPINR6bits.ICM4R = 38;      // SCCP Capture 4 to RP38, which corresponds to pin RB6
-//    RPINR7bits.ICM5R = 39;      // SCCP Capture 5 to RP39, which corresponds to pin RB7
-//            
-//    // Lock control register
-//    __builtin_write_RPCON(0x0800);
-//}
-
-//void configureInputCapture() {
-//    // Configures Input Capture mode on multiple pins. Assumes PPS has already been configured
-//    
-//    // *** Capture 1 module
-//    TRISBbits.TRISB13 = 1;              // Set to digital input
-//    CCP1CON1Lbits.CCPON = 0;            // Disable module before making changes. Probably not necessary
-//    CCP1CON1Lbits.CCSEL = 1;            // Select Input Capture mode
-//    CCP1CON1Lbits.CLKSEL = 0;           // Set Fosc/2 as the clock source 
-//    CCP1CON1Lbits.MOD = 0;              // Edge detect mode (a bit different from every rising/falling edge mode in how overflow handled)
-//    CCP1CON1Lbits.T32 = 1;              // Set timer to 32 bit mode
-//    CCP1CON2Hbits.ICS = 0;              // Set Input Capture source to IC1 pin (from PPS)
-//    CCP1CON1Lbits.CCPON = 1;            // Enable the module
-//    
-//    // Interrupts for Capture 1 module
-//    IEC0bits.CCP1IE = 1;                // Enable Capture Compare interrupt
-//    IFS0bits.CCP1IF = 0;                // Clear Capture 1 interrupt flag
-//    
-//    // *** Capture 2 module
-//    TRISBbits.TRISB12 = 1;              // Set to digital input
-//    CCP2CON1Lbits.CCPON = 0;            // Disable module before making changes. Probably not necessary
-//    CCP2CON1Lbits.CCSEL = 1;            // Select Input Capture mode
-//    CCP2CON1Lbits.CLKSEL = 0;           // Set Fosc/2 as the clock source 
-//    CCP2CON1Lbits.MOD = 0;              // Edge detect mode (a bit different from every rising/falling edge mode in how overflow handled)
-//    CCP2CON1Lbits.T32 = 1;              // Set timer to 32 bit mode
-//    CCP2CON2Hbits.ICS = 0;              // Set Input Capture source to IC2 pin (from PPS)
-//    CCP2CON1Lbits.CCPON = 1;            // Enable the module
-//    
-//    // Interrupts for Capture 2 module
-//    IEC1bits.CCP2IE = 1;                // Enable Capture Compare interrupt
-//    IFS1bits.CCP2IF = 0;                // Clear Capture 2 interrupt flag
-//    
-//    // *** Capture 3 module
-//    TRISBbits.TRISB11 = 1;              // Set to digital input
-//    CCP3CON1Lbits.CCPON = 0;            // Disable module before making changes. Probably not necessary
-//    CCP3CON1Lbits.CCSEL = 1;            // Select Input Capture mode
-//    CCP3CON1Lbits.CLKSEL = 0;           // Set Fosc/2 as the clock source 
-//    CCP3CON1Lbits.MOD = 0;              // Edge detect mode (a bit different from every rising/falling edge mode in how overflow handled)
-//    CCP3CON1Lbits.T32 = 1;              // Set timer to 32 bit mode
-//    CCP3CON2Hbits.ICS = 0;              // Set Input Capture source to IC3 pin (from PPS)
-//    CCP3CON1Lbits.CCPON = 1;            // Enable the module
-//    
-//    // Interrupts for Capture 3 module
-//    IEC2bits.CCP3IE = 1;                // Enable Capture Compare interrupt
-//    IFS2bits.CCP3IF = 0;                // Clear Capture 3 interrupt flag
-//    
-//    // *** Capture 4 module
-//    TRISBbits.TRISB6 = 1;               // Set to digital input
-//    CCP4CON1Lbits.CCPON = 0;            // Disable module before making changes. Probably not necessary
-//    CCP4CON1Lbits.CCSEL = 1;            // Select Input Capture mode
-//    CCP4CON1Lbits.CLKSEL = 0;           // Set Fosc/2 as the clock source 
-//    CCP4CON1Lbits.MOD = 0;              // Edge detect mode (a bit different from every rising/falling edge mode in how overflow handled)
-//    CCP4CON1Lbits.T32 = 1;              // Set timer to 32 bit mode
-//    CCP4CON2Hbits.ICS = 0;              // Set Input Capture source to IC4 pin (from PPS)
-//    CCP4CON1Lbits.CCPON = 1;            // Enable the module
-//    
-//    // Interrupts for Capture 4 module
-//    IEC2bits.CCP4IE = 1;                // Enable Capture Compare interrupt
-//    IFS2bits.CCP4IF = 0;                // Clear Capture 4 interrupt flag
-//    
-//    // *** Capture 5 module
-//    TRISBbits.TRISB7 = 1;               // Set to digital input
-//    CCP2CON1Lbits.CCPON = 0;            // Disable module before making changes. Probably not necessary
-//    CCP2CON1Lbits.CCSEL = 1;            // Select Input Capture mode
-//    CCP2CON1Lbits.CLKSEL = 0;           // Set Fosc/2 as the clock source 
-//    CCP2CON1Lbits.MOD = 0;              // Edge detect mode (a bit different from every rising/falling edge mode in how overflow handled)
-//    CCP2CON1Lbits.T32 = 1;              // Set timer to 32 bit mode
-//    CCP2CON2Hbits.ICS = 0;              // Set Input Capture source to IC5 pin (from PPS)
-//    CCP2CON1Lbits.CCPON = 1;            // Enable the module
-//    
-//    // Interrupts for Capture 5 module
-//    IEC2bits.CCP5IE = 1;                // Enable Capture Compare interrupt
-//    IFS2bits.CCP5IF = 0;                // Clear Capture 5 interrupt flag
-//    
-//}

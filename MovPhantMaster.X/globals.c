@@ -44,31 +44,22 @@ uint16_t g_waveformUpdatePeriod;        // number of PWM1 interrupts between wav
 //PWM parameters
 int16_t g_pwm1Cycles;                   // Duty cycle parameter for PWM1
 int16_t g_pwm2Cycles;                   // Duty cycle parameter for PWM1
-//int16_t* g_pwmArray=NULL;
-              // maximum PWM integer allowed
-
-//int16_t g_filtNumerator;                // low-pass PWM filter parameter defined as integer numerator and denominator
-//int16_t g_filtDenominator; 
 
 // PWM parameters for velocity and position outputs
+uint16_t g_pwm1ZeroOffset;               // offset for motor 1 position output. This will be the pwm output for zero position
 uint16_t g_pwm2ZeroOffset;               // offset for velocity output. This will be the pwm output for zero speed. 
 uint16_t g_pwm3ZeroOffset;
-int16_t g_encoderToPwmDenom;            // divisor for position encoder steps to pwm output for position output pwm (pwm2))
+int16_t g_encoderToPwmDenom;                // divisor for position encoder steps to pwm output for position output pwm (pwm2))
 
 // Timer1 interrupt period sets the update rate of the feedback loop
-uint16_t g_feedbackUpdatePeriod;
+uint16_t g_feedbackHalfUpdatePeriod;    // Timer1 interrupt period in units of Timer1 cycles. Feedback output for each motor is updated every two of these periods
 uint16_t g_timer1Prescale;              // Pre-scale factor in Timer1 configuration, needed for other calculations
-//float g_velReadsPerWfUpdate;            // number of times velocity is read per waveform update period (one index advancement) -- non integer 
 
 // Quadrature Encoder parameters
 uint32_t g_encoderZeroPos;              // quadrature encoder zero position
 uint16_t g_encoderStepsPerMM;           // Number of encoder steps per mm of travel
 uint32_t g_landmarkPosition;            // Position of Landmark in encoder units
 
-// motor control feedback parameters
-//volatile uint16_t g_velocity;
-//volatile int16_t g_velDemand;
-//volatile uint16_t g_tmp;
 
 // Feedback Parameters for motor 1. The proportional, integral, and derivative constants are expressed as a numerator and a denominator. 
 // The ratio is the proportionality between that error term in the position and the PWM output component that results.

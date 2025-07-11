@@ -33,6 +33,8 @@ void configSlaveInitial() {
     gs_output1Enabled = false;
     gs_output2Enabled = false;
     
+    // LED 2 Pin
+    TRISBbits.TRISB1 = 0;
  
     // Configure Motor 1 and 2 Driver, direction outputs as digital output pins
     TRISCbits.TRISC4 = 0;                       // PWM_Driver1 (Motor 1)

@@ -6,6 +6,7 @@
 #include "MSCommunication_slv.h"
 #include "enums_slave.h"
 #include "StateManagement_slv.h"
+#include "motorCntrlSlv.h"
 
 
 void processCommandFromPrimary() {
@@ -107,6 +108,8 @@ void receive32bVariableFromPrimary() {
             break;
         case DISPLACEMENT2_DEMAND:
             gs_displacement2Demand = (int32_t)var32;
+            break;
+        default:
             break;
     }
 }

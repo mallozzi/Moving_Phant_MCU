@@ -11,7 +11,7 @@
 
 
 void configureTimer1() {
-    //Configure Timer1, but does not start it or enable the interrupts.
+    //Configures Timer1, but does not start it or enable the interrupts.
     //The 'Peripheral Bus Clock' referred to in the datasheets seems to be half the oscillator frequency, which
     //happens to be the same as the instruction cycle frequency unless the CLKDIV.DOZE bits are used to slow down 
     //the instruction cycle frequency
@@ -24,7 +24,7 @@ void configureTimer1() {
     T1CONbits.TCKPS = 3;    //pre-scaler. Value of 3 (0b11) is 256:1. Be sure to update g_timer1Prescale if changed.
     g_timer1Prescale = 256; //pre-scaler value, set for use elsewhere in calculations
     TMR1 = 0;               //clear the Timer1 register
-    PR1 = 12500;            //Timer1 period. With instruction cycle at 64 MIPS and prescaler set to 256:1, 2500 is every 10 milliseconds.
+    PR1 = 2500;             //Timer1 period. With instruction cycle at 64 MIPS and prescaler set to 256:1, 2500 is every 10 milliseconds.
     IEC0bits.T1IE = 0;      //disable Timer1 interrupt
     INTCON2bits.GIE = 1;    //Enable global interrupts
     IFS0bits.T1IF = 0;      //clears interrupt flag

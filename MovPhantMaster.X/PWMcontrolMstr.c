@@ -79,7 +79,6 @@ void configurePWM3() {
     
     
     //set period 
- //   gs_maxPWMInteger = 12799;            // maximum PWM integer allowed
     PG3PER = g_maxPWMInteger; //PWM period is PG1PER+1 clock cycles. Value of 12799 is designed to give period of 12800 / 256 MHz = 50 micro-seconds
     PG3PHASE = 0; //no offset from start of PWM period
     PG3DC = 0; //width of pulse in clock cycles. Initial value of zero would give no output

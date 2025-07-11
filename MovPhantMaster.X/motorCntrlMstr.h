@@ -22,7 +22,7 @@ extern "C" {
 
 #include <stdbool.h>
 
-//void enableDriver(bool enable);
+//void readSecondaryQuadEncoder();        // reads the position and velocity registers of the quadrature encoder on the secondary core
 
 #endif	/* MOTORCNTRLMSTR_H */
 
