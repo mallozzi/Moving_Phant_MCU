@@ -67,7 +67,7 @@ extern bool g_faultDetected;
 
 // Velocity and Position PWM outputs
 extern uint16_t g_pwm1ZeroOffset;               // offset for motor 1 position output. This will be the pwm output for zero position
-extern uint16_t g_pwm2ZeroOffset;               // offset for position output. This will be the pwm output for zero speed
+extern uint16_t g_pwm2ZeroOffset;               // offset for motor 2 position output. This will be the pwm output for zero speed
 extern uint16_t g_pwm3ZeroOffset;               // offset for velocity output. This will be the pwm output for zero speed
 extern int16_t g_encoderToPwmDenom;             // divisor for position encoder steps to pwm output for position output pwm (pwm2))
 
@@ -78,33 +78,33 @@ extern uint16_t g_timer1Prescale;               // Pre-scale factor in Timer1 co
 
 
 // motor 1 control feedback parameters
-extern volatile uint16_t g_propConstNum;        // Numerator of proportionality constant for Proportional Feedback component
-extern volatile uint16_t g_propConstDenom;      // Denominator of proportionality constant for Proportional Feedback component
-extern volatile uint16_t g_intConstNum;         // Numerator of proportionality constant for Integral Feedback component
-extern volatile uint16_t g_intConstDenom;       // Denominator of proportionality constant for Integral Feedback component
-extern volatile uint16_t g_derivConstNum;       // Numerator of proportionality constant for Derivative Feedback component
-extern volatile uint16_t g_derivConstDenom;     // Denominator of proportionality constant for Derivative Feedback component
+extern volatile uint16_t g_propConstNum1;        // Numerator of proportionality constant for Proportional Feedback component
+extern volatile uint16_t g_propConstDenom1;      // Denominator of proportionality constant for Proportional Feedback component
+extern volatile uint16_t g_intConstNum1;         // Numerator of proportionality constant for Integral Feedback component
+extern volatile uint16_t g_intConstDenom1;       // Denominator of proportionality constant for Integral Feedback component
+extern volatile uint16_t g_derivConstNum1;       // Numerator of proportionality constant for Derivative Feedback component
+extern volatile uint16_t g_derivConstDenom1;     // Denominator of proportionality constant for Derivative Feedback component
 extern volatile int32_t g_displacement1Demand;   // Demand for encoder displacement (relative)
 
 // motor 2 control feedback parameters
 // TO DO: MAKE THESE ALL FOR MOTOR 2
-//extern volatile uint16_t g_propConstNum;        // Numerator of proportionality constant for Proportional Feedback component
-//extern volatile uint16_t g_propConstDenom;      // Denominator of proportionality constant for Proportional Feedback component
-//extern volatile uint16_t g_intConstNum;         // Numerator of proportionality constant for Integral Feedback component
-//extern volatile uint16_t g_intConstDenom;       // Denominator of proportionality constant for Integral Feedback component
-//extern volatile uint16_t g_derivConstNum;       // Numerator of proportionality constant for Derivative Feedback component
-//extern volatile uint16_t g_derivConstDenom;     // Denominator of proportionality constant for Derivative Feedback component
+extern volatile uint16_t g_propConstNum2;      // Numerator of proportionality constant for Proportional Feedback component
+extern volatile uint16_t g_propConstDenom2;      // Denominator of proportionality constant for Proportional Feedback component
+extern volatile uint16_t g_intConstNum2;         // Numerator of proportionality constant for Integral Feedback component
+extern volatile uint16_t g_intConstDenom2;       // Denominator of proportionality constant for Integral Feedback component
+extern volatile uint16_t g_derivConstNum2;       // Numerator of proportionality constant for Derivative Feedback component
+extern volatile uint16_t g_derivConstDenom2;     // Denominator of proportionality constant for Derivative Feedback component
 extern volatile int32_t g_displacement2Demand;   // Demand for encoder displacement (relative)
 
 
 // Quadrature Encoder parameters
-extern uint32_t g_encoderZeroPos;          // quadrature encoder zero position. This is a short-term reference position
-extern uint16_t g_encoderStepsPerMM;       // Number of encoder steps per mm of travel
-extern uint32_t g_landmarkPosition;        // Position of Landmark in encoder units
+extern uint32_t g_encoder1ZeroPos;              // quadrature encoder zero position. This is a short-term reference position
+extern uint32_t g_encoder2ZeroPos;              // quadrature encoder zero position. This is a short-term reference position
+extern uint16_t g_encoderStepsPerMM;            // Number of encoder steps per mm of travel
+extern uint32_t g_landmark1Position;            // Position of Landmark for motor 1 in encoder units
+extern uint32_t g_landmark2Position;            // Position of Landmark for motor 2 in encoder units
 
 // Commands and other output-related variables
-//extern volatile bool g_zeroPosOutput;           // variable to cause zero voltage output when true
-//extern volatile bool g_playSingleWaveformOnly;  // set to true to play just one period of the waveform array
 extern volatile bool g_startMotor;              // set to true to cause motor to start
 extern volatile bool g_gotoLandmark;            // set to true to cause system to go to landmark
 

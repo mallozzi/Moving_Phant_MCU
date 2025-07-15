@@ -192,7 +192,6 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
     // The output is set by updating the g_pwmxCycles variable. 
     
     static uint16_t counter = 0;                    // Counts interrupts to manage alternating motor updates.
-    static uint16_t pingCompare = 13;               // arbitrary number to use for validating ping request
     
     // variables used to temporarily hold quadrature encoder bytes while reading
     static uint16_t posLowByte;
@@ -206,9 +205,6 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
     static int16_t pwmPosition1;                    // pwm output corresponding to the position
     
     //feedback control parameters for motor 2
-    static uint16_t speed2Register;
-    static int16_t velocity2;                       // signed velocity in units of encoder steps per interrupt period
-    static uint32_t position2;                      //absolute encoder position reading with large zero offset
     static int32_t displacement2;                   //position relative to zero position
     static int16_t pwmPosition2;                    // pwm output corresponding to the position
     
@@ -240,15 +236,17 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         posLowByte = POS1CNTL; // Should load POS1CNTH into POS1HLD
         posHighByte = POS1HLD;
         position1 = (posHighByte<<16) + posLowByte;
-        if(position1 >= g_encoderZeroPos) {
-            displacement1 = (int32_t)(position1 - g_encoderZeroPos);
+        if(position1 >= g_encoder1ZeroPos) {
+            displacement1 = (int32_t)(position1 - g_encoder1ZeroPos);
         }
         else {
-            displacement1 = -(int32_t)(g_encoderZeroPos - position1);
+            displacement1 = -(int32_t)(g_encoder1ZeroPos - position1);
         }
-        // Convert displacement to a pwm output for external position analog signal output. Clip if out of bounds
+        // Convert displacement to a pwm output for external position analog signal output.
         // This is not part of the feedback calculation, just an external signal for monitoring position
         pwmPosition1 = ( __builtin_divsd(displacement1, g_encoderToPwmDenom) + (int32_t)g_pwm1ZeroOffset );
+        
+        // clip the output if it goes out of bounds
         if(pwmPosition1 < 0) {
             pwmPosition1 = 0;
         }
@@ -273,9 +271,9 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
 
             if(!g_motorTestMode) {
                 // Set output = Proportional term + Integral term + Derivative Term
-                g_pwm1Cycles = -MultiplyByFraction((int16_t)displacement1Error, g_propConstNum, g_propConstDenom) 
-                              - MultiplyByFraction((int16_t)integralDisplacement1Error, g_intConstNum, g_intConstDenom)
-                              - MultiplyByFraction(velocity1, g_derivConstNum, g_derivConstDenom);
+                g_pwm1Cycles = -MultiplyByFraction((int16_t)displacement1Error, g_propConstNum1, g_propConstDenom1) 
+                              - MultiplyByFraction((int16_t)integralDisplacement1Error, g_intConstNum1, g_intConstDenom1)
+                              - MultiplyByFraction(velocity1, g_derivConstNum1, g_derivConstDenom1);
             }
             else {  // motor test mode - spin motor at constant pwm
                 g_pwm1Cycles = g_motorTestPwm;
@@ -295,74 +293,71 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         
         counter++;
     }
-    else { // counter==1, motor 2 feedback loop update
-        // Read position and velocity register. Motor 2 quad encoder is on secondary core. There is some time needed
-        // to ensure this has happened, so we wrap it in a ping request.
-        g_pingVar = 0;
-        sendCommandToSecondary(READ_QUAD_ENC);
-        sendPingRequestToSecondary(pingCompare);  
-        LATDbits.LATD10 = 1;                // temporary - turn on LED 1 before we wait for response
-        while(g_pingVar != pingCompare);    // wait until ping is complete to know we have read quad encode module
-        LATDbits.LATD10 = 0;                // if we got stuck, LED1 won't turn back off.
+    else { // counter==1, MOTOR 2 feedback loop update
+        // Read position and velocity register. Motor 2 quad encoder is on secondary core. Takes a few instruction cycles      
+        readSecondaryQuadEncoder();
         // At this point the quadrature encoder absolute position read is in g_secondaryQuadEncPos
         // ...and the velocity is in g_secondaryQuadEncVel
         
-        // Set velocity PWM for analog output. Uncomment to output motor 2 velocity
+        // Set velocity PWM for analog output. Uncomment the line below to output motor 2 velocity, and comment out the corresponding
+        // ... line in the motor 1 code above.
         //setOnCyclesPWM3((uint16_t)(g_secondaryQuadEncVel + g_pwm3ZeroOffset));
 
-        if(g_secondaryQuadEncPos >= g_encoderZeroPos) {
-            displacement2 = (int32_t)(g_secondaryQuadEncPos - g_encoderZeroPos);
+        if(g_secondaryQuadEncPos >= g_encoder2ZeroPos) {
+            displacement2 = (int32_t)(g_secondaryQuadEncPos - g_encoder2ZeroPos);  
         }
         else {
-            displacement2 = -(int32_t)(g_encoderZeroPos - g_secondaryQuadEncPos);
+            displacement2 = -(int32_t)(g_encoder2ZeroPos - g_secondaryQuadEncPos);
         }
-        // Convert displacement to a pwm output for external position analog signal output. Clip if out of bounds
+        // Convert displacement to a pwm output for external position analog signal output.
         // This is not part of the feedback calculation, just an external signal for monitoring position
-        // TO DO: check g_pwm2ZeroOffset, make sure I am using the right pwm module
         pwmPosition2 = ( __builtin_divsd(displacement2, g_encoderToPwmDenom) + (int32_t)g_pwm2ZeroOffset );
-        if(pwmPosition1 < 0) {
-            pwmPosition1 = 0;
+        
+        // clip the output if it goes out of bounds
+        if(pwmPosition2 < 0) {
+            pwmPosition2 = 0;
         }
-        else if (pwmPosition1 > (int16_t)g_maxPWMInteger) {
-            pwmPosition1 = (int16_t) g_maxPWMInteger;
+        else if (pwmPosition2 > (int16_t)g_maxPWMInteger) {
+            pwmPosition2 = (int16_t) g_maxPWMInteger;
         }
 
         // set the position PWM output
-        setOnCyclesPWM2((uint16_t)pwmPosition1);
+        setOnCyclesPWM2((uint16_t)pwmPosition2);
 
         // ---------------  POSITION FEEDBACK CONTROL ------------------
-        if(g_output1Enabled) {
-            displacement1Error = displacement1 - g_displacement1Demand;
-            integralDisplacement1Error+= displacement1Error;
+        if(g_output2Enabled) {
+            displacement2Error = displacement2 - g_displacement2Demand;
+            integralDisplacement2Error+= displacement2Error;
             // clip integral error
-            if(integralDisplacement1Error > integralErrorLimit) {
-                integralDisplacement1Error = integralErrorLimit;
+            if(integralDisplacement2Error > integralErrorLimit) {
+                integralDisplacement2Error = integralErrorLimit;
             }
-            if(integralDisplacement1Error < -integralErrorLimit) {
-                integralDisplacement1Error = -integralErrorLimit;
+            if(integralDisplacement2Error < -integralErrorLimit) {
+                integralDisplacement2Error = -integralErrorLimit;
             }
 
             if(!g_motorTestMode) {
-                // Set output = Proportional term + Integral term + Derivative Term
-                g_pwm1Cycles = -MultiplyByFraction((int16_t)displacement1Error, g_propConstNum, g_propConstDenom) 
-                              - MultiplyByFraction((int16_t)integralDisplacement1Error, g_intConstNum, g_intConstDenom)
-                              - MultiplyByFraction(velocity1, g_derivConstNum, g_derivConstDenom);
+                // Set output = Proportional term + Integral term + Derivative Term. g_pwm2Cycles refers to motor 2, not
+                // the pwm2 module on the primary core
+                g_pwm2Cycles = -MultiplyByFraction((int16_t)displacement2Error, g_propConstNum2, g_propConstDenom2) 
+                              - MultiplyByFraction((int16_t)integralDisplacement2Error, g_intConstNum2, g_intConstDenom2)
+                              - MultiplyByFraction(g_secondaryQuadEncVel, g_derivConstNum2, g_derivConstDenom2);
             }
             else {  // motor test mode - spin motor at constant pwm
-                g_pwm1Cycles = g_motorTestPwm;
+                g_pwm2Cycles = g_motorTestPwm;
             }
 
         }
-        else {  // !g_output1Enabled
+        else {  // !g_output2Enabled
             // Decay output voltage gradually. Rate of decay in ms will depend upon T1 interrupt rate
-            integralDisplacement1Error = 0;
-            g_pwm1Cycles = (int16_t)( (int32_t)g_pwm1Cycles*93/100 );   
-            g_displacement1Demand = 0;   // This probably doesn't matter anymore and should probably just be set in the secondary and removed from here.
+            integralDisplacement2Error = 0;
+            g_pwm2Cycles = (int16_t)( (int32_t)g_pwm2Cycles*93/100 );   
+            g_displacement2Demand = 0;   // This probably doesn't matter anymore and should probably just be set in the secondary and removed from here.
         }
 
-        // This is done even if output disabled because g_displacement1Demand will set the future output. The pwm1 cycles are
+        // This is done even if output disabled because g_displacement2Demand will set the future output. The pwm1 cycles are
         // decayed down in the else code above if the output gets turned off.
-        sendVariableToSecondary(PWM1_CYCLES, (uint16_t)g_pwm1Cycles);  // send to secondary core
+        sendVariableToSecondary(PWM2_CYCLES, (uint16_t)g_pwm2Cycles);  // send to secondary core
         counter = 0;
     }
     // --------------- END POSITION FEEDBACK CONTROL ------------------  

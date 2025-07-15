@@ -77,6 +77,7 @@ void sendPingRequestToSecondary(uint16_t pingVal) {
     // secondary reads this value and sends it back as a single-byte ping variable. The 
     // primary receives that variable and sets the local variable g_pingVal with this value
     // which can be checked against the transmitted pingVal to match, verifying the ping.
+    // The variable g_pingVal should be set to 0 before calling this function.
     // This ping is used to ensure that an earlier FIFO transmission has occurred.
     
     // ...Send register that identifies it as a ping variable

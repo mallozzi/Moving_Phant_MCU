@@ -69,7 +69,7 @@ void configureQuadEncoder() {
     // counter is 32 bits, so halfway through in hex is 0x7FFF FFFF
     POS1CNTH = 0x0100;          // This line seems unnecessary and may be a relic of testing. Test without it at some point
     POS1HLD = 0x7FFF;           // Write high bit to Position 1 Counter Hold Register
-    POS1CNTL = 0x0002;    
+    POS1CNTL = 0x0000;    
 }
 
 void setOutputWaveform(int32_t* waveformArray) {
@@ -134,29 +134,6 @@ void designRampWaveform(int16_t mmStepSize) {
     setOutputWaveform(waveformArray); 
     gs_playSingleWaveformOnly = true;    // play waveform only once, then stop
 }
-
-
-//void designVelSineWaveform(int16_t mmDisplacementPP) {
-//    // Creates a sine waveform designed to give mmDisplacement as the peak-peak position
-//    // displacement
-//    
-//    int32_t posAmplitudePP;
-//    int32_t* waveformArray;
-//    
-//    posAmplitudePP = (int32_t)mmDisplacementPP * (int32_t)gs_encoderStepsPerMM;
-//    waveformArray = makeVelSineWaveform(posAmplitudePP, gs_numArrayVals);
-//    setOutputWaveform(waveformArray);
-//    
-//}
-
-//void designVelPulseWaveform(int16_t mmDisplacement) {
-//    int32_t posAmplitudePP;
-//    int32_t* waveformArray;
-//    
-//    posAmplitudePP = (int32_t)mmDisplacement * (int32_t)gs_encoderStepsPerMM;
-//    waveformArray = makeWideVelPulseWaveform(posAmplitudePP, gs_numArrayVals);
-//    setOutputWaveform(waveformArray);
-//}
 
 int32_t* makePosSineWaveform(int32_t amplitudeEncPP, uint16_t numValues) {
     // Allocates a sine waveform of a given amplitude number of values numValues. Also allocates the global zero waveform of the same length.

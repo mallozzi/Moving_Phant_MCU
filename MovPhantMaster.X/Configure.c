@@ -79,25 +79,40 @@ void configureInitial() {
     g_reverseDirection = 0;             // 0 for forward motion sign, 1 for reverse motion sign
     g_freqUser = 20;                    // cycles per minute. Will be overwritten by software.
     
-    // Quadrature Encoder
-    g_encoderZeroPos = 0x7FFF;      // set to halfway to max 32-bit unsigned. Leaves plenty of room in either direction without rollover
-    g_encoderZeroPos = (g_encoderZeroPos << 16);
-    g_landmarkPosition = g_encoderZeroPos;    
-    //write zero position offset to position counter
-    POS1HLD = 0x7FFF;
-    POS1CNTL = 0;                   // this will transfer msb to POS1CNTH
+    // Quadrature Encoders. Initialize to halfway through their range and set landmarks to this position.
+    // ...motor 1
+    g_encoder1ZeroPos = 0x7FFF;      // set to halfway to max 32-bit unsigned. Leaves plenty of room in either direction without rollover
+    g_encoder1ZeroPos = (g_encoder1ZeroPos << 16);
+    g_landmark1Position = g_encoder1ZeroPos;    
+    // write zero position offset to position counter - Not necessary anymore, since we initialize position to 0x7FFF in quad 
+    // encode configuration. TO DO: delete when verified.
+//    POS1HLD = 0x7FFF;
+//    POS1CNTL = 0;                   // this will transfer msb to POS1CNTH
+    
+    // ...motor 2
+    g_encoder2ZeroPos = 0x7FFF;      // set to halfway to max 32-bit unsigned. Leaves plenty of room in either direction without rollover
+    g_encoder2ZeroPos = (g_encoder2ZeroPos << 16);
+    g_landmark2Position = g_encoder2ZeroPos;    
+    
     g_displacement1Demand = 0;       // Set the demand to the current position so that no initial output is created from feedback loop
     g_displacement2Demand = 0;       // Set the demand to the current position so that no initial output is created from feedback loop
     g_encoderStepsPerMM = 500;
     g_maxDisplacementMM = 50;       // This will be overwritten by software
  
     // Feedback Parameters. For safety, initialize for no signal. Will be replaced at runtime
-    g_propConstNum = 0;
-    g_propConstDenom = 10;
-    g_intConstNum = 0;
-    g_intConstDenom = 100;
-    g_derivConstNum = 0;
-    g_derivConstDenom = 100;
+    g_propConstNum1 = 0;
+    g_propConstDenom1 = 10;
+    g_intConstNum1 = 0;
+    g_intConstDenom1 = 100;
+    g_derivConstNum1 = 0;
+    g_derivConstDenom1 = 100;
+    
+    g_propConstNum2 = 0;
+    g_propConstDenom2 = 10;
+    g_intConstNum2 = 0;
+    g_intConstDenom2 = 100;
+    g_derivConstNum2 = 0;
+    g_derivConstDenom2 = 100;
     
 //    INTCON1bits.NSTDIS = 1;  //disable nested interrupts
  //   IPC4bits.SI2C1IP = 3;    // give I2c a higher interrupt priority than Timer1, which has a natural IP of 4
@@ -147,7 +162,7 @@ void configureQuadEncoder() {
     // counter is 32 bits, so halfway through in hex is 0x7FFF FFFF
     POS1CNTH = 0x0100;      // This line seems unnecessary and may be a relic of testing. Test without it at some point
     POS1HLD = 0x7FFF;       // Write high bit to Position 1 Counter Hold Register
-    POS1CNTL = 0x0002;      // This write transfers POS1HLD into POS1CNTLH
+    POS1CNTL = 0x0000;      // This write transfers POS1HLD into POS1CNTLH
     
     // Here POS1CNTH should be 0x7FFF
     // TO DO: this line was not commented in Mov1a prototype....I believe it was a relic of a test and

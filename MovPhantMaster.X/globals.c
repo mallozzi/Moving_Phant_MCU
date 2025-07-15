@@ -56,36 +56,36 @@ uint16_t g_feedbackHalfUpdatePeriod;    // Timer1 interrupt period in units of T
 uint16_t g_timer1Prescale;              // Pre-scale factor in Timer1 configuration, needed for other calculations
 
 // Quadrature Encoder parameters
-uint32_t g_encoderZeroPos;              // quadrature encoder zero position
-uint16_t g_encoderStepsPerMM;           // Number of encoder steps per mm of travel
-uint32_t g_landmarkPosition;            // Position of Landmark in encoder units
+uint32_t g_encoder1ZeroPos;              // quadrature encoder zero position
+uint32_t g_encoder2ZeroPos;              // quadrature encoder zero position
+uint16_t g_encoderStepsPerMM;            // Number of encoder steps per mm of travel
+uint32_t g_landmark1Position;            // Position of Landmark for motor 1 in encoder units
+uint32_t g_landmark2Position;            // Position of Landmark for motor 2 in encoder units
 
 
 // Feedback Parameters for motor 1. The proportional, integral, and derivative constants are expressed as a numerator and a denominator. 
 // The ratio is the proportionality between that error term in the position and the PWM output component that results.
-volatile uint16_t g_propConstNum;       // Numerator of proportionality constant for Proportional Feedback component
-volatile uint16_t g_propConstDenom;     // Denominator of proportionality constant for Proportional Feedback component
-volatile uint16_t g_intConstNum;        // Numerator of proportionality constant for Integral Feedback component
-volatile uint16_t g_intConstDenom;      // Denominator of proportionality constant for Integral Feedback component
-volatile uint16_t g_derivConstNum;      // Numerator of proportionality constant for Derivative Feedback component
-volatile uint16_t g_derivConstDenom;    // Denominator of proportionality constant for Derivative Feedback component
+volatile uint16_t g_propConstNum1;       // Numerator of proportionality constant for Proportional Feedback component
+volatile uint16_t g_propConstDenom1;     // Denominator of proportionality constant for Proportional Feedback component
+volatile uint16_t g_intConstNum1;        // Numerator of proportionality constant for Integral Feedback component
+volatile uint16_t g_intConstDenom1;      // Denominator of proportionality constant for Integral Feedback component
+volatile uint16_t g_derivConstNum1;      // Numerator of proportionality constant for Derivative Feedback component
+volatile uint16_t g_derivConstDenom1;    // Denominator of proportionality constant for Derivative Feedback component
 volatile int32_t g_displacement1Demand;  // Demand for encoder displacement (relative)
 
 // Feedback Parameters for motor 2. The proportional, integral, and derivative constants are expressed as a numerator and a denominator. 
 // The ratio is the proportionality between that error term in the position and the PWM output component that results.
 // TO DO: Make all of these for motor 2
-//volatile uint16_t g_propConstNum;       // Numerator of proportionality constant for Proportional Feedback component
-//volatile uint16_t g_propConstDenom;     // Denominator of proportionality constant for Proportional Feedback component
-//volatile uint16_t g_intConstNum;        // Numerator of proportionality constant for Integral Feedback component
-//volatile uint16_t g_intConstDenom;      // Denominator of proportionality constant for Integral Feedback component
-//volatile uint16_t g_derivConstNum;      // Numerator of proportionality constant for Derivative Feedback component
-//volatile uint16_t g_derivConstDenom;    // Denominator of proportionality constant for Derivative Feedback component
+volatile uint16_t g_propConstNum2;       // Numerator of proportionality constant for Proportional Feedback component
+volatile uint16_t g_propConstDenom2;     // Denominator of proportionality constant for Proportional Feedback component
+volatile uint16_t g_intConstNum2;        // Numerator of proportionality constant for Integral Feedback component
+volatile uint16_t g_intConstDenom2;      // Denominator of proportionality constant for Integral Feedback component
+volatile uint16_t g_derivConstNum2;      // Numerator of proportionality constant for Derivative Feedback component
+volatile uint16_t g_derivConstDenom2;    // Denominator of proportionality constant for Derivative Feedback component
 volatile int32_t g_displacement2Demand;  // Demand for encoder displacement (relative)
 
 
 // Commands and other output-related variables
-//volatile bool g_zeroPosOutput;          // variable to cause zero voltage output when true
-//volatile bool g_playSingleWaveformOnly; // set to true to play just one period of the waveform array
 volatile bool g_startMotor;             // set to true to cause motor to start
 volatile bool g_gotoLandmark;           // set to true to cause system to go to landmark
 

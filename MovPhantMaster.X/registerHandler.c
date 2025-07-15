@@ -16,14 +16,22 @@
 #define REG_MAX_MOTION_AMP_1 13             // maximum allowable motion amplitude in motor 1
 #define REG_FREQ 14                         // register for frequency
 #define REG_REVERSE 15                      // register to reverse frequency
-#define REG_PROP_NUM 16                     // register to set numerator of proportional feedback constant
-#define REG_PROP_DEN 17                     // register to set denominator of proportional feedback constant
-#define REG_INT_NUM 18                      // register to set numerator of integral feedback constant
-#define REG_INT_DEN 19                      // register to set denominator of integral feedback constant
-#define REG_DER_NUM 20                      // register to set numerator of derivative feedback constant
-#define REG_DER_DEN 21                      // register to set denominator of derivative feedback constant
-#define REG_PWM_POS_OFFSET 22               // register to set pwm position offset
-#define REG_PWM_VEL_OFFSET 23               // register to set pwm velocity offset
+#define REG_PROP_NUM1 16                    // register to set numerator of proportional feedback constant motor 1
+#define REG_PROP_DEN1 17                    // register to set denominator of proportional feedback constant motor 1
+#define REG_INT_NUM1 18                     // register to set numerator of integral feedback constant motor 1
+#define REG_INT_DEN1 19                     // register to set denominator of integral feedback constant motor 1
+#define REG_DER_NUM1 20                     // register to set numerator of derivative feedback constant motor 1
+#define REG_DER_DEN1 21                     // register to set denominator of derivative feedback constant motor 1
+#define REG_PWM_POS1_OFFSET 22              // register to set pwm position offset motor 1
+#define REG_PWM_VEL_OFFSET 23              // register to set pwm velocity offset motor 1 or motor 2
+#define REG_PROP_NUM2 24                    // register to set numerator of proportional feedback constant motor 2
+#define REG_PROP_DEN2 25                    // register to set denominator of proportional feedback constant motor 2
+#define REG_INT_NUM2 26                     // register to set numerator of integral feedback constant motor 2
+#define REG_INT_DEN2 27                     // register to set denominator of integral feedback constant motor 2
+#define REG_DER_NUM2 28                     // register to set numerator of derivative feedback constant motor 2
+#define REG_DER_DEN2 29                     // register to set denominator of derivative feedback constant motor 2
+#define REG_PWM_POS2_OFFSET 30              // register to set pwm position offset motor 2
+
 
 // Value definitions
 
@@ -95,29 +103,50 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
     else if(regNum == REG_REVERSE) {
         g_reverseDirection = dataVal;
     }
-    else if(regNum == REG_PROP_NUM) {
-        g_propConstNum = dataVal;
+    else if(regNum == REG_PROP_NUM1) {
+        g_propConstNum1 = dataVal;
     }
-    else if(regNum == REG_PROP_DEN) {
-        g_propConstDenom = dataVal;
+    else if(regNum == REG_PROP_DEN1) {
+        g_propConstDenom1 = dataVal;
     }
-    else if(regNum == REG_INT_NUM) {
-        g_intConstNum = dataVal;
+    else if(regNum == REG_INT_NUM1) {
+        g_intConstNum1 = dataVal;
     }
-    else if(regNum == REG_INT_DEN) {
-        g_intConstDenom = dataVal;
+    else if(regNum == REG_INT_DEN1) {
+        g_intConstDenom1 = dataVal;
     }
-    else if(regNum == REG_DER_NUM) {
-        g_derivConstNum = dataVal;
+    else if(regNum == REG_DER_NUM1) {
+        g_derivConstNum1 = dataVal;
     }
-    else if(regNum == REG_DER_DEN) {
-        g_derivConstDenom = dataVal;
+    else if(regNum == REG_DER_DEN1) {
+        g_derivConstDenom1 = dataVal;
     }
-    else if(regNum == REG_PWM_POS_OFFSET) {
-        g_pwm2ZeroOffset = dataVal;
+    else if(regNum == REG_PWM_POS1_OFFSET) {
+        g_pwm1ZeroOffset = dataVal;
     }
     else if(regNum == REG_PWM_VEL_OFFSET) {
         g_pwm3ZeroOffset = dataVal;
+    }
+    else if(regNum == REG_PROP_NUM2) {
+        g_propConstNum2 = dataVal;
+    }
+    else if(regNum == REG_PROP_DEN2) {
+        g_propConstDenom2 = dataVal;
+    }
+    else if(regNum == REG_INT_NUM2) {
+        g_intConstNum2 = dataVal;
+    }
+    else if(regNum == REG_INT_DEN2) {
+        g_intConstDenom2 = dataVal;
+    }
+    else if(regNum == REG_DER_NUM2) {
+        g_derivConstNum2 = dataVal;
+    }
+    else if(regNum == REG_DER_DEN2) {
+        g_derivConstDenom2 = dataVal;
+    }
+    else if(regNum == REG_PWM_POS2_OFFSET) {
+        g_pwm2ZeroOffset = dataVal;
     }
     
     
@@ -153,29 +182,49 @@ uint16_t getRegisterValue(uint8_t regNum) {
     else if (regNum == REG_REVERSE) {
         val = g_reverseDirection;
     }
-    else if(regNum == REG_PROP_NUM) {
-        val = g_propConstNum;
+    else if(regNum == REG_PROP_NUM1) {
+        val = g_propConstNum1;
     }
-    else if(regNum == REG_PROP_DEN) {
-        val = g_propConstDenom;
+    else if(regNum == REG_PROP_DEN1) {
+        val = g_propConstDenom1;
     }
-    else if(regNum == REG_INT_NUM) {
-        val = g_intConstNum;
+    else if(regNum == REG_INT_NUM1) {
+        val = g_intConstNum1;
     }
-    else if(regNum == REG_INT_DEN) {
-        val = g_intConstDenom;
+    else if(regNum == REG_INT_DEN1) {
+        val = g_intConstDenom1;
     }
-    else if(regNum == REG_DER_NUM) {
-        val = g_derivConstNum;
+    else if(regNum == REG_DER_NUM1) {
+        val = g_derivConstNum1;
     }
-    else if(regNum == REG_DER_DEN) {
-        val = g_derivConstDenom;
+    else if(regNum == REG_DER_DEN1) {
+        val = g_derivConstDenom1;
     }
-    else if(regNum == REG_PWM_POS_OFFSET) {
-        val = g_pwm2ZeroOffset;
+    else if(regNum == REG_PWM_POS1_OFFSET) {
+        val = g_pwm1ZeroOffset;
     }
     else if(regNum == REG_PWM_VEL_OFFSET) {
         val = g_pwm3ZeroOffset;
+    }else if(regNum == REG_PROP_NUM2) {
+        val = g_propConstNum2;
+    }
+    else if(regNum == REG_PROP_DEN2) {
+        val = g_propConstDenom2;
+    }
+    else if(regNum == REG_INT_NUM2) {
+        val = g_intConstNum2;
+    }
+    else if(regNum == REG_INT_DEN2) {
+        val = g_intConstDenom2;
+    }
+    else if(regNum == REG_DER_NUM2) {
+        val = g_derivConstNum2;
+    }
+    else if(regNum == REG_DER_DEN2) {
+        val = g_derivConstDenom2;
+    }
+    else if(regNum == REG_PWM_POS2_OFFSET) {
+        val = g_pwm2ZeroOffset;
     }
     
     return val;

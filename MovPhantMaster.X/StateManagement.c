@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include "StateManagement.h"
 #include "globals.h"
-//#include "PWMcontrol.h"
 #include "MathUtil.h"
 #include "Configure.h"
 #include "MSCommunication_mstr.h"
+#include "motorCntrlMstr.h"
 
 void enableDriver(bool enable) {
     // Sends signal to bring driver chip out of sleep mode or put it in sleep mode. Input is true to enable, false to put in sleep.
@@ -46,20 +46,30 @@ void setZeroPosition() {
     // Reads the current encoder position register and sets that as the new zero
     uint16_t posLowByte;
     uint32_t posHighByte;
+    uint16_t pingvalue = 9;  // arbitrary integer
     
     posLowByte = POS1CNTL; // Should load POS1CNTH into POS1HLD
     posHighByte = POS1HLD;
-    g_encoderZeroPos = (posHighByte << 16) + posLowByte;  
+    g_encoder1ZeroPos = (posHighByte << 16) + posLowByte;  
+    
+    // Encoder 2 - more complicated because it is on the secondary core
+    //... read the encoder position
+    readSecondaryQuadEncoder();
+    g_encoder2ZeroPos = g_secondaryQuadEncPos;
 }
 
 void setLandmarkPosition() {
-    // Reads the current encoder position register and sets that as the new zero
+    // Reads the current encoder position registers for motor 1 and motor 2 and sets that them as the new landmark positions
+    
     uint16_t posLowByte;
     uint32_t posHighByte;
     
     posLowByte = POS1CNTL; // Should load POS1CNTH into POS1HLD
     posHighByte = POS1HLD;
-    g_landmarkPosition = (posHighByte << 16) + posLowByte;
+    g_landmark1Position = (posHighByte << 16) + posLowByte;
+    
+    readSecondaryQuadEncoder();
+    g_landmark2Position = g_secondaryQuadEncPos;
 }
 
 void gotoLandmark() {
@@ -79,7 +89,7 @@ void gotoLandmark() {
     currentPosition = (posHighByte << 16) + posLowByte;
     
     encoderStepsPerMM = (int16_t)g_encoderStepsPerMM;           
-    encoderSteps = g_landmarkPosition - currentPosition;
+    encoderSteps = g_landmark1Position - currentPosition;
     travelDistMM = (int16_t)( (encoderSteps + encoderStepsPerMM/2) / encoderStepsPerMM );
     
     if(travelDistMM >= 0) {
