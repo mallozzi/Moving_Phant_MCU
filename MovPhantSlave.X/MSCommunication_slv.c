@@ -61,11 +61,17 @@ void receiveVariableFromPrimary() {
         case WAVEFORM_TYPE:
             gs_waveformType = fifoVal;
             break;
-        case MOTION_AMPLITUDE_MM:
-            gs_motionAmplitudeMM = fifoVal;
+        case MOTION_AMPLITUDE_MM1:
+            gs_motionAmplitudeMM1 = fifoVal;
             break;
-        case REVERSE_DIRECTION:
-            gs_reverseDirection = fifoVal;
+        case MOTION_AMPLITUDE_MM2:
+            gs_motionAmplitudeMM2 = fifoVal;
+            break;
+        case REVERSE_DIRECTION1:
+            gs_reverseDirection1 = fifoVal;
+            break;
+        case REVERSE_DIRECTION2:
+            gs_reverseDirection2 = fifoVal;
             break;
         case FREQ_USER:
             gs_freqUser = fifoVal;

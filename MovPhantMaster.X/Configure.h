@@ -25,15 +25,8 @@ void configureInitial();
 void configurePPS();
 void configureAnalogToDigital();
 void configureDerivedQuantities();
-//void configureDirection();
 void configureI2C();
 void configureQuadEncoder();
-//int32_t* makePosSineWaveform(int32_t amplitudeEnc, uint16_t numValues);
-//int32_t* makeVelSineWaveform(int32_t posAmplitude, uint16_t numValues);
-//int32_t* makeRampWaveform(int32_t amplitude, uint16_t numValues);
-//int32_t* makeWideVelPulseWaveform(int32_t amplitude, uint16_t numValues);
-//int32_t* makeZeroWaveform(uint16_t numValues);
-//int32_t* makeConstWaveform(int32_t value, uint16_t numValues);
 void calcNumPoints();
 
 #endif	/* CONFIGURE_H */

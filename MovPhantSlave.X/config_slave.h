@@ -22,13 +22,11 @@ extern "C" {
 void configSlaveInitial();
 void configureSecondaryPPS();
 void configureQuadEncoder();
-void setOutputWaveform(int32_t* waveformArray);
+//void setOutputWaveformMotor1(int32_t* waveformArray);
 
-void setUpWaveform();
-void designPosSineWaveform(int16_t mmDisplacementPP);
-void designRampWaveform(int16_t mmStepSize);
-//void designVelSineWaveform(int16_t mmDisplacementPP);
-//void designVelPulseWaveform(int16_t mmDisplacement);
+void setUpWaveforms();
+int32_t* designPosSineWaveform(int16_t mmDisplacementPP);
+int32_t* designRampWaveform(int16_t mmStepSize);
 
 int32_t* makePosSineWaveform(int32_t amplitudeEnc, uint16_t numValues);
 //int32_t* makeVelSineWaveform(int32_t posAmplitude, uint16_t numValues);
@@ -36,7 +34,6 @@ int32_t* makeRampWaveform(int32_t amplitude, uint16_t numValues);
 int32_t* makeWideVelPulseWaveform(int32_t amplitude, uint16_t numValues);
 int32_t* makeZeroWaveform(uint16_t numValues);
 int32_t* makeConstWaveform(int32_t value, uint16_t numValues);
-//void calcNumPoints();
 
 
 

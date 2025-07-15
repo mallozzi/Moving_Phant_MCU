@@ -75,8 +75,10 @@ void configureInitial() {
     g_waveformType = 0;                 // 0-sine wave; 1-Pulse
     g_waveformUpdatePeriod = 200;       // Number of PWM1 periods between each waveform index advance
     //g_numArrayVals = 400;             // number of array values in output waveform. Will be overwritten
-    g_motionAmplitudeMM = 1;            // motion amplitude in mm. Small default value to avoid physical damage
-    g_reverseDirection = 0;             // 0 for forward motion sign, 1 for reverse motion sign
+    g_motionAmplitudeMM1 = 1;           // motion amplitude in mm. Small default value to avoid physical damage
+    g_motionAmplitudeMM2 = 1;           // motion amplitude in mm. Small default value to avoid physical damage
+    g_reverseDirection1 = 0;            // 0 for forward motion sign, 1 for reverse motion sign
+    g_reverseDirection2 = 0;            // 0 for forward motion sign, 1 for reverse motion sign
     g_freqUser = 20;                    // cycles per minute. Will be overwritten by software.
     
     // Quadrature Encoders. Initialize to halfway through their range and set landmarks to this position.

@@ -13,8 +13,8 @@
 void startMotion() {
     
     // Note: parameters from master must be transmitted before calling this function
-    setUpWaveform();
-    gs_zeroPosOutput = false;
+    setUpWaveforms();
+    gs_stopMotors = false;
     gs_resetWaveform = true;
     gs_displacement1Demand=0;
     gs_displacement2Demand=0;
@@ -27,6 +27,6 @@ void startMotion() {
 
 void stopMotion() {
     // The purpose of this is to have a short function to call from an I2C command
-    gs_zeroPosOutput = true;
+    gs_stopMotors = true;
     
 }

@@ -48,7 +48,7 @@ extern int16_t g_pwm2Cycles;                // Signed duty cycle parameter for P
 extern uint16_t g_maxDisplacementMM;         // Maximum peak-to-peak displacement in mm for translational motion. Not used by secondary
 
 // Waveform arrays
-extern int32_t* g_outputWaveform;           // pointer to whatever array is currently being used to determine output. It could represent speed or position
+//extern int32_t* g_outputWaveform;           // pointer to whatever array is currently being used to determine output. It could represent speed or position
 extern int32_t* g_zeroWaveform;             // waveform of zeros useful for bringing output to zero gradually
 
 
@@ -56,10 +56,12 @@ extern int32_t* g_zeroWaveform;             // waveform of zeros useful for brin
 extern uint16_t g_numArrayVals;                 // number of array values in output waveform
 extern uint16_t g_waveformUpdatePeriod;         // number of PWM1 interrupts between waveform index updates
 extern uint16_t g_waveformType;                 // stores which type of waveform is selected
-extern uint16_t g_motionAmplitudeMM;            // amplitude of motion in mm
-extern uint16_t g_reverseDirection;             // 1 to move opposite direction, 0 for forward
+extern uint16_t g_reverseDirection1;            // 1 to move opposite direction, 0 for forward motor 1
+extern uint16_t g_reverseDirection2;            // 1 to move opposite direction, 0 for forward motor 2
 extern uint32_t g_waveformTimeStep_microS;      // Time between each element of the waveform array in microseconds
 extern uint16_t g_freqUser;                     // frequency requested by user in cycles / min
+extern uint16_t g_motionAmplitudeMM1;           // amplitude of motion in mm motor 1
+extern uint16_t g_motionAmplitudeMM2;           // amplitude of motion in mm motor 2
 
 extern uint16_t g_errorFlags;                   // Each bit is an error flag. See globals.c
 extern bool g_faultDetected;

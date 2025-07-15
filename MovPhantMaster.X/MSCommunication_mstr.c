@@ -106,10 +106,16 @@ void sendParamtersToSecondary() {
     sendVariableToSecondary(WAVEFORM_TYPE, g_waveformType);
     __delay32(g_OscillatorFreq / 40000);
     
-    sendVariableToSecondary(MOTION_AMPLITUDE_MM, g_motionAmplitudeMM);
+    sendVariableToSecondary(MOTION_AMPLITUDE_MM1, g_motionAmplitudeMM1);
     __delay32(g_OscillatorFreq / 40000);
     
-    sendVariableToSecondary(REVERSE_DIRECTION, g_reverseDirection);
+    sendVariableToSecondary(MOTION_AMPLITUDE_MM2, g_motionAmplitudeMM2);
+    __delay32(g_OscillatorFreq / 40000);
+    
+    sendVariableToSecondary(REVERSE_DIRECTION1, g_reverseDirection1);
+    __delay32(g_OscillatorFreq / 40000);
+    
+    sendVariableToSecondary(REVERSE_DIRECTION2, g_reverseDirection2);
     __delay32(g_OscillatorFreq / 40000);
     
     send32bVariableToSecondary(WAVEFORM_TIMESTEP_MICROS, g_waveformTimeStep_microS);

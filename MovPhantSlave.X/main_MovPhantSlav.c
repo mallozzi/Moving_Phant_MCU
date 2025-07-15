@@ -113,9 +113,8 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
         // Within the loop, alternate updating motor 1 and motor 2 outputs, so that motor 1 is updated at the beginning of an
         // ...update period, and motor 2 is updated halfway through the update period.
         if(interruptCount == motorUpdateHalfInterval) {      // time to update output to motor with whatever is currently requested
-            if(!gs_zeroPosOutput) { // normal condition - no call to zero the output position            
+            if(!gs_stopMotors) { // normal condition - no call to zero the output position            
                 setMotorOutput1(gs_pwm1Cycles);
-     //           interruptCount = 0;
             }
             else { // zero output has been requested  
                 gs_output1Enabled = false;
@@ -140,7 +139,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
                     gs_playSingleWaveformOnly = false;          // reset for future waveforms. 
                 }
             }
-            gs_displacement1Demand = gs_outputWaveform[wf1_ind]; // Update demand from waveform array
+            gs_displacement1Demand = gs_outputWaveform1[wf1_ind]; // Update demand from waveform array
             
             // Make sure MS FIFO is not full, then send the displacement demand back to the primary core for use in feedback calculation
             if(!SI1FIFOCSbits.SWFFULL) {  // FIFO should not fill up, but if a __delay command were put on the master side, it could happen
@@ -167,8 +166,8 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
         // Within the loop, alternate updating motor 1 and motor 2 outputs, so that motor 1 is updated at the beginning of an
         // ...update period, and motor 2 is updated halfway through the update period.
         if(interruptCount >= motorUpdateFullInterval) {      // time to update output to motor with whatever is currently requested
-            if(!gs_zeroPosOutput) { // normal condition - no call to zero the output position            
-                setMotorOutput1(gs_pwm2Cycles);
+            if(!gs_stopMotors) { // normal condition - no call to zero the output position            
+                setMotorOutput2(gs_pwm2Cycles);
             }
             else { // zero output has been requested  
                 gs_output2Enabled = false;
@@ -193,7 +192,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
                     gs_playSingleWaveformOnly = false;          // reset for future waveforms. 
                 }
             }
-            gs_displacement2Demand = gs_outputWaveform[wf2_ind]; // Update demand from waveform array. TO DO: make motor 2 waveform array
+            gs_displacement2Demand = gs_outputWaveform2[wf2_ind]; // Update demand from waveform array. TO DO: make motor 2 waveform array
             
             // Make sure MS FIFO is not full, then send the displacement demand back to the primary core for use in feedback calculation
             if(!SI1FIFOCSbits.SWFFULL) {  // FIFO should not fill up, but if a __delay command were put on the master side, it could happen

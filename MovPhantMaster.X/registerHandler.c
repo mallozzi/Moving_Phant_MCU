@@ -15,7 +15,7 @@
 #define REG_STEPS_PER_MM_1 12               // steps per mm
 #define REG_MAX_MOTION_AMP_1 13             // maximum allowable motion amplitude in motor 1
 #define REG_FREQ 14                         // register for frequency
-#define REG_REVERSE 15                      // register to reverse frequency
+#define REG_REVERSE1 15                     // register to reverse motion direction motor 1
 #define REG_PROP_NUM1 16                    // register to set numerator of proportional feedback constant motor 1
 #define REG_PROP_DEN1 17                    // register to set denominator of proportional feedback constant motor 1
 #define REG_INT_NUM1 18                     // register to set numerator of integral feedback constant motor 1
@@ -23,7 +23,7 @@
 #define REG_DER_NUM1 20                     // register to set numerator of derivative feedback constant motor 1
 #define REG_DER_DEN1 21                     // register to set denominator of derivative feedback constant motor 1
 #define REG_PWM_POS1_OFFSET 22              // register to set pwm position offset motor 1
-#define REG_PWM_VEL_OFFSET 23              // register to set pwm velocity offset motor 1 or motor 2
+#define REG_PWM_VEL_OFFSET 23               // register to set pwm velocity offset motor 1 or motor 2
 #define REG_PROP_NUM2 24                    // register to set numerator of proportional feedback constant motor 2
 #define REG_PROP_DEN2 25                    // register to set denominator of proportional feedback constant motor 2
 #define REG_INT_NUM2 26                     // register to set numerator of integral feedback constant motor 2
@@ -31,6 +31,9 @@
 #define REG_DER_NUM2 28                     // register to set numerator of derivative feedback constant motor 2
 #define REG_DER_DEN2 29                     // register to set denominator of derivative feedback constant motor 2
 #define REG_PWM_POS2_OFFSET 30              // register to set pwm position offset motor 2
+
+#define REG_MOTION_AMPLITUDE_2 31           // amplitude (peak-to-peak) in mm of motor 2
+#define REG_REVERSE2 32                     // register to reverse motion direction motor 2
 
 
 // Value definitions
@@ -62,15 +65,15 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         }
         else if(dataVal == STEP_FORWARD) {
             g_waveformType = 1;
-            g_motionAmplitudeMM = 5;
-            g_reverseDirection = 0;
+            g_motionAmplitudeMM1 = 5;
+            g_reverseDirection1 = 0;
             g_freqUser = 80;
             startMotion();
         }
         else if(dataVal == STEP_BACKWARD) {
             g_waveformType = 1;
-            g_motionAmplitudeMM = 5;
-            g_reverseDirection = 1;
+            g_motionAmplitudeMM1 = 5;
+            g_reverseDirection1 = 1;
             g_freqUser = 80;
             startMotion();
         }
@@ -94,14 +97,20 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         g_waveformType = dataVal;
     }
     else if(regNum == REG_MOTION_AMPLITUDE_1) {
-        g_motionAmplitudeMM = dataVal;
+        g_motionAmplitudeMM1 = dataVal;
+    }
+    else if(regNum == REG_MOTION_AMPLITUDE_2) {
+        g_motionAmplitudeMM2 = dataVal;
     }
     else if(regNum == REG_FREQ) {
         g_freqUser = dataVal;
         configureDerivedQuantities();
     }
-    else if(regNum == REG_REVERSE) {
-        g_reverseDirection = dataVal;
+    else if(regNum == REG_REVERSE1) {
+        g_reverseDirection1 = dataVal;
+    }
+    else if(regNum == REG_REVERSE2) {
+        g_reverseDirection2 = dataVal;
     }
     else if(regNum == REG_PROP_NUM1) {
         g_propConstNum1 = dataVal;
@@ -174,13 +183,19 @@ uint16_t getRegisterValue(uint8_t regNum) {
         val = g_waveformType;
     }
     else if (regNum == REG_MOTION_AMPLITUDE_1) {
-        val = g_motionAmplitudeMM;
+        val = g_motionAmplitudeMM1;
+    }
+    else if (regNum == REG_MOTION_AMPLITUDE_2) {
+        val = g_motionAmplitudeMM2;
     }
     else if(regNum == REG_FREQ) {
         val = g_freqUser;
     }
-    else if (regNum == REG_REVERSE) {
-        val = g_reverseDirection;
+    else if (regNum == REG_REVERSE1) {
+        val = g_reverseDirection1;
+    }
+    else if (regNum == REG_REVERSE2) {
+        val = g_reverseDirection2;
     }
     else if(regNum == REG_PROP_NUM1) {
         val = g_propConstNum1;

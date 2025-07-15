@@ -33,8 +33,10 @@ uint16_t g_maxDisplacementMM;           // Maximum peak-to-peak displacement in 
 // Waveform parameters
 uint16_t g_numArrayVals;                // number of array values in output waveform
 uint16_t g_waveformType;                // stores which type of waveform is selected
-uint16_t g_motionAmplitudeMM;           // amplitude of motion in mm
-uint16_t g_reverseDirection;            // 1 to move opposite direction, 0 for forward
+uint16_t g_reverseDirection1;            // 1 to move opposite direction, 0 for forward motor 1
+uint16_t g_reverseDirection2;            // 1 to move opposite direction, 0 for forward motor 2
+uint16_t g_motionAmplitudeMM1;          // amplitude of motion in mm motor 1
+uint16_t g_motionAmplitudeMM2;          // amplitude of motion in mm motor 2
 
 // Other waveform properties
 uint32_t g_waveformTimeStep_microS;     // Time between each element of the waveform array in microseconds

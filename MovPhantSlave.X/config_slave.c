@@ -29,7 +29,7 @@ void configSlaveInitial() {
     gs_filtDenominator = 100;
     
 // Some state variables
-    gs_zeroPosOutput = true;                    // will get set when starting motion
+    gs_stopMotors = true;                    // will get set when starting motion
     gs_output1Enabled = false;
     gs_output2Enabled = false;
     
@@ -72,45 +72,59 @@ void configureQuadEncoder() {
     POS1CNTL = 0x0000;    
 }
 
-void setOutputWaveform(int32_t* waveformArray) {
-    // Sets the output waveform array to waveformArray. If the output waveform is not already set
-    // to waveformArray, it frees the memory first the global variable containing the output waveform array.
-    if(gs_outputWaveform != NULL && gs_outputWaveform != waveformArray) {
-        free(gs_outputWaveform);
-    }
-    gs_outputWaveform = waveformArray;
-}
+//void setOutputWaveformMotor1(int32_t* waveformArray) {
+//    // Sets the output waveform array to waveformArray. 
+//    if(gs_outputWaveform1 != NULL) {
+//        free(gs_outputWaveform1);
+//    }
+//    gs_outputWaveform1 = waveformArray;
+//}
 
-void setUpWaveform() {
-    int16_t signedAmplitudeMM;
-    // Adjust waveform update time (time between index advances) based on the frequency requested. The goal is to have a 10 ms update time
-    // for waveforms with a period of less than 8 seconds, 20 ms for 8-16, and 40 ms for periods longer than 16s. Assuming that the max pwm1
-    // integer is 12799, and the input clocking is set up so that this corresponds to 50 microseconds per interrupt time, then a value
-    // of g_waveformUpdatePeriod of 200 gives 10 ms update time.
-    // 
+void setUpWaveforms() {
+    //
     
-    // free memory from previous waveform
-    if(gs_outputWaveform != NULL) {
-        free(gs_outputWaveform);
-        gs_outputWaveform = NULL;
+    int16_t signedAmplitudeMM;
+    
+    // free memory from previous waveforms
+    if(gs_outputWaveform1 != NULL) {
+        free(gs_outputWaveform1);
+        gs_outputWaveform1 = NULL;
+    }
+    if(gs_outputWaveform2 != NULL) {
+        free(gs_outputWaveform2);
+        gs_outputWaveform2 = NULL;
     }
     
-    // set up waveforms
-    if(gs_reverseDirection == 0) {
-       signedAmplitudeMM = (int16_t)gs_motionAmplitudeMM;     
+    // set up motor 1 waveforms
+    if(gs_reverseDirection1 == 0) {
+       signedAmplitudeMM = (int16_t)gs_motionAmplitudeMM1;     
     }
     else {
-        signedAmplitudeMM = -(int16_t)gs_motionAmplitudeMM; 
+        signedAmplitudeMM = -(int16_t)gs_motionAmplitudeMM1; 
     }
     if(gs_waveformType == 0) {  // sine waveform
-        designPosSineWaveform(signedAmplitudeMM);      
+        gs_outputWaveform1 = designPosSineWaveform(signedAmplitudeMM);      
     }
     else if(gs_waveformType == 1) {  //Step waveform
-        designRampWaveform(signedAmplitudeMM);
+        gs_outputWaveform1 = designRampWaveform(signedAmplitudeMM);
+    }
+    
+    // set up motor 2 waveforms
+    if(gs_reverseDirection2 == 0) {
+       signedAmplitudeMM = (int16_t)gs_motionAmplitudeMM2;     
+    }
+    else {
+        signedAmplitudeMM = -(int16_t)gs_motionAmplitudeMM2; 
+    }
+    if(gs_waveformType == 0) {  // sine waveform
+        gs_outputWaveform2 = designPosSineWaveform(signedAmplitudeMM);      
+    }
+    else if(gs_waveformType == 1) {  //Step waveform
+        gs_outputWaveform2 = designRampWaveform(signedAmplitudeMM);
     }
 }
 
-void designPosSineWaveform(int16_t mmDisplacementPP) {
+int32_t* designPosSineWaveform(int16_t mmDisplacementPP) {
     // Creates a sine waveform designed to give mmDisplacement as the peak-peak position
     // displacement
     
@@ -119,20 +133,23 @@ void designPosSineWaveform(int16_t mmDisplacementPP) {
     
     posAmplitudePP = (int32_t)mmDisplacementPP * (int32_t)gs_encoderStepsPerMM;
     waveformArray = makePosSineWaveform(posAmplitudePP, gs_numArrayVals);
-    setOutputWaveform(waveformArray);   
+//    setOutputWaveformMotor1(waveformArray);   
     gs_playSingleWaveformOnly = false;   // plays multiple waveforms
-    
+    return waveformArray;
 }
 
-void designRampWaveform(int16_t mmStepSize) {
+int32_t* designRampWaveform(int16_t mmStepSize) {
     // designs the ramp waveform to step by at total of mmStepSize mm. Plays one waveform only
+    // returns waveform array pointer
+    
     int32_t stepSizeEncoder;            // number of encoder steps (signed)
     int32_t* waveformArray;
     
     stepSizeEncoder = (int32_t)mmStepSize * (int32_t)gs_encoderStepsPerMM;
     waveformArray = makeRampWaveform(stepSizeEncoder, gs_numArrayVals);
-    setOutputWaveform(waveformArray); 
+//    setOutputWaveformMotor1(waveformArray); 
     gs_playSingleWaveformOnly = true;    // play waveform only once, then stop
+    return waveformArray;
 }
 
 int32_t* makePosSineWaveform(int32_t amplitudeEncPP, uint16_t numValues) {
@@ -140,6 +157,8 @@ int32_t* makePosSineWaveform(int32_t amplitudeEncPP, uint16_t numValues) {
     // INPUTS
     // amplitudeEncPP is the peak-to-peak amplitude of the waveform in units of encoder steps
     // numValues is the number of values in the array.
+    // OUTPUT
+    // waveformArray is an array of int32_t with the waveform values
     uint16_t ii;
     float x;
     float step = 2*3.14159265359 / numValues;
@@ -163,42 +182,6 @@ int32_t* makePosSineWaveform(int32_t amplitudeEncPP, uint16_t numValues) {
     
     return waveformArray;  
 }
-
-
-//int32_t* makeVelSineWaveform(int32_t posAmplitude, uint16_t numValues) {
-//    // Allocates a sine waveform of a given amplitude number of values numValues. Also allocates the global zero waveform of the same length.
-//    // This is designed as a velocity-controlled waveform, so the amplitude is estimated so that the position
-//    // displacement is the posAmplitude input.
-//    // INPUTS
-//    // posAmplitude is the target position displacement (0-peak) in units of encoder steps 
-//    uint16_t ii;
-//    float x;
-//    float step = 2*3.14159265359 / numValues;
-//    float amplitude;
-//    
-//    // scale amplitude to make the position amplitude (0-peak) equal to the posAmplitude input
-//    // A half sine wave has average value of 2/pi = 0.636953.
-//     amplitude = (float)posAmplitude / numValues / gs_velReadsPerWfUpdate / 0.635953;
-//    //amplitude = (float)posAmplitude / numValues / 0.635953;
-//    
-//    
-//    if(gs_zeroWaveform != NULL) {
-//        free(gs_zeroWaveform);
-//    }
-//    
-//    // Allocate memory. Note: to use dynamic memory allocation, a heap must be 
-//    //  ...created in the linker. See notes on project
-//    int32_t* waveformArray = (int32_t*)malloc(numValues*sizeof(int32_t));
-//    for(ii=0; ii<numValues; ii++) {
-//        x = amplitude * sin(ii*step);
-//        waveformArray[ii] = (int32_t)(x+0.5);
-//    }
-//    
-// //   g_zeroWaveform = makeZeroWaveform(numValues);  // create corresponding zero waveform
-//    gs_numArrayVals = numValues;
-//    
-//    return waveformArray;  
-//}
 
 int32_t* makeRampWaveform(int32_t stepSize, uint16_t numValues) {
     // Creates a waveform meant to move the motor a defined amount. The last 10%
@@ -296,14 +279,3 @@ int32_t* makeConstWaveform(int32_t value, uint16_t numValues) {
     
     return waveformArray;
 }
-
-//void calcNumPoints() {
-//    // Calculate the number of points in one period of the waveform (one pass through the waveform array). The intention is that the caller
-//    // of this function knows the value of g_waveformTimeStep_microS (update time of waveform index)
-//    // and ensures that the period of the waveform array is an integer number of waveform update time steps. This function will round to the
-//    // nearest number of points just in case.
-//    
-//    float period_microSec =  60.0 * 1000000.0 / (float)gs_freqUser;
-//    gs_numArrayVals = (uint16_t)( period_microSec / (float)gs_waveformTimeStep_microS + 0.5 );
-//  
-//}

@@ -38,8 +38,10 @@ extern volatile bool gs_resetWaveform;              // causes waveform array ind
 extern uint16_t gs_numArrayVals;                    // number of array values in output waveform
 extern uint16_t gs_waveformUpdatePeriod;            // number of PWM1 interrupts between waveform index updates
 extern uint16_t gs_waveformType;                    // stores which type of waveform is selected
-extern uint16_t gs_motionAmplitudeMM;               // amplitude of motion in mm
-extern uint16_t gs_reverseDirection;                // 1 to move opposite direction, 0 for forward
+extern uint16_t gs_motionAmplitudeMM1;              // amplitude of motion in mm motor 1
+extern uint16_t gs_motionAmplitudeMM2;              // amplitude of motion in mm motor 2
+extern uint16_t gs_reverseDirection1;               // 1 to move opposite direction, 0 for forward motor 1
+extern uint16_t gs_reverseDirection2;               // 1 to move opposite direction, 0 for forward motor 2
 extern uint32_t gs_waveformTimeStep_microS;         // Time between each element of the waveform array in microseconds
 extern uint16_t gs_freqUser;                        // frequency requested by user in cycles / min
 
@@ -53,7 +55,7 @@ extern volatile int32_t gs_displacement2Demand;     // Demand for encoder displa
 extern uint16_t gs_encoderStepsPerMM;               // Number of encoder steps per mm of travel
 
 // Commands and other output-related variables
-extern volatile bool gs_zeroPosOutput;              // variable to cause zero voltage output when true
+extern volatile bool gs_stopMotors;              // variable to cause zero voltage output when true
 extern volatile bool gs_playSingleWaveformOnly;     // set to true to play just one period of the waveform array
 extern volatile bool gs_startMotor;                 // set to true to cause motor to start
 
@@ -65,7 +67,8 @@ extern volatile bool gs_startMotor;                 // set to true to cause moto
 // *** SECONDARY CORE ONLY GLOBAL PARAMETERS *****
 
 // Waveform parameters
-extern int32_t* gs_outputWaveform;                  // pointer to whatever array is currently being used to determine output. It could represent speed or position
+extern int32_t* gs_outputWaveform1;                 // pointer to output waveform for motor 1
+extern int32_t* gs_outputWaveform2;                 // pointer to output waveform for motor 2
 extern int32_t* gs_zeroWaveform;                    // waveform of zeros useful for bringing output to zero gradually
 
 

@@ -160,8 +160,6 @@ int main(void) {
          // and start the motion
          if(g_startMotor) {
             configureDerivedQuantities();
-          //  setUpWaveform();
-           // g_resetWaveform = true;
             setZeroPosition();
             g_displacement1Demand = 0;   
             g_displacement2Demand = 0;      
