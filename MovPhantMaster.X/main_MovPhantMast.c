@@ -113,7 +113,7 @@ int main(void) {
     
     //uint16_t val=0;
     // Make RB11 digital input for pushbutton
-    TRISBbits.TRISB11 = 1;
+ //   TRISBbits.TRISB11 = 1;
     uint32_t blinkCounter=0;               // counter for LED blink
     uint32_t blinkCounterMax = 500000;   // determines blink rate
     while(1) {
@@ -127,10 +127,9 @@ int main(void) {
         // and both cores would just wait for one another.
   //      __delay32(g_OscillatorFreq/2);
         
-  //      LATBbits.LATB2 = 0;
         // Blink LED 1
         if(blinkCounter == blinkCounterMax) {
-            LATBbits.LATB2 = ~PORTBbits.RB2;
+            LATDbits.LATD10 = ~PORTDbits.RD10;
             blinkCounter = 0;
         }
         else {
@@ -140,7 +139,6 @@ int main(void) {
         // Monitor Master-Secondary Read Fifo for incoming transmission
         while(!MSI1FIFOCSbits.RFEMPTY) {  // read until the read FIFO is empty
             if(!MSI1FIFOCSbits.RFEMPTY) {
-     //           LATBbits.LATB2 = 1;
                 fifoReg=MRSWFDATA;
                 if(fifoReg == REG_VARIABLE_32)  {               // command
                     receive32bVariableFromSecondary();
@@ -252,7 +250,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
             pwmPosition1 = (int16_t) g_maxPWMInteger;
         }
 
-        // set the position PWM output
+        // set the position PWM for analog output
         setOnCyclesPWM1((uint16_t)pwmPosition1);
 
         // ---------------  POSITION FEEDBACK CONTROL ------------------
@@ -445,4 +443,16 @@ void __attribute__((__interrupt__,no_auto_psv)) _SI2C1Interrupt(void) {
 
     IFS1bits.SI2C1IF = 0;
     I2C1CONLbits.SCLREL = 1;        //release clock
+}
+
+
+void __attribute__((__interrupt__,no_auto_psv)) _CNBInterrupt(void) {
+    // Interrupt Service Routine for Change Notice on PORTB pins
+    
+    if(CNFBbits.CNFB15) {                       // RB15
+        LATDbits.LATD10 = ~PORTDbits.RD10;      // Toggle LED
+    }
+    CNFBbits.CNFB15 = 0;
+    
+    IFS0bits.CNBIF = 0;                 // clear interrupt flag
 }

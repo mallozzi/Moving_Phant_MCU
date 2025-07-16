@@ -31,9 +31,10 @@
 #define REG_DER_NUM2 28                     // register to set numerator of derivative feedback constant motor 2
 #define REG_DER_DEN2 29                     // register to set denominator of derivative feedback constant motor 2
 #define REG_PWM_POS2_OFFSET 30              // register to set pwm position offset motor 2
-
 #define REG_MOTION_AMPLITUDE_2 31           // amplitude (peak-to-peak) in mm of motor 2
 #define REG_REVERSE2 32                     // register to reverse motion direction motor 2
+#define REG_MOT1_ENABLED 33                 // register to enable motor 1
+#define REG_MOT2_ENABLED 34                 // register to enable motor 2
 
 
 // Value definitions
@@ -157,6 +158,12 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
     else if(regNum == REG_PWM_POS2_OFFSET) {
         g_pwm2ZeroOffset = dataVal;
     }
+    else if(regNum == REG_MOT1_ENABLED) {
+        g_output1Enabled = (bool)dataVal;
+    }
+    else if(regNum == REG_MOT2_ENABLED) {
+        g_output2Enabled = (bool)dataVal;
+    }
     
     
     lastValueWritten = dataVal;
@@ -220,7 +227,8 @@ uint16_t getRegisterValue(uint8_t regNum) {
     }
     else if(regNum == REG_PWM_VEL_OFFSET) {
         val = g_pwm3ZeroOffset;
-    }else if(regNum == REG_PROP_NUM2) {
+    }
+    else if(regNum == REG_PROP_NUM2) {
         val = g_propConstNum2;
     }
     else if(regNum == REG_PROP_DEN2) {
@@ -240,6 +248,12 @@ uint16_t getRegisterValue(uint8_t regNum) {
     }
     else if(regNum == REG_PWM_POS2_OFFSET) {
         val = g_pwm2ZeroOffset;
+    }
+    else if(regNum == REG_MOT1_ENABLED) {
+        val = g_output1Enabled;
+    }
+    else if(regNum == REG_MOT2_ENABLED) {
+        val = g_output2Enabled;
     }
     
     return val;

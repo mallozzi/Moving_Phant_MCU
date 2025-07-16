@@ -28,7 +28,8 @@ bool g_output1Enabled = false;          // true when motion output is enabled, f
 bool g_output2Enabled = false;          // true when motion output is enabled, false otherwise.
 
 // User configuration parameters
-uint16_t g_maxDisplacementMM;           // Maximum peak-to-peak displacement in mm for translational motion
+uint16_t g_maxDisplacementMM;           // Defines the displacement that corresponds to full scale voltage output
+                                        // ...in analog output signal
 
 // Waveform parameters
 uint16_t g_numArrayVals;                // number of array values in output waveform
@@ -51,7 +52,7 @@ int16_t g_pwm2Cycles;                   // Duty cycle parameter for PWM1
 uint16_t g_pwm1ZeroOffset;               // offset for motor 1 position output. This will be the pwm output for zero position
 uint16_t g_pwm2ZeroOffset;               // offset for velocity output. This will be the pwm output for zero speed. 
 uint16_t g_pwm3ZeroOffset;
-int16_t g_encoderToPwmDenom;                // divisor for position encoder steps to pwm output for position output pwm (pwm2))
+int16_t g_encoderToPwmDenom;             // divisor for position encoder steps to pwm output for analog position output pwm (pwm2))
 
 // Timer1 interrupt period sets the update rate of the feedback loop
 uint16_t g_feedbackHalfUpdatePeriod;    // Timer1 interrupt period in units of Timer1 cycles. Feedback output for each motor is updated every two of these periods

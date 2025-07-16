@@ -133,7 +133,6 @@ void receiveVariableFromSecondary() {
     Variable whichVar;
     uint16_t fifoVal;
     
-   // LATBbits.LATB2 = 1;
     // First entry in FIFO is a Variable type that identifies which variable is being sent.
     while(MSI1FIFOCSbits.RFEMPTY);          // wait for next FIFO data to come through
     whichVar = MRSWFDATA;                   // which variable
@@ -160,7 +159,6 @@ void receive32bVariableFromSecondary() {
     uint16_t fifoVal;
     uint32_t var32;
      
-   // LATBbits.LATB2 = 1;
     // First entry in FIFO is a Variable type that identifies which variable is being sent.
     while(MSI1FIFOCSbits.RFEMPTY);          // wait for next FIFO data to come through
     whichVar = MRSWFDATA;                    // which variable

@@ -27,6 +27,7 @@ void configureAnalogToDigital();
 void configureDerivedQuantities();
 void configureI2C();
 void configureQuadEncoder();
+void configureInterruptOnChange();
 void calcNumPoints();
 
 #endif	/* CONFIGURE_H */

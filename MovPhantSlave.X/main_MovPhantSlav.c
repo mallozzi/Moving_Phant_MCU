@@ -51,14 +51,11 @@ int main(void) {
     // main loop continually monitors the master-slave FIFO and reacts accordingly
     Register fifoReg;
 
-    TRISBbits.TRISB1 = 0;
-    ANSELBbits.ANSELB1 = 0;
 
     while(1) {
         
         // Monitor the FIFO for incoming commands and variables from the primary core
         if(!SI1FIFOCSbits.SRFEMPTY) {
-//            LATBbits.LATB2 = 1;
             fifoReg=SRMWFDATA;
             if(fifoReg == REG_COMMAND)  {               // command
                 processCommandFromPrimary();

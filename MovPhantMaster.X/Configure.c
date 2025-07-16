@@ -7,6 +7,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "StateManagement.h"
 
 void configureInitial() {
 // Initial configuration. It is assumed that this method is called before other configurations are done, as it broadly sets a lot of
@@ -34,20 +35,17 @@ void configureInitial() {
     
     // Configure the fault input and sleep output pins
     // RA0 is fault input from driver
-    TRISAbits.TRISA0 = 1;       // digital input
-    TRISBbits.TRISB13 = 0;      // digital output
+    TRISAbits.TRISA0 = 1;       // nFault1 input
+    TRISCbits.TRISC0 = 1;       // nFault2 input
+    TRISDbits.TRISD1 = 0;       // nSleep output
     
-    // Set driver to sleep mode by default. 
-    // RB13 puts the driver into sleep mode of it is logic low, and the toggle switch is set to MCU control
-    LATBbits.LATB13 = 0;        // default to sleep mode so that it must be actively enabled to turn motor
+    // Set motor drivers to sleep mode by default. 
+    enableDriver(false);
+    //LATDbits.LATD1 = 0;        // default to sleep mode so that it must be actively enabled to turn motor
     
     // Configure Fault output pin RB0
     TRISBbits.TRISB0 = 0;
     LATBbits.LATB0 = 0;
-    
-    // Configure Fault Input Pin from driver RA0 as digital input
-    TRISAbits.TRISA0 = 1;
-    ANSELAbits.ANSELA0 = 0;
     
     // set motor and goto landmark actions to non-starting state
     g_startMotor = false;
@@ -57,6 +55,9 @@ void configureInitial() {
     // Set digital input pins for Quad Enc 1 (motor 1). Motor 2 quad enc is on secondary core
     TRISBbits.TRISB6 = 1;
     TRISBbits.TRISB7 = 1;
+    
+    // Push button pin as digital input
+    TRISBbits.TRISB15 = 1;
     
     // PWM parameters
     g_maxPWMInteger = 12799;            // maximum PWM integer allowed
@@ -192,6 +193,17 @@ void configureI2C() {
     I2C1CONLbits.I2CEN = 1; //enable I2C module
 }
 
+void configureInterruptOnChange() {
+    // Pushbutton switch on RB15
+    CNCONBbits.ON = 1;              // enable change notification
+    CNCONBbits.CNSTYLE = 1;         // detect changes not mismatches on all PORTB pins
+    CNEN0Bbits.CNEN0B15 = 1;        // with CNEN1B15, configure to detect positive only transitions
+    CNEN1Bbits.CNEN1B15 = 0;        // with CNEN0B15, configure to detect positive only transitions
+    CNFBbits.CNFB15 = 0;            // clear pin-specific change flag
+    IEC0bits.CNBIE = 1;             // enable interrupts for PORTB pins
+    IFS0bits.CNBIF = 0;             // clear interrupt flag for PORTB
+}
+
 void configureDerivedQuantities() {
     // Calculate quantities that depend upon other configuration parameters. This function  should be run after all other configuration function
     
@@ -228,7 +240,7 @@ void configureDerivedQuantities() {
         g_waveformUpdatePeriod = 1600; // targets 80 ms update period assuming PWM1 max integer of 12799
     }
     
-    // Configures the PWM-output-to-position encoder
+    // Configures the PWM-output-to-position encoder for analog output signal
     g_encoderToPwmDenom = (int16_t)(  (float)(g_maxDisplacementMM) * (float)(g_encoderStepsPerMM) / (float)g_maxPWMInteger + 0.5);
     
     // Calculates the time between each step in the waveform playout. Depends upon configuration of the PWM and the number of interrupts.

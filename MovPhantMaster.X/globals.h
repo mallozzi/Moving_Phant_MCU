@@ -45,7 +45,8 @@ extern int16_t g_pwm1Cycles;                // Signed duty cycle parameter for P
 extern int16_t g_pwm2Cycles;                // Signed duty cycle parameter for PWM1.
 
 // User configuration parameters
-extern uint16_t g_maxDisplacementMM;         // Maximum peak-to-peak displacement in mm for translational motion. Not used by secondary
+extern uint16_t g_maxDisplacementMM;        // Defines the displacement that corresponds to full scale voltage output
+                                            // ...in analog output signal
 
 // Waveform arrays
 //extern int32_t* g_outputWaveform;           // pointer to whatever array is currently being used to determine output. It could represent speed or position
@@ -71,7 +72,7 @@ extern bool g_faultDetected;
 extern uint16_t g_pwm1ZeroOffset;               // offset for motor 1 position output. This will be the pwm output for zero position
 extern uint16_t g_pwm2ZeroOffset;               // offset for motor 2 position output. This will be the pwm output for zero speed
 extern uint16_t g_pwm3ZeroOffset;               // offset for velocity output. This will be the pwm output for zero speed
-extern int16_t g_encoderToPwmDenom;             // divisor for position encoder steps to pwm output for position output pwm (pwm2))
+extern int16_t g_encoderToPwmDenom;             // divisor for position encoder steps to pwm output for analog position output pwm (pwm2))
 
 // Timer1 interrupt period sets the update rate of the feedback loop
 extern uint16_t g_feedbackHalfUpdatePeriod;     // Timer1 interrupt period in units of Timer1 cycles. Feedback output for each motor is updated every two of these periods
