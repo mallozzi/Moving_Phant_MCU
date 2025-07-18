@@ -40,18 +40,20 @@ int main(void) {
     // Wait for PLL to lock
     while (OSCCONbits.LOCK!= 1);
     
-    configSlaveInitial();
+    uint32_t blinkCounter=0;
+    uint32_t blinkCounterMax = 500000;  // defines blinking interval
     configureSecondaryPPS();
+    configSlaveInitial();
+ //   LATBbits.LATB1 = 1;
     configurePWM1();
     configurePWM2();
     configureQuadEncoder();
  //   configurePWM3();
     startPWM1();
-    
+//    LATBbits.LATB1 = 1;
     // main loop continually monitors the master-slave FIFO and reacts accordingly
     Register fifoReg;
-
-
+//    LATBbits.LATB1 = 1;
     while(1) {
         
         // Monitor the FIFO for incoming commands and variables from the primary core
@@ -77,6 +79,16 @@ int main(void) {
             
             
         }
+        
+        // blink LED2
+        if(blinkCounter > blinkCounterMax) {
+            LATBbits.LATB1 = ~PORTBbits.RB1;
+            blinkCounter = 0;
+        }
+        else{
+            blinkCounter++;
+        }
+        
     }  // main while loop
     return 0;
 }
@@ -88,6 +100,9 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
     //         into gs_displacementDemand and the waveform index is advanced
     //      2) Sets the motor output to whatever is in gs_pwmxCycles. That value is set in the feedback loop code and ultimately
     //         comes in through the master-secondary interface.
+    // NOTE: This interrupt should be disabled during FIFO writes to the primary core, because this ISR also writes to the
+    //       FIFO. The writes could get disrupted if this interrupt happens in the middle of a FIFO write. This interrupt
+    //       does not trigger any FIFO reads, so it does not need to be disabled for reads.
     
     
     static uint16_t interruptCount=0;               // tracks the number of PWM1 interrupts since the output has been updated
@@ -123,7 +138,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
         // we need to update every waveformUpdatePeriod=200 interrupts
         waveform1Count++;
         if(waveform1Count >= gs_waveformUpdatePeriod) {         // time to update what is requested (next element in waveform array)           
-            // NOTE: I BELIEVE THIS IS NO LONGER NECESSARY SINCE WE RESET THE WAVEFORM INDEX (wf1_ind) UPON TERMINATION OF THE LOOP. DOUBLE CHECK AND DELETE
+            // TO DO NOTE: I BELIEVE THIS IS NO LONGER NECESSARY SINCE WE RESET THE WAVEFORM INDEX (wf1_ind) UPON TERMINATION OF THE LOOP. DOUBLE CHECK AND DELETE
             if(gs_resetWaveform) {                              // if motor has been off, reset the waveform index for the initial run 
                 wf1_ind = 0;
                 gs_resetWaveform = false;

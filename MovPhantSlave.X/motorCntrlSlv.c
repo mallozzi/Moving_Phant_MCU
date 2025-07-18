@@ -99,8 +99,7 @@ uint32_t readQuadEncoderPos() {
     // Read position register and update pwm position output
     posLowByte = POS1CNTL; // Should load POS1CNTH into POS1HLD
     posHighByte = POS1HLD;
-    position = (posHighByte<<16) + posLowByte;
-    
+    position = ( ((uint32_t)posHighByte) <<16) + (uint32_t)posLowByte;
     return position;
 }
 

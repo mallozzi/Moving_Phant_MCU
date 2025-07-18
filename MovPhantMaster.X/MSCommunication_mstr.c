@@ -4,21 +4,31 @@
 #include "MSCommunication_mstr.h"
 #include "globals.h"
 #include "enums.h"
+#include "motorCntrlMstr.h"
+#include "StateManagement.h"
 
 
 void sendCommandToSecondary(Command whichCommand) {
-   // Sneds a command to the secondary through the MS FIFO
+    // Sends a command to the secondary through the MS FIFO. It is important not to
+    // allow FIFO writes to get interrupted or else the data stream can be corrupted
     
+    IEC0bits.T1IE = 0;                  // Disable Timer1 interrupt temporarily
+            
     // Send register that identifies it as a command.
     while(MSI1FIFOCSbits.WFFULL);       //wait until write FIFO is not full
     MWSRFDATA = REG_COMMAND;
     
     while(MSI1FIFOCSbits.WFFULL);       //wait until write FIFO is not full
     MWSRFDATA = whichCommand;
+    
+    IEC0bits.T1IE = 1;                  // Re-enable Timer1 interrupt
 }
 
 void sendVariableToSecondary(Variable whichVar, uint16_t value) {
     // Sends a single 16-bit variable to the secondary through the MS FIFO
+    
+    IEC0bits.T1IE = 0;                  // Disable Timer1 interrupt temporarily 
+    
     // ...Send register that identifies it as a 16-bit variable
     while(MSI1FIFOCSbits.WFFULL);       //wait until write FIFO is not full
     MWSRFDATA = REG_VARIABLE;
@@ -28,6 +38,8 @@ void sendVariableToSecondary(Variable whichVar, uint16_t value) {
     
     while(MSI1FIFOCSbits.WFFULL);       //wait until write FIFO is not full
     MWSRFDATA = value;
+    
+    IEC0bits.T1IE = 1;                  // Re-enable Timer1 interrupt
 
 }
 
@@ -40,6 +52,8 @@ void send32bVariableToSecondary(Variable32 whichVar, uint32_t value) {
     
     msb = (uint16_t)((value & 0xFFFF0000) >> 16);     //most significant bits
     lsb = (uint16_t)(value & 0x0000FFFF);           //least significant bits
+    
+    IEC0bits.T1IE = 0;                              // Disable Timer1 interrupt temporarily 
     
     // Send register that identifies it as a 32-bit variable
     while(MSI1FIFOCSbits.WFFULL);                   //wait until write FIFO is not full
@@ -55,10 +69,15 @@ void send32bVariableToSecondary(Variable32 whichVar, uint32_t value) {
     // Transmit least significant bits
     while(MSI1FIFOCSbits.WFFULL);                   //wait until write FIFO is not full
     MWSRFDATA = lsb;
+    
+    IEC0bits.T1IE = 1;                              // Re-enable Timer1 interrupt
+    
 }
 
 void sendBoolVarToSecondary(BoolVariable whichVar, bool boolVal) {
     // Sends a single boolean variable to the secondary through the MS FIFO
+     
+    IEC0bits.T1IE = 0;                  // Disable Timer1 interrupt temporarily 
     
     // Send register that identifies it as a 16-bit variable
     while(MSI1FIFOCSbits.WFFULL);       //wait until write FIFO is not full
@@ -69,6 +88,9 @@ void sendBoolVarToSecondary(BoolVariable whichVar, bool boolVal) {
     
     while(MSI1FIFOCSbits.WFFULL);       //wait until write FIFO is not full
     MWSRFDATA = (uint16_t)boolVal;
+    
+    IEC0bits.T1IE = 1;                  // Re-enable Timer1 interrupt
+    
 }
 
 void sendPingRequestToSecondary(uint16_t pingVal) {
@@ -80,12 +102,16 @@ void sendPingRequestToSecondary(uint16_t pingVal) {
     // The variable g_pingVal should be set to 0 before calling this function.
     // This ping is used to ensure that an earlier FIFO transmission has occurred.
     
+    IEC0bits.T1IE = 0;                  // Disable Timer1 interrupt temporarily 
+    
     // ...Send register that identifies it as a ping variable
     while(MSI1FIFOCSbits.WFFULL);       //wait until write FIFO is not full
     MWSRFDATA = REG_PING;
     
     while(MSI1FIFOCSbits.WFFULL);       //wait until write FIFO is not full
     MWSRFDATA = pingVal;
+    
+    IEC0bits.T1IE = 1;                  // Re-enable Timer1 interrupt
     
 }
 
@@ -132,7 +158,7 @@ void receiveVariableFromSecondary() {
     // Reads 16-bit variable from Master-Slave Fifo and sets the appropriate primary core variable
     Variable whichVar;
     uint16_t fifoVal;
-    
+       
     // First entry in FIFO is a Variable type that identifies which variable is being sent.
     while(MSI1FIFOCSbits.RFEMPTY);          // wait for next FIFO data to come through
     whichVar = MRSWFDATA;                   // which variable
@@ -158,7 +184,7 @@ void receive32bVariableFromSecondary() {
     Variable32 whichVar;
     uint16_t fifoVal;
     uint32_t var32;
-     
+    
     // First entry in FIFO is a Variable type that identifies which variable is being sent.
     while(MSI1FIFOCSbits.RFEMPTY);          // wait for next FIFO data to come through
     whichVar = MRSWFDATA;                    // which variable
@@ -172,8 +198,7 @@ void receive32bVariableFromSecondary() {
     // ...least significant bits
     while(MSI1FIFOCSbits.RFEMPTY);          // wait for next FIFO data to come through
     fifoVal = MRSWFDATA;                    // value in the variable data.
-    var32 = var32 | ((uint32_t)fifoVal);
-    
+    var32 = var32 | ((uint32_t)fifoVal);    
     
     switch(whichVar) {
         case DISPLACEMENT1_DEMAND:
@@ -186,6 +211,7 @@ void receive32bVariableFromSecondary() {
             g_waveformTimeStep_microS = var32;
             break;
         case QUAD_ENC_POS:
+ //           setLED1(1);
             g_secondaryQuadEncPos = var32;
             break;
     }
@@ -195,14 +221,14 @@ void receiveBoolVarFromSecondary() {
     // Reads 16-bit variable from Master-Slave Fifo and sets the appropriate primary core variable
     BoolVariable whichVar;
     bool fifoVal;
-     
+    
     // First entry in FIFO is a Variable type that identifies which variable is being sent.
     while(MSI1FIFOCSbits.RFEMPTY);          // wait for next FIFO data to come through
     whichVar = MRSWFDATA;                   // which variable
     
     // Second entry is the value of the variable to set
     while(MSI1FIFOCSbits.RFEMPTY);          // wait for next FIFO data to come through
-    fifoVal = (bool)MRSWFDATA;                    // value in the variable data.
+    fifoVal = (bool)MRSWFDATA;              // value in the variable data.
     
     switch(whichVar) {
         case OUTPUT1_ENABLED:                // Dummy test - may not need anything yet

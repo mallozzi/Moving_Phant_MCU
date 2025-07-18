@@ -82,6 +82,7 @@ void stopMotion();
 void setZeroPosition();
 void setLandmarkPosition();
 void gotoLandmark();
+void setLED1(uint16_t onoff);
 
 
 

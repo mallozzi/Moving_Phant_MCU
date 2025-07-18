@@ -10,6 +10,7 @@
 #include <libpic30.h>
 #include "enums.h"
 #include "motorCntrlMstr.h"
+#include "StateManagement.h"
 
 // FOSCSEL
 #pragma config FNOSC = FRC                  // Oscillator Source Selection (Internal Fast RC (FRC))
@@ -87,7 +88,7 @@ int main(void) {
  // Initial Configuration
     configurePPS();       // must be done very early - review carefully if doing any config prior to this.
     configureInitial();
- //   configureDirection();
+    configureInterruptOnChange();
     configurePWM2();
     configurePWM3();
     configureTimer1();
@@ -96,26 +97,32 @@ int main(void) {
     configureQuadEncoder();
 
     // Set PCB LED state if desired
-    LATDbits.LATD10 = 0;   // Set initial LED 1 state
+  //  LATDbits.LATD10 = 0;   // Set initial LED 1 state
+
 
     INTCON2bits.GIE  = 1;    //global interrupt enable
     
     _program_secondary(1,0,MovPhantSlave);
     _start_secondary();
-   // __delay32(g_OscillatorFreq*2);
+    __delay32(g_OscillatorFreq*2);
     enableMSFifo();
     Register fifoReg;
-
     // Launch feedback loop with no output
     g_pwm1Cycles = 0;  // begin with no output
     g_pwm2Cycles = 0;  // begin with no output
     startTimer1(g_feedbackHalfUpdatePeriod);  // argument determines Timer1 interrupt interval in units of Timer1 periods
     
+ //   __delay32(g_OscillatorFreq*2);
+    
+    
     //uint16_t val=0;
     // Make RB11 digital input for pushbutton
  //   TRISBbits.TRISB11 = 1;
-    uint32_t blinkCounter=0;               // counter for LED blink
-    uint32_t blinkCounterMax = 500000;   // determines blink rate
+    uint32_t blinkCounter=0;                // counter for LED blink
+    uint32_t blinkCounterMax = 100000;       // determines blink rate
+    uint32_t readCounter = 0;               // counter for secondary quad encoder read
+    uint32_t readCounterMax = 1000;          // determines interval to read secondary quad encoder
+
     while(1) {
         // IMPORTANT NOTE ABOUT DELAYS IN THIS LOOP:
         // Substantial delays should not be put in the main while loop, as the design of the 
@@ -127,17 +134,21 @@ int main(void) {
         // and both cores would just wait for one another.
   //      __delay32(g_OscillatorFreq/2);
         
+        
         // Blink LED 1
         if(blinkCounter == blinkCounterMax) {
+ //           setLED1(1);
             LATDbits.LATD10 = ~PORTDbits.RD10;
+ //           LATDbits.LATD10 = ~PORTDbits.RD10;
             blinkCounter = 0;
         }
         else {
             blinkCounter++;
         }
-
+        
         // Monitor Master-Secondary Read Fifo for incoming transmission
         while(!MSI1FIFOCSbits.RFEMPTY) {  // read until the read FIFO is empty
+            
             if(!MSI1FIFOCSbits.RFEMPTY) {
                 fifoReg=MRSWFDATA;
                 if(fifoReg == REG_VARIABLE_32)  {               // command
@@ -150,7 +161,20 @@ int main(void) {
                    receiveBoolVarFromSecondary();
                 }
             }
+ //           __delay32(100);
         }
+        
+        // Read the secondary quadrature encoder position with every pass. The position is updated in the 
+        // ...g_secondaryQuadEncPos variable very frequently and is therefore up to date wherever else it is needed,
+        // ...as this main loop executes very quickly when no interrupt service routine is executing.
+        if(readCounter > readCounterMax) {
+            readSecondaryQuadEncoder();
+            readCounter=0;
+        }
+        else{
+            readCounter++;
+        }
+//        __delay32(2000);
          
          // The purpose of starting the motor this way rather than calling a function from registerHandler is to allow
          // the I2c transmission to finish without having to wait for all the waveform configuration code to run.
@@ -186,8 +210,11 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
     // The Timer1 interrupt is used to update the feedback loop. Each motor has the feedback updated every other
     // interrupt, so that one motor has an update period of two Timer1 interrupt periods.
     // The output is set by updating the g_pwmxCycles variable. 
+    // NOTE: This ISR should be disabled during Master-Slave FIFO writes, as it also triggers writes to the FIFO
+    //       that could interfere.
     
     static uint16_t counter = 0;                    // Counts interrupts to manage alternating motor updates.
+    static bool firstPass = true;                   // identifies the first time the ISR is called for variable initialization purposes
     
     // variables used to temporarily hold quadrature encoder bytes while reading
     static uint16_t posLowByte;
@@ -203,6 +230,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
     //feedback control parameters for motor 2
     static int32_t displacement2;                   //position relative to zero position
     static int16_t pwmPosition2;                    // pwm output corresponding to the position
+    static uint32_t lastPositionEnc2;                // stores previous position of quad encoder 2 for velocity calculation
     
     // Position feedback error parameters for motor 1
     static int32_t displacement1Error;              // error signal in units of encoder steps.
@@ -290,15 +318,34 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         counter++;
     }
     else { // counter==1, MOTOR 2 feedback loop update
-        // Read position and velocity register. Motor 2 quad encoder is on secondary core. Takes a few instruction cycles      
-        readSecondaryQuadEncoder();
-        // At this point the quadrature encoder absolute position read is in g_secondaryQuadEncPos
-        // ...and the velocity is in g_secondaryQuadEncVel
+        // The first time through this routine, initialize things so that the velocity comes out zero
+        if(firstPass) {                 
+            lastPositionEnc2 = g_secondaryQuadEncPos;  // ensures that the velocity will be zero the first time through
+            firstPass = false;
+        }
+        
+        // g_secondaryQuadEncPos and lastPositionEnc2 are unsigned integers, so we need to deal with negative velocities
+        if(g_secondaryQuadEncPos >= lastPositionEnc2) {
+            g_secondaryQuadEncVel = (int32_t)(g_secondaryQuadEncPos - lastPositionEnc2);
+        }
+        else {
+            g_secondaryQuadEncVel = -(int32_t)(lastPositionEnc2 - g_secondaryQuadEncPos);
+        }
+        lastPositionEnc2 = g_secondaryQuadEncPos;
+        
+        // temp test
+        if(g_secondaryQuadEncVel > 0) {
+  //          setLED1(1);
+        }
+        // end temp test
         
         // Set velocity PWM for analog output. Uncomment the line below to output motor 2 velocity, and comment out the corresponding
         // ... line in the motor 1 code above.
         //setOnCyclesPWM3((uint16_t)(g_secondaryQuadEncVel + g_pwm3ZeroOffset));
-
+        
+        // encoder position is constantly updated in the main routine, so g_secondaryQuadEncPos has current position taken
+        // ...within the last few microseconds. The code block below calculates the displacement relative to the zero position
+        // ...for use in the feedback loop and for sending to the analog output PWM
         if(g_secondaryQuadEncPos >= g_encoder2ZeroPos) {
             displacement2 = (int32_t)(g_secondaryQuadEncPos - g_encoder2ZeroPos);  
         }

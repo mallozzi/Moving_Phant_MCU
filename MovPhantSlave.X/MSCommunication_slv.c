@@ -13,27 +13,27 @@ void processCommandFromPrimary() {
     Command fifoCmd;
     static uint32_t var32;
     static int16_t var16;
+    
     while(SI1FIFOCSbits.SRFEMPTY);          // wait for next FIFO data to come through
-        fifoCmd = SRMWFDATA;
-        if(fifoCmd == START_MOTION) {
-           startMotion();
-        }
-        else if (fifoCmd == STOP_MOTION) {
-            stopMotion();
-        }
-        else if (fifoCmd == READ_QUAD_ENC) {
-            var32 = readQuadEncoderPos();
-            send32bVariableToPrimary(QUAD_ENC_POS, var32);
-            var16 = readEncoderVelocity();
-            sendVariableToPrimary(QUAD_ENC_VEL, (uint16_t)var16);
-        }
+    fifoCmd = SRMWFDATA;
+    if(fifoCmd == START_MOTION) {
+       startMotion();
+    }
+    else if (fifoCmd == STOP_MOTION) {
+        stopMotion();
+    }
+    else if (fifoCmd == READ_QUAD_ENC) {
+        var32 = readQuadEncoderPos();
+        send32bVariableToPrimary(QUAD_ENC_POS, var32);
+    }
+    
 }
 
 void receiveVariableFromPrimary() {
     // Reads 16-bit variable from Master-Slave Fifo and sets the appropriate secondary core variable
     Variable whichVar;
     uint16_t fifoVal;
-     
+    
     // First entry in FIFO is a Variable type that identifies which variable is being sent.
     while(SI1FIFOCSbits.SRFEMPTY);          // wait for next FIFO data to come through
     whichVar = SRMWFDATA;                   // which variable
@@ -89,7 +89,7 @@ void receive32bVariableFromPrimary() {
     Variable32 whichVar;
     uint16_t fifoVal;
     uint32_t var32;
-     
+    
     // First entry in FIFO is a Variable type that identifies which variable is being sent.
     while(SI1FIFOCSbits.SRFEMPTY);          // wait for next FIFO data to come through
     whichVar = SRMWFDATA;                   // which variable
@@ -124,7 +124,7 @@ void receiveBoolVarFromPrimary() {
     // Reads boolean variable from Master-Slave Fifo and sets the appropriate secondary core variable
     BoolVariable whichVar;
     bool fifoVal;
-     
+    
     // First entry in FIFO is a Variable type that identifies which variable is being sent.
     while(SI1FIFOCSbits.SRFEMPTY);          // wait for next FIFO data to come through
     whichVar = SRMWFDATA;                   // which variable
@@ -150,15 +150,20 @@ void processPingRequest() {
     // This function reads that value and sends it right back to the primary, where the response
     // is to set a global variable g_pingVal that can be compared to what was sent.
     
+    IEC4bits.PWM2IE = 0;                    // Disable PWM2 interrupt
     uint16_t fifoVal;
-
+    
     while(SI1FIFOCSbits.SRFEMPTY);          // wait for next FIFO data to come through
     fifoVal = SRMWFDATA;                    // reads the value sent and then sends it back
     sendVariableToPrimary(PING_VAR, fifoVal);
+    
+    IEC4bits.PWM2IE = 1;                    // Re-enable PWM2 interrupt
 }
 
 void sendVariableToPrimary(Variable whichVar, uint16_t value) {
     // Sends a single 16-bit variable to the primary through the MS FIFO
+    
+    IEC4bits.PWM2IE = 0;                // Disable PWM2 interrupt
     
     // Send register that identifies it as a 16-bit variable
     while(SI1FIFOCSbits.SWFFULL);       //wait until write FIFO is not full
@@ -169,6 +174,9 @@ void sendVariableToPrimary(Variable whichVar, uint16_t value) {
     
     while(SI1FIFOCSbits.SWFFULL);       //wait until write FIFO is not full
     SWMRFDATA = value;
+    
+    IEC4bits.PWM2IE = 1;                // Re-enable PWM2 interrupt
+    
 }
 
 void send32bVariableToPrimary(Variable32 whichVar, uint32_t value) {
@@ -178,8 +186,10 @@ void send32bVariableToPrimary(Variable32 whichVar, uint32_t value) {
     uint16_t lsb;
     uint16_t msb;    
     
-    msb = (uint16_t)((value & 0xFFFF0000) >> 16);     //most significant bits
+    msb = (uint16_t)((value & 0xFFFF0000) >> 16);    //most significant bits
     lsb = (uint16_t)(value & 0x0000FFFF);           //least significant bits
+    
+    IEC4bits.PWM2IE = 0;                            // Disable PWM2 interrupt
     
     // Send register that identifies it as a 32-bit variable
     while(SI1FIFOCSbits.SWFFULL);                   //wait until write FIFO is not full
@@ -195,10 +205,14 @@ void send32bVariableToPrimary(Variable32 whichVar, uint32_t value) {
     // Transmit least significant bits
     while(SI1FIFOCSbits.SWFFULL);                   //wait until write FIFO is not full
     SWMRFDATA = lsb;
+    
+    IEC4bits.PWM2IE = 1;                            // Re-enable PWM2 interrupt
 }
 
 void sendBoolVarToPrimary(Variable whichVar, bool value) {
     // Sends a single boolean variable to the primary through the MS FIFO
+    
+    IEC4bits.PWM2IE = 0;                // Disable PWM2 interrupt
     
     // Send register that identifies it as a 16-bit variable
     while(SI1FIFOCSbits.SWFFULL);       //wait until write FIFO is not full
@@ -209,4 +223,7 @@ void sendBoolVarToPrimary(Variable whichVar, bool value) {
     
     while(SI1FIFOCSbits.SWFFULL);       //wait until write FIFO is not full
     SWMRFDATA = (uint16_t)value;
+    
+    IEC4bits.PWM2IE = 1;                // Re-enable PWM2 interrupt
+    
 }

@@ -22,7 +22,7 @@ void configSlaveInitial() {
     TRISD = 0;
     LATD = 0;
     
-    
+    INTCON1bits.NSTDIS = 1;                     // allow nested interrupts so that CPU priority can be changed on the fly
     gs_numArrayVals = 400;                      // number of array values in output waveform. Will be overwritten
     
     gs_filtNumerator = 97;                      // low-pass PWM filter parameter defined as integer numerator and denominator
@@ -51,6 +51,9 @@ void configSlaveInitial() {
 void configureSecondaryPPS() {
         // Unlock control register
     __builtin_write_RPCON(0x0000);
+    
+    TRISBbits.TRISB11 = 1;                      // Quad Encoder 2 A channel
+    TRISBbits.TRISB13 = 1;                      // Quad Encoder 2 B channel
     
     // Assign RB11 to Quadrature Input A and RB13 to Quadrature Input B
     RPINR14bits.QEIA1R = 43;

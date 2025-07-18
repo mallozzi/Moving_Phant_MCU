@@ -53,7 +53,7 @@ void setZeroPosition() {
     
     // Encoder 2 - more complicated because it is on the secondary core
     //... read the encoder position
-    readSecondaryQuadEncoder();
+//    readSecondaryQuadEncoder();
     g_encoder2ZeroPos = g_secondaryQuadEncPos;
 }
 
@@ -67,7 +67,7 @@ void setLandmarkPosition() {
     posHighByte = POS1HLD;
     g_landmark1Position = (posHighByte << 16) + posLowByte;
     
-    readSecondaryQuadEncoder();
+//    readSecondaryQuadEncoder();
     g_landmark2Position = g_secondaryQuadEncPos;
 }
 
@@ -104,7 +104,7 @@ void gotoLandmark() {
     
     // Motor 2
     // ... read current position
-    readSecondaryQuadEncoder();         // encoder position is in g_secondaryQuadEncPos
+//    readSecondaryQuadEncoder();         // encoder position is in g_secondaryQuadEncPos
     
     // ... figure out how far to travel
     encoderSteps = g_landmark2Position - g_secondaryQuadEncPos;
@@ -128,3 +128,6 @@ void gotoLandmark() {
     
 }
 
+void setLED1(uint16_t onoff) {
+    LATDbits.LATD10 = onoff;
+}
