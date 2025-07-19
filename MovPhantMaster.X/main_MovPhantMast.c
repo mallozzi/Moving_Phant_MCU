@@ -187,11 +187,10 @@ int main(void) {
             g_displacement2Demand = 0; 
             // Temporary - for now, we will just have a single reverse control for both motors. May update later
             g_reverseDirection2 = g_reverseDirection1;
-            sendCommandToSecondary(START_MOTION);
-            
             sendParamtersToSecondary();
             while(!MSI1FIFOCSbits.WFEMPTY);         // wait for secondary to finish reading the FIFO. 
             enableDriver(true);
+            sendCommandToSecondary(START_MOTION);
             g_startMotor = false;         // stops code from entering this block until start button pushed again
             
          }
