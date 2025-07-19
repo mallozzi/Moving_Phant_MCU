@@ -255,7 +255,7 @@ uint16_t getRegisterValue(uint8_t regNum) {
         val = g_userMotor1Enable;
     }
     else if(regNum == REG_MOT2_ENABLED) {
-        val = g_userMotor1Enable;
+        val = g_userMotor2Enable;
     }
     
     return val;

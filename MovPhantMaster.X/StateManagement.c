@@ -26,7 +26,7 @@ void startMotion() {
     stopMotion();
     // delay to  make sure slave core stops output. g_OscillatorFreq / 40000 is about 50 microseconds.
     // Be careful not to make this any longer than it needs to be, or slave-write-master-read FIFO could fill up
-    __delay32(g_OscillatorFreq / 40000);   
+    __delay32(g_OscillatorFreq / 10000);   
     g_startMotor = true;
 
 }
