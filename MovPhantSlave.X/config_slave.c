@@ -219,9 +219,8 @@ int32_t* makeRampWaveform(int32_t stepSize, uint16_t numValues) {
         }
     }
     
- //   g_zeroWaveform = makeZeroWaveform(numValues);
     gs_numArrayVals = numValues;
- //   g_playSingleWaveformOnly = true;
+
     return waveformArray;
 }
 

@@ -149,7 +149,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
                 if(gs_playSingleWaveformOnly) {                 // if playing a single waveform only, set things up to stop
                     sendBoolVarToPrimary(OUTPUT1_ENABLED, false);
                     gs_output1Enabled = false;
-                    gs_playSingleWaveformOnly = false;          // reset for future waveforms. 
+                    //gs_playSingleWaveformOnly = false;          // reset for future waveforms. 
                 }
             }
             gs_displacement1Demand = gs_outputWaveform1[wf1_ind]; // Update demand from waveform array
@@ -202,7 +202,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
                 if(gs_playSingleWaveformOnly) {                 // if playing a single waveform only, set things up to stop
                     sendBoolVarToPrimary(OUTPUT2_ENABLED, false);
                     gs_output2Enabled = false;
-                    gs_playSingleWaveformOnly = false;          // reset for future waveforms. 
+                 //   gs_playSingleWaveformOnly = false;          // reset for future waveforms. 
                 }
             }
             gs_displacement2Demand = gs_outputWaveform2[wf2_ind]; // Update demand from waveform array. TO DO: make motor 2 waveform array
