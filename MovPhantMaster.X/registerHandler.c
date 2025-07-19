@@ -67,6 +67,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         else if(dataVal == STEP_FORWARD) {
             g_waveformType = 1;
             g_motionAmplitudeMM1 = 5;
+            g_motionAmplitudeMM2 = 5;
             g_reverseDirection1 = 0;
             g_freqUser = 80;
             startMotion();
@@ -74,6 +75,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         else if(dataVal == STEP_BACKWARD) {
             g_waveformType = 1;
             g_motionAmplitudeMM1 = 5;
+            g_motionAmplitudeMM2 = 5;
             g_reverseDirection1 = 1;
             g_freqUser = 80;
             startMotion();

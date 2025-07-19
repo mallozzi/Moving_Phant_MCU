@@ -499,3 +499,21 @@ void __attribute__((__interrupt__,no_auto_psv)) _CNBInterrupt(void) {
     
     IFS0bits.CNBIF = 0;                 // clear interrupt flag
 }
+
+void __attribute__((__interrupt__,no_auto_psv)) _CNCInterrupt(void) {
+    // Interrupt Service Routine for Change Notice on PORTB pins
+    
+    // motor 1 proximity sensor on RC12
+    if(CNFCbits.CNFC12) {                       
+        stopMotion();                           // Stop both motors
+    }
+    CNFCbits.CNFC12 = 0;
+    
+    // motor 1 proximity sensor on RC12
+    if(CNFCbits.CNFC13) {                       
+        stopMotion();                           // Stop both motors
+    }
+    CNFCbits.CNFC13 = 0;
+    
+    IFS1bits.CNCIF = 0; 
+}

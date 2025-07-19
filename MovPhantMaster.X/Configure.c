@@ -56,8 +56,7 @@ void configureInitial() {
     TRISBbits.TRISB6 = 1;
     TRISBbits.TRISB7 = 1;
     
-    // Push button pin as digital input
-    TRISBbits.TRISB15 = 1;
+    
     
     // PWM parameters
     g_maxPWMInteger = 12799;            // maximum PWM integer allowed
@@ -194,14 +193,37 @@ void configureI2C() {
 }
 
 void configureInterruptOnChange() {
-    // Pushbutton switch on RB15
+    
+    // Pushbutton switch on RB15    
+    TRISBbits.TRISB15 = 1;          // Set pin as digital input
     CNCONBbits.ON = 1;              // enable change notification
     CNCONBbits.CNSTYLE = 1;         // detect changes not mismatches on all PORTB pins
-    CNEN0Bbits.CNEN0B15 = 1;        // with CNEN1B15, configure to detect positive only transitions
-    CNEN1Bbits.CNEN1B15 = 0;        // with CNEN0B15, configure to detect positive only transitions
+    CNEN0Bbits.CNEN0B15 = 0;        // with CNEN1B15, configure to detect negative only transitions
+    CNEN1Bbits.CNEN1B15 = 1;        // with CNEN0B15, configure to detect negative only transitions
     CNFBbits.CNFB15 = 0;            // clear pin-specific change flag
     IEC0bits.CNBIE = 1;             // enable interrupts for PORTB pins
     IFS0bits.CNBIF = 0;             // clear interrupt flag for PORTB
+    
+    // Proximity Sensor for motor 1 on RC12
+    TRISCbits.TRISC12 = 1;          // Set pin as digital input
+    CNCONCbits.ON = 1;              // enable change notification
+    CNCONCbits.CNSTYLE = 1;         // detect changes not mismatches on all PORTC pins
+    CNEN0Cbits.CNEN0C12 = 0;        // with CNEN1C12, configure to detect negative only transitions
+    CNEN1Cbits.CNEN1C12 = 1;        // with CNEN0C12, configure to detect negative only transitions
+    CNFCbits.CNFC12 = 0;            // clear pin-specific change flag
+    IEC1bits.CNCIE = 1;             // enable interrupts for PORTC pins
+    IFS1bits.CNCIF = 0;             // clear interrupt flag for PORTC
+    
+    // Proximity Sensor for motor 2 on RC13
+    TRISCbits.TRISC13 = 1;          // Set pin as digital input
+    CNCONCbits.ON = 1;              // enable change notification
+    CNCONCbits.CNSTYLE = 1;         // detect changes not mismatches on all PORTC pins
+    CNEN0Cbits.CNEN0C13 = 0;        // with CNEN1C13, configure to detect negative only transitions
+    CNEN1Cbits.CNEN1C13 = 1;        // with CNEN0C13, configure to detect negative only transitions
+    CNFCbits.CNFC13 = 0;            // clear pin-specific change flag
+    IEC1bits.CNCIE = 1;             // enable interrupts for PORTC pins
+    IFS1bits.CNCIF = 0;             // clear interrupt flag for PORTC
+    
 }
 
 void configureDerivedQuantities() {

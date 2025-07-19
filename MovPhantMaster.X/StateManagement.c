@@ -51,9 +51,7 @@ void setZeroPosition() {
     posHighByte = POS1HLD;
     g_encoder1ZeroPos = (posHighByte << 16) + posLowByte;  
     
-    // Encoder 2 - more complicated because it is on the secondary core
-    //... read the encoder position
-//    readSecondaryQuadEncoder();
+    // Encoder 2 position is always kept up to date from reading it from the secondary
     g_encoder2ZeroPos = g_secondaryQuadEncPos;
 }
 
