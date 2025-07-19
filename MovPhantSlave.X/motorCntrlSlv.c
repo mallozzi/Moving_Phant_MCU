@@ -43,7 +43,7 @@ void setMotorOutput1(int16_t pwmSignedDutyCycleInt) {
     
     
     INTCON2bits.GIE = 0;                // disable global interrupts
-    LATCbits.LATC11 = dir;              // set direction. Do this directly for maximal speed rather than call function
+    LATCbits.LATC5 = dir;              // set direction. Do this directly for maximal speed rather than call function
     setOnCyclesPWM1(pwmDutyCycleInt);   // sets motor output voltage. PWM1 is motor1, so this actually sets the pwm 2 module
     INTCON2bits.GIE = 1;                // re-enable global interrupt 
     
@@ -81,10 +81,9 @@ void setMotorOutput2(int16_t pwmSignedDutyCycleInt) {
         pwmDutyCycleInt = gs_maxPWMInteger;
     }
     
-    
     INTCON2bits.GIE = 0;                // disable global interrupts
-    LATCbits.LATC5 = dir;               // set direction. Do this directly for maximal speed rather than call function
-    setOnCyclesPWM1(pwmDutyCycleInt);   // sets motor output voltage. Remember PWM1 is motor 1, which is pwm 2 module
+    LATCbits.LATC11 = dir;               // set direction. Do this directly for maximal speed rather than call function
+    setOnCyclesPWM2(pwmDutyCycleInt);   // sets motor output voltage. Remember PWM1 is motor 1, which is pwm 2 module
     INTCON2bits.GIE = 1;                //re-enable global interrupt 
     
 }

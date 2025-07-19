@@ -39,6 +39,8 @@ enum LOGICAL {FALSE,TRUE};
 
 extern bool g_output1Enabled;               // true when motion output is enabled, false otherwise.
 extern bool g_output2Enabled;               // true when motion output is enabled, false otherwise.
+extern bool g_userMotor1Enable;             // true when the user requests motor 1 to be enabled on the UI
+extern bool g_userMotor2Enable;             // true when the user requests motor 2 to be enabled on the UI
 
 // PWM parameters
 extern int16_t g_pwm1Cycles;                // Signed duty cycle parameter for PWM1.

@@ -25,6 +25,8 @@ extern "C" {
 
 extern bool gs_output1Enabled;                      // true when motion output is enabled, false otherwise.
 extern bool gs_output2Enabled;                      // true when motion output is enabled, false otherwise.
+extern bool gs_userMotor1Enable;                    // true when the user requests motor 1 to be enabled on the UI
+extern bool gs_userMotor2Enable;                    // true when the user requests motor 2 to be enabled on the UI
 
 // PWM parameters
 extern int16_t gs_pwm1Cycles;                       // Signed duty cycle parameter for PWM1.

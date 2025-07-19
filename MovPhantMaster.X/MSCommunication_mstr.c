@@ -152,6 +152,13 @@ void sendParamtersToSecondary() {
     
     sendVariableToSecondary(ENCODER_STEPS_PER_MM, g_encoderStepsPerMM);
     __delay32(g_OscillatorFreq / 40000);
+    
+    sendBoolVarToSecondary(USER_MOT1_ENABLED, g_userMotor1Enable);
+    __delay32(g_OscillatorFreq / 40000);
+    
+    sendBoolVarToSecondary(USER_MOT2_ENABLED, g_userMotor2Enable);
+    __delay32(g_OscillatorFreq / 40000);
+    
 }
 
 void receiveVariableFromSecondary() {
@@ -211,7 +218,6 @@ void receive32bVariableFromSecondary() {
             g_waveformTimeStep_microS = var32;
             break;
         case QUAD_ENC_POS:
- //           setLED1(1);
             g_secondaryQuadEncPos = var32;
             break;
     }
@@ -231,9 +237,9 @@ void receiveBoolVarFromSecondary() {
     fifoVal = (bool)MRSWFDATA;              // value in the variable data.
     
     switch(whichVar) {
-        case OUTPUT1_ENABLED:                // Dummy test - may not need anything yet
+        case OUTPUT1_ENABLED:                
             g_output1Enabled = fifoVal;
-        case OUTPUT2_ENABLED:                // Dummy test - may not need anything yet
+        case OUTPUT2_ENABLED:                
             g_output2Enabled = fifoVal;
         default:
             break;

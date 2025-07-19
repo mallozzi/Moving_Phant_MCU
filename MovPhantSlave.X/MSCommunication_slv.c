@@ -140,6 +140,12 @@ void receiveBoolVarFromPrimary() {
         case OUTPUT2_ENABLED:
             gs_output2Enabled = fifoVal;
             break;
+        case USER_MOT1_ENABLED:
+            gs_userMotor1Enable = fifoVal;
+            break;
+        case USER_MOT2_ENABLED:
+            gs_userMotor2Enable = fifoVal;
+            break;
         default:
             break;
     }

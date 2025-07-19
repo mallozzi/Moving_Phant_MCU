@@ -41,19 +41,20 @@ int main(void) {
     while (OSCCONbits.LOCK!= 1);
     
     uint32_t blinkCounter=0;
-    uint32_t blinkCounterMax = 500000;  // defines blinking interval
+    uint32_t blinkCounterMax = 1000000;  // defines blinking interval
     configureSecondaryPPS();
     configSlaveInitial();
- //   LATBbits.LATB1 = 1;
     configurePWM1();
     configurePWM2();
     configureQuadEncoder();
- //   configurePWM3();
     startPWM1();
-//    LATBbits.LATB1 = 1;
+    startPWM2();
+    
+    // Test
+//    PG1DC = 100;
+
     // main loop continually monitors the master-slave FIFO and reacts accordingly
     Register fifoReg;
-//    LATBbits.LATB1 = 1;
     while(1) {
         
         // Monitor the FIFO for incoming commands and variables from the primary core
@@ -82,8 +83,8 @@ int main(void) {
         
         // blink LED2
         if(blinkCounter > blinkCounterMax) {
-            LATBbits.LATB1 = ~PORTBbits.RB1;
             blinkCounter = 0;
+            LATBbits.LATB1 = ~PORTBbits.RB1;
         }
         else{
             blinkCounter++;
@@ -224,7 +225,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
     
     interruptCount++;   
     // Once a full cycle of motor and waveform updates has been completed, reset the interrupt counter
-    if(interruptCount >= motorUpdateFullInterval) {
+    if(interruptCount > motorUpdateFullInterval) {
         interruptCount = 0;
     }
     // Clear the PWM1 interrupt flag

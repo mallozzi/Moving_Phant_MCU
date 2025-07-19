@@ -26,6 +26,8 @@ uint16_t g_errorFlags;
 
 bool g_output1Enabled = false;          // true when motion output is enabled, false otherwise.
 bool g_output2Enabled = false;          // true when motion output is enabled, false otherwise.
+bool g_userMotor1Enable = false;        // true when the user requests motor 1 to be enabled on the UI
+bool g_userMotor2Enable = false;        // true when the user requests motor 2 to be enabled on the UI
 
 // User configuration parameters
 uint16_t g_maxDisplacementMM;           // Defines the displacement that corresponds to full scale voltage output

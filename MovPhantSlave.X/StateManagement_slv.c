@@ -19,10 +19,10 @@ void startMotion() {
     gs_displacement1Demand=0;
     gs_displacement2Demand=0;
     while(SI1FIFOCSbits.SWFFULL);  // wait until write FIFO is not full
-    sendBoolVarToPrimary(OUTPUT1_ENABLED, true);
-    sendBoolVarToPrimary(OUTPUT2_ENABLED, true);
-    gs_output1Enabled=true;
-    gs_output2Enabled=true;
+    gs_output1Enabled = gs_userMotor1Enable;
+    gs_output2Enabled = gs_userMotor2Enable;
+    sendBoolVarToPrimary(OUTPUT1_ENABLED, gs_output1Enabled);
+    sendBoolVarToPrimary(OUTPUT2_ENABLED, gs_output2Enabled);
 }
 
 void stopMotion() {

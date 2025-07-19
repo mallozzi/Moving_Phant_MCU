@@ -55,6 +55,8 @@ typedef enum {
 typedef enum {
     OUTPUT1_ENABLED,
     OUTPUT2_ENABLED,
+    USER_MOT1_ENABLED,
+    USER_MOT2_ENABLED,
     PLAY_SINGLE_WAVEFORM
 } BoolVariable;
 

@@ -12,6 +12,8 @@ uint16_t gs_maxPWMInteger;                  // maximum PWM integer allowed
 
 bool gs_output1Enabled;                     // true when motion output is enabled, false otherwise.
 bool gs_output2Enabled;                     // true when motion output is enabled, false otherwise.
+bool gs_userMotor1Enable;                   // true when the user requests motor 1 to be enabled on the UI
+bool gs_userMotor2Enable;                   // true when the user requests motor 2 to be enabled on the UI
 
 // Waveform parameters
 volatile bool gs_resetWaveform = false;     // causes waveform array index to be reset to zero.

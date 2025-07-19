@@ -89,12 +89,14 @@ int main(void) {
     configurePPS();       // must be done very early - review carefully if doing any config prior to this.
     configureInitial();
     configureInterruptOnChange();
+    configurePWM1();
     configurePWM2();
     configurePWM3();
     configureTimer1();
     configureAnalogToDigital();
     configureI2C();
     configureQuadEncoder();
+    
 
     // Set PCB LED state if desired
   //  LATDbits.LATD10 = 0;   // Set initial LED 1 state
@@ -119,9 +121,9 @@ int main(void) {
     // Make RB11 digital input for pushbutton
  //   TRISBbits.TRISB11 = 1;
     uint32_t blinkCounter=0;                // counter for LED blink
-    uint32_t blinkCounterMax = 100000;       // determines blink rate
+    uint32_t blinkCounterMax = 500000;       // determines blink rate
     uint32_t readCounter = 0;               // counter for secondary quad encoder read
-    uint32_t readCounterMax = 1000;          // determines interval to read secondary quad encoder
+    uint32_t readCounterMax = 10;          // determines interval to read secondary quad encoder
 
     while(1) {
         // IMPORTANT NOTE ABOUT DELAYS IN THIS LOOP:
@@ -137,9 +139,7 @@ int main(void) {
         
         // Blink LED 1
         if(blinkCounter == blinkCounterMax) {
- //           setLED1(1);
             LATDbits.LATD10 = ~PORTDbits.RD10;
- //           LATDbits.LATD10 = ~PORTDbits.RD10;
             blinkCounter = 0;
         }
         else {
@@ -184,7 +184,7 @@ int main(void) {
             configureDerivedQuantities();
             setZeroPosition();
             g_displacement1Demand = 0;   
-            g_displacement2Demand = 0;      
+            g_displacement2Demand = 0; 
             sendParamtersToSecondary();
             while(!MSI1FIFOCSbits.WFEMPTY);         // wait for secondary to finish reading the FIFO. 
             enableDriver(true);
@@ -333,11 +333,6 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         }
         lastPositionEnc2 = g_secondaryQuadEncPos;
         
-        // temp test
-        if(g_secondaryQuadEncVel > 0) {
-  //          setLED1(1);
-        }
-        // end temp test
         
         // Set velocity PWM for analog output. Uncomment the line below to output motor 2 velocity, and comment out the corresponding
         // ... line in the motor 1 code above.
@@ -400,6 +395,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
 
         // This is done even if output disabled because g_displacement2Demand will set the future output. The pwm1 cycles are
         // decayed down in the else code above if the output gets turned off.
+            
         sendVariableToSecondary(PWM2_CYCLES, (uint16_t)g_pwm2Cycles);  // send to secondary core
         counter = 0;
     }

@@ -16,7 +16,6 @@ void configurePWM1() {
     PG1IOCONH = 0x0008; //PWM module controls high output pin only
     
     PG1EVTLbits.UPDTRG = 1; // write to PG1DC automatically triggers update request
- //   PG1EVTL = PG1EVTL | 8;
     
     
     //set period 
@@ -34,7 +33,7 @@ void configurePWM1() {
     IEC4bits.PWM1IE = 0; //Do not enable PWM2 interrupt
     
     //Make sure PWM1 is disabled. It will get enabled by the startPWM1() function.
-    PG1CONLbits.ON = 0; //PWM1 generator is not enabled by this configuration function
+    PG1CONLbits.ON = 1; //PWM1 generator is not enabled by this configuration function
 }
 
 void configurePWM2() {

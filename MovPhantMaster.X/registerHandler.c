@@ -159,10 +159,10 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         g_pwm2ZeroOffset = dataVal;
     }
     else if(regNum == REG_MOT1_ENABLED) {
-        g_output1Enabled = (bool)dataVal;
+        g_userMotor1Enable = (bool)dataVal;
     }
     else if(regNum == REG_MOT2_ENABLED) {
-        g_output2Enabled = (bool)dataVal;
+        g_userMotor2Enable = (bool)dataVal;
     }
     
     
@@ -250,10 +250,10 @@ uint16_t getRegisterValue(uint8_t regNum) {
         val = g_pwm2ZeroOffset;
     }
     else if(regNum == REG_MOT1_ENABLED) {
-        val = g_output1Enabled;
+        val = g_userMotor1Enable;
     }
     else if(regNum == REG_MOT2_ENABLED) {
-        val = g_output2Enabled;
+        val = g_userMotor1Enable;
     }
     
     return val;
