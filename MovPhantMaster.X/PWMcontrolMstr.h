@@ -22,6 +22,7 @@ extern "C" {
 #include <stdint.h>
 
 // void configurePWM1();
+void configurePWM1();
 void configurePWM2();
 void configurePWM3();
 void setOnCyclesPWM1(uint16_t nCyclesOn);

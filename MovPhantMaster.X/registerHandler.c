@@ -44,10 +44,12 @@
 #define START_MOTION  1        // begin pulsing electric field
 #define STOP_MOTION 2          // stop pulsing electric field
 //#define SET_ZERO_POSITION 3    // sets the current encoder position as zero
-#define STEP_FORWARD 4         // step forward once
-#define STEP_BACKWARD 5        // step backward once
+#define STEP_HEAD 4         // step forward once
+#define STEP_FOOT 5        // step backward once
 #define SET_LANDMARK 6         // set landmark
 #define GOTO_LANDMARK 7        // goto landmark position
+#define STEP_LEFT 8            // step left once
+#define STEP_RIGHT 9           // step right once
 
 // Fault States
 #define FS_NOFAULT 0
@@ -64,18 +66,42 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         else if(dataVal == STOP_MOTION) {
             stopMotion();              // in StateManagement.c
         }
-        else if(dataVal == STEP_FORWARD) {
+        else if(dataVal == STEP_HEAD) {
             g_waveformType = 1;
             g_motionAmplitudeMM1 = 5;
             g_motionAmplitudeMM2 = 5;
+            g_userMotor1Enable = true;
+            g_userMotor2Enable = false;
             g_reverseDirection1 = 0;
             g_freqUser = 80;
             startMotion();
         }
-        else if(dataVal == STEP_BACKWARD) {
+        else if(dataVal == STEP_FOOT) {
             g_waveformType = 1;
             g_motionAmplitudeMM1 = 5;
             g_motionAmplitudeMM2 = 5;
+            g_userMotor1Enable = true;
+            g_userMotor2Enable = false;
+            g_reverseDirection1 = 1;
+            g_freqUser = 80;
+            startMotion();
+        }
+        else if(dataVal == STEP_RIGHT) {
+            g_waveformType = 1;
+            g_motionAmplitudeMM1 = 5;
+            g_motionAmplitudeMM2 = 5;
+            g_userMotor1Enable = false;
+            g_userMotor2Enable = true;
+            g_reverseDirection1 = 0;
+            g_freqUser = 80;
+            startMotion();
+        }
+        else if(dataVal == STEP_LEFT) {
+            g_waveformType = 1;
+            g_motionAmplitudeMM1 = 5;
+            g_motionAmplitudeMM2 = 5;
+            g_userMotor1Enable = false;
+            g_userMotor2Enable = true;
             g_reverseDirection1 = 1;
             g_freqUser = 80;
             startMotion();
@@ -86,11 +112,12 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         else if(dataVal == GOTO_LANDMARK) {
             g_gotoLandmark = true;
         }
+
     }
     // The else if statements are for passing data to a function
     else if(regNum == REG_MAX_MOTION_AMP_1) { // amplitude in mm of motor 1
+        setLED1(1);
         g_maxDisplacementMM = dataVal;  
-//        configureDerivedQuantities();
     }
     else if(regNum == REG_STEPS_PER_MM_1) {
         g_encoderStepsPerMM = dataVal;
@@ -100,6 +127,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         g_waveformType = dataVal;
     }
     else if(regNum == REG_MOTION_AMPLITUDE_1) {
+        setLED1(1);
         g_motionAmplitudeMM1 = dataVal;
     }
     else if(regNum == REG_MOTION_AMPLITUDE_2) {
@@ -107,7 +135,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
     }
     else if(regNum == REG_FREQ) {
         g_freqUser = dataVal;
-        configureDerivedQuantities();
+ //       configureDerivedQuantities();
     }
     else if(regNum == REG_REVERSE1) {
         g_reverseDirection1 = dataVal;
@@ -167,8 +195,8 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         g_userMotor2Enable = (bool)dataVal;
     }
     
-    
-    lastValueWritten = dataVal;
+
+    lastValueWritten = dataVal;     // scope is within whole file
     
 }
 

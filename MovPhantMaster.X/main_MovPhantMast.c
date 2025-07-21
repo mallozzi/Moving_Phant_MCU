@@ -116,7 +116,6 @@ int main(void) {
     
  //   __delay32(g_OscillatorFreq*2);
     
-    
     //uint16_t val=0;
     // Make RB11 digital input for pushbutton
  //   TRISBbits.TRISB11 = 1;
@@ -139,7 +138,7 @@ int main(void) {
         
         // Blink LED 1
         if(blinkCounter == blinkCounterMax) {
-            LATDbits.LATD10 = ~PORTDbits.RD10;
+            //LATDbits.LATD10 = ~PORTDbits.RD10;
             blinkCounter = 0;
         }
         else {
@@ -495,7 +494,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _CNBInterrupt(void) {
     // Interrupt Service Routine for Change Notice on PORTB pins
     
     if(CNFBbits.CNFB15) {                       // RB15
-        LATDbits.LATD10 = ~PORTDbits.RD10;      // Toggle LED
+ //       LATDbits.LATD10 = ~PORTDbits.RD10;      // Toggle LED
     }
     CNFBbits.CNFB15 = 0;
     
