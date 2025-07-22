@@ -116,18 +116,15 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
     }
     // The else if statements are for passing data to a function
     else if(regNum == REG_MAX_MOTION_AMP_1) { // amplitude in mm of motor 1
-        setLED1(1);
         g_maxDisplacementMM = dataVal;  
     }
     else if(regNum == REG_STEPS_PER_MM_1) {
         g_encoderStepsPerMM = dataVal;
-//        configureDerivedQuantities();
     }
     else if(regNum == REG_WAVEFORM_TYPE) {
         g_waveformType = dataVal;
     }
     else if(regNum == REG_MOTION_AMPLITUDE_1) {
-        setLED1(1);
         g_motionAmplitudeMM1 = dataVal;
     }
     else if(regNum == REG_MOTION_AMPLITUDE_2) {
@@ -135,7 +132,6 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
     }
     else if(regNum == REG_FREQ) {
         g_freqUser = dataVal;
- //       configureDerivedQuantities();
     }
     else if(regNum == REG_REVERSE1) {
         g_reverseDirection1 = dataVal;

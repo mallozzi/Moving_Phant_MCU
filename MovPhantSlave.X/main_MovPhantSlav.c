@@ -84,7 +84,7 @@ int main(void) {
         // blink LED2
         if(blinkCounter > blinkCounterMax) {
             blinkCounter = 0;
-   //         LATBbits.LATB1 = ~PORTBbits.RB1;
+            LATBbits.LATB1 = ~PORTBbits.RB1;
         }
         else{
             blinkCounter++;

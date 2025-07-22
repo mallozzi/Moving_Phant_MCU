@@ -121,6 +121,10 @@ void gotoLandmark() {
     g_waveformType = 1;  // Ramp
     g_freqUser = 30;     // do it in 2 seconds (30 cycles / min)
     
+    //enable both motors
+    g_userMotor1Enable = true;
+    g_userMotor2Enable = true;
+    
     g_gotoLandmark = false;    // so this function is not executed again
     g_startMotor = true;
     

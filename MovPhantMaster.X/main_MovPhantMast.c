@@ -21,11 +21,13 @@
 
 #pragma config FCKSM = CSECMD               // Clock Switching Mode bits
 
-// FWDT
-#pragma config FWDTEN = ON_SW               // Watchdog Timer Enable bit (WDT controlled via SW, use WDTCON.ON bit)
-
 // FICD
 #pragma config ICS = PGD2                   // Selects PGC2 and PGD2 for serial programming pins
+
+// Watchdog timer configuration
+#pragma config FWDTEN = ON_SW               // Watchdog Timer Enable bit (WDT controlled via SW, use WDTCON.ON bit)
+//#pragma config RCLKSEL = LPRC               // Use LPRC as watchdog timer clock, nominal period of 1 millisecond
+#pragma config RWDTPS = 12                  // post scaler. Setting of 13 sets it to 2^13 = 8192 cycles of the watchdog timer clock
 
 // ---------------  Slave Configuration bits -------------------
 // FOSCSEL
@@ -83,7 +85,10 @@ int main(void) {
     __builtin_write_OSCCONL(OSCCON | 0x01); //initiates the switch
     
        
-    while (OSCCONbits.OSWEN != 0); // Wait for Clock switch to occur
+    while (OSCCONbits.OSWEN != 0);      // Wait for Clock switch to occur
+    
+    WDTCONLbits.WDTWINEN = 0;           // set non-window mode for watchdog timer
+    WDTCONLbits.ON = 1;                 // Turn on watchdog timer
     
  // Initial Configuration
     configurePPS();       // must be done very early - review carefully if doing any config prior to this.
@@ -96,10 +101,6 @@ int main(void) {
     configureAnalogToDigital();
     configureI2C();
     configureQuadEncoder();
-    
-
-    // Set PCB LED state if desired
-  //  LATDbits.LATD10 = 0;   // Set initial LED 1 state
 
 
     INTCON2bits.GIE  = 1;    //global interrupt enable
@@ -123,6 +124,10 @@ int main(void) {
     uint32_t blinkCounterMax = 500000;       // determines blink rate
     uint32_t readCounter = 0;               // counter for secondary quad encoder read
     uint32_t readCounterMax = 10;          // determines interval to read secondary quad encoder
+    
+    // Watchdog timer
+    volatile unsigned *wdtKey; 
+    wdtKey = (&WDTCONH);
 
     while(1) {
         // IMPORTANT NOTE ABOUT DELAYS IN THIS LOOP:
@@ -135,10 +140,12 @@ int main(void) {
         // and both cores would just wait for one another.
   //      __delay32(g_OscillatorFreq/2);
         
+        // clear watchdog timer
+        *wdtKey = 0x5743;  // clear WDT by performing a 16-bit write to WDTCON
         
         // Blink LED 1
         if(blinkCounter == blinkCounterMax) {
-            //LATDbits.LATD10 = ~PORTDbits.RD10;
+            LATDbits.LATD10 = ~PORTDbits.RD10;
             blinkCounter = 0;
         }
         else {
