@@ -188,6 +188,7 @@ int main(void) {
          // and start the motion
          if(g_startMotor) {
             configureDerivedQuantities();
+            g_statusFlags = 0;
             setZeroPosition();
             g_displacement1Demand = 0;   
             g_displacement2Demand = 0; 
@@ -498,10 +499,10 @@ void __attribute__((__interrupt__,no_auto_psv)) _SI2C1Interrupt(void) {
 
 
 void __attribute__((__interrupt__,no_auto_psv)) _CNBInterrupt(void) {
-    // Interrupt Service Routine for Change Notice on PORTB pins
+    // Interrupt Service Routine for Change Notice on PORTB pins. Detects one of 
     
     if(CNFBbits.CNFB15) {                       // RB15
- //       LATDbits.LATD10 = ~PORTDbits.RD10;      // Toggle LED
+        stopMotion();
     }
     CNFBbits.CNFB15 = 0;
     
@@ -509,17 +510,19 @@ void __attribute__((__interrupt__,no_auto_psv)) _CNBInterrupt(void) {
 }
 
 void __attribute__((__interrupt__,no_auto_psv)) _CNCInterrupt(void) {
-    // Interrupt Service Routine for Change Notice on PORTB pins
+    // Interrupt Service Routine for Change Notice on Proximity Sensor pins
     
     // motor 1 proximity sensor on RC12
     if(CNFCbits.CNFC12) {                       
         stopMotion();                           // Stop both motors
+        g_statusFlags = g_statusFlags | 1;      // set the error flag for out of range error
     }
     CNFCbits.CNFC12 = 0;
     
-    // motor 1 proximity sensor on RC12
+    // motor 2 proximity sensor on RC13
     if(CNFCbits.CNFC13) {                       
         stopMotion();                           // Stop both motors
+        g_statusFlags = g_statusFlags | 1;      // set the error flag for out of range error
     }
     CNFCbits.CNFC13 = 0;
     

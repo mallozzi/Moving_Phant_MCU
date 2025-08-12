@@ -4,7 +4,8 @@
 #include "globals.h"
 #include <stdio.h>
 
-uint16_t g_firmwareRev = 13;             // Revision number of firmware
+uint16_t g_firmwareRev = 13;            // Revision number of firmware
+uint16_t g_statusFlags = 0;             // flags containing status information
 
 // *** VARIABLES THAT MUST BE THE SAME IN MASTER AND SLAVE ***
 uint16_t g_maxPWMInteger;        // maximum PWM integer allowed

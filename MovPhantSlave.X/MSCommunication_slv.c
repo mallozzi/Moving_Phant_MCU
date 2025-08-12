@@ -12,7 +12,7 @@
 void processCommandFromPrimary() {
     Command fifoCmd;
     static uint32_t var32;
-    static int16_t var16;
+//    static int16_t var16;
     
     while(SI1FIFOCSbits.SRFEMPTY);          // wait for next FIFO data to come through
     fifoCmd = SRMWFDATA;

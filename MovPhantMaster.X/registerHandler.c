@@ -35,21 +35,23 @@
 #define REG_REVERSE2 32                     // register to reverse motion direction motor 2
 #define REG_MOT1_ENABLED 33                 // register to enable motor 1
 #define REG_MOT2_ENABLED 34                 // register to enable motor 2
+#define REG_STATUS_FLAGS 35                 // get the status flags byte
 
 
 // Value definitions
 
 
 // Register commands. These are what gets passed into the dataVal field of setRegisterValue and determine which command is executed
-#define START_MOTION  1        // begin pulsing electric field
-#define STOP_MOTION 2          // stop pulsing electric field
-//#define SET_ZERO_POSITION 3    // sets the current encoder position as zero
-#define STEP_HEAD 4         // step forward once
-#define STEP_FOOT 5        // step backward once
-#define SET_LANDMARK 6         // set landmark
-#define GOTO_LANDMARK 7        // goto landmark position
-#define STEP_LEFT 8            // step left once
-#define STEP_RIGHT 9           // step right once
+#define START_MOTION  1                     // begin pulsing electric field
+#define STOP_MOTION 2                       // stop pulsing electric field
+//#define SET_ZERO_POSITION 3               // sets the current encoder position as zero
+#define STEP_HEAD 4                         // step forward once
+#define STEP_FOOT 5                         // step backward once
+#define SET_LANDMARK 6                      // set landmark
+#define GOTO_LANDMARK 7                     // goto landmark position
+#define STEP_LEFT 8                         // step left once
+#define STEP_RIGHT 9                        // step right once
+
 
 // Fault States
 #define FS_NOFAULT 0
@@ -190,6 +192,9 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
     else if(regNum == REG_MOT2_ENABLED) {
         g_userMotor2Enable = (bool)dataVal;
     }
+    else if(regNum == REG_STATUS_FLAGS) {
+        g_statusFlags = dataVal;
+    }
     
 
     lastValueWritten = dataVal;     // scope is within whole file
@@ -280,6 +285,9 @@ uint16_t getRegisterValue(uint8_t regNum) {
     }
     else if(regNum == REG_MOT2_ENABLED) {
         val = g_userMotor2Enable;
+    }
+    else if(regNum == REG_STATUS_FLAGS) {
+        val = g_statusFlags;
     }
     
     return val;
