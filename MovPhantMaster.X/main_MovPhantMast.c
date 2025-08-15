@@ -513,16 +513,22 @@ void __attribute__((__interrupt__,no_auto_psv)) _CNCInterrupt(void) {
     // Interrupt Service Routine for Change Notice on Proximity Sensor pins
     
     // motor 1 proximity sensor on RC12
-    if(CNFCbits.CNFC12) {                       
-        stopMotion();                           // Stop both motors
-        g_statusFlags = g_statusFlags | 1;      // set the error flag for out of range error
+    if(CNFCbits.CNFC12) {   
+        __delay32(g_OscillatorFreq*2/1000000);      // TEMP: delay a bit to make sure it wasn't a glitch. TO DO: remove after hardware fix
+        if(!PORTCbits.RC12) {                       // if it has stayed low
+            stopMotion();                           // Stop both motors
+            g_statusFlags = g_statusFlags | 1;      // set the error flag for out of range error
+        }
     }
     CNFCbits.CNFC12 = 0;
     
     // motor 2 proximity sensor on RC13
-    if(CNFCbits.CNFC13) {                       
-        stopMotion();                           // Stop both motors
-        g_statusFlags = g_statusFlags | 1;      // set the error flag for out of range error
+    if(CNFCbits.CNFC13) {
+        __delay32(g_OscillatorFreq*2/1000000);      // TEMP: delay a bit to make sure it wasn't a glitch. TO DO: remove after hardware fix
+        if(!PORTCbits.RC13) {                        // If it has stayed low
+            stopMotion();                           // Stop both motors
+            g_statusFlags = g_statusFlags | 1;      // set the error flag for out of range error
+        }
     }
     CNFCbits.CNFC13 = 0;
     

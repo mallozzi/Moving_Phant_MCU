@@ -69,13 +69,13 @@ void setMotorOutput2(int16_t pwmSignedDutyCycleInt) {
     // Convert negative values to a direction and create a positive duty cycle integer
     if(newPwmVal >= 0) {
         // TEMP: Reverse direction for miswiring. TODO: remove this when done
-       // dir=1;              // which direction is positive vs negative depends upon how things are hooked up.
-        dir=0;              // which direction is positive vs negative depends upon how things are hooked up.
+        dir=1;              // which direction is positive vs negative depends upon how things are hooked up.
+    //    dir=0;              // which direction is positive vs negative depends upon how things are hooked up.
         pwmDutyCycleInt = (uint16_t)newPwmVal;
     }
     else {
-        //dir=0;                // This is the correct one
-        dir=1;                  // temporary workaround for miswiring of encoder on motor 2 (green)
+        dir=0;                // This is the correct one
+    //    dir=1;                  // temporary workaround for miswiring of encoder on motor 2 (green)
         pwmDutyCycleInt = (uint16_t)(-newPwmVal);
     }
     
