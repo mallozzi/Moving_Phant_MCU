@@ -49,9 +49,7 @@ int main(void) {
     configureQuadEncoder();
     startPWM1();
     startPWM2();
-    
-    // Test
-//    PG1DC = 100;
+
 
     // main loop continually monitors the master-slave FIFO and reacts accordingly
     Register fifoReg;
@@ -69,7 +67,6 @@ int main(void) {
             }
             else if (fifoReg == REG_VARIABLE_32) {
                 receive32bVariableFromPrimary();
-                //send32bVariableToPrimary(WAVEFORM_TIMESTEP_MICROS, gs_waveformTimeStep_microS);
             }
             else if (fifoReg == REG_BOOLVAR) {
                 receiveBoolVarFromPrimary();
@@ -137,7 +134,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
 
         // increment the waveform index in the waveform array every 10 milliseconds. For a pwm period of 50 microseconds, this means 
         // we need to update every waveformUpdatePeriod=200 interrupts
-        waveform1Count++;
+        waveform1Count++;                                       // this is really counting interrupts
         if(waveform1Count >= gs_waveformUpdatePeriod) {         // time to update what is requested (next element in waveform array)           
             // TO DO NOTE: I BELIEVE THIS IS NO LONGER NECESSARY SINCE WE RESET THE WAVEFORM INDEX (wf1_ind) UPON TERMINATION OF THE LOOP. DOUBLE CHECK AND DELETE
             if(gs_resetWaveform) {                              // if motor has been off, reset the waveform index for the initial run 
@@ -149,7 +146,6 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
                 if(gs_playSingleWaveformOnly) {                 // if playing a single waveform only, set things up to stop
                     sendBoolVarToPrimary(OUTPUT1_ENABLED, false);
                     gs_output1Enabled = false;
-                    //gs_playSingleWaveformOnly = false;          // reset for future waveforms. 
                 }
             }
             gs_displacement1Demand = gs_outputWaveform1[wf1_ind]; // Update demand from waveform array
@@ -190,7 +186,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
 
         // increment the waveform index in the waveform array every 10 milliseconds. For a pwm period of 50 microseconds, this means 
         // we need to update every waveformUpdatePeriod=200 interrupts
-        waveform2Count++;
+        waveform2Count++;                                       // this is really counting interrupts
         if(waveform2Count >= gs_waveformUpdatePeriod) {         // time to update what is requested (next element in waveform array)           
             // NOTE: I BELIEVE THIS IS NO LONGER NECESSARY SINCE WE RESET THE WAVEFORM INDEX (wf1_ind) UPON TERMINATION OF THE LOOP. DOUBLE CHECK AND DELETE
             if(gs_resetWaveform) {                              // if motor has been off, reset the waveform index for the initial run 

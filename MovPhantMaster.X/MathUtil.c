@@ -19,3 +19,4 @@ int16_t MultiplyByFraction(int16_t input, int16_t numerator, int16_t denominator
     int16_t result = __builtin_divsd(prod1, denominator);
     return result;
 }
+

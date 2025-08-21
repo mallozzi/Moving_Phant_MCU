@@ -145,7 +145,7 @@ int main(void) {
         
         // Blink LED 1
         if(blinkCounter == blinkCounterMax) {
-            LATDbits.LATD10 = ~PORTDbits.RD10;
+ //           LATDbits.LATD10 = ~PORTDbits.RD10;
             blinkCounter = 0;
         }
         else {
@@ -252,6 +252,17 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
     // other feedback error variables
     static int32_t integralErrorLimit = 30000;      // value at which integral error signal is clipped
     
+    // slow-start parameters
+    static bool lastEnabledState = false;           // stores state of g_outputEnabled last time this function was entered
+    static int32_t ramped1Demand;                   // actual demand value that will be used to drive motor
+    static uint16_t rampNumerator=0;                // numerator of slow ramp up factor
+    static uint16_t rampDenomCalculated;              // for speed purposes, this is the calculated ramp numerator
+    static uint16_t denomBitShifts=4;               // denominator of ramp up factor, expressed as a number of bit shifts
+    static bool fullyRamped = false;                // true if we have finished ramping up the slow start.
+    
+    rampDenomCalculated = 1 << denomBitShifts;
+    
+    
     if(counter == 0) { // motor 1 feedback loop update
          
         // Read velocity register. When direction is positive, velocity counter counts backward.
@@ -292,7 +303,21 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
 
         // ---------------  POSITION FEEDBACK CONTROL ------------------
         if(g_output1Enabled) {
+            
+            if(fullyRamped) {
+                ramped1Demand = g_displacement1Demand;
+            }
+            else {
+                rampNumerator++;
+                ramped1Demand = g_displacement1Demand * ramped1Demand;  // this is a fast calculation
+                ramped1Demand = ramped1Demand >> denomBitShifts;
+                if(rampNumerator == rampDenomCalculated) {
+                    fullyRamped = true;
+                }
+            }
+            
             displacement1Error = displacement1 - g_displacement1Demand;
+   //         displacement1Error = displacement1 - ramped1Demand;
             integralDisplacement1Error+= displacement1Error;
             // clip integral error
             if(integralDisplacement1Error > integralErrorLimit) {
@@ -318,6 +343,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
             integralDisplacement1Error = 0;
             g_pwm1Cycles = (int16_t)( (int32_t)g_pwm1Cycles*93/100 );   
             g_displacement1Demand = 0;   // This probably doesn't matter anymore and should probably just be set in the secondary and removed from here.
+        
         }
 
         // This is done even if output disabled because g_displacement1Demand will set the future output. The pwm1 cycles are
@@ -400,6 +426,11 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
             integralDisplacement2Error = 0;
             g_pwm2Cycles = (int16_t)( (int32_t)g_pwm2Cycles*93/100 );   
             g_displacement2Demand = 0;   // This probably doesn't matter anymore and should probably just be set in the secondary and removed from here.
+            
+            if(!g_output1Enabled) {     // if both motors are disabled.
+                rampNumerator = 0;
+                fullyRamped = false;
+            }
         }
 
         // This is done even if output disabled because g_displacement2Demand will set the future output. The pwm1 cycles are

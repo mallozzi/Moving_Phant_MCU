@@ -68,8 +68,12 @@ void configureInitial() {
                                         // Note this gets overwritten in configureDerivedQuantities()
     
     // Timer1 interrupt period sets the update rate of the feedback loop
-    //With instruction cycle at 64 MIPS and prescaler set to 256:1, 2500 is every 10 milliseconds.
-    g_feedbackHalfUpdatePeriod = 2500;
+    // With instruction cycle at 64 MIPS and prescaler set to 256:1, 2500 is every 10 milliseconds. 500 is every 2 ms.
+    // Caution should be used in changing this, as the feedback loop uses velocity as simply the number of counts between
+    // reads. This should probably be corrected, though it may involve some division operations that have to be implemented carefully
+    // to avoid slowing down the calculation too much.
+  //  g_feedbackHalfUpdatePeriod = 2500;
+    g_feedbackHalfUpdatePeriod = 500;
     
     // Waveform parameters
     g_waveformType = 0;                 // 0-sine wave; 1-Pulse
@@ -245,6 +249,7 @@ void configureDerivedQuantities() {
     uint16_t thresh3 = 10;   //period of 6 sec
     uint16_t thresh4 = 5;   // period of 12 sec
     
+    // g_freqUser is the user-requested frequency in cycles per minute
     if(g_freqUser > thresh1) {
         g_waveformUpdatePeriod = 100;  // targets 5 ms update period assuming PWM1 max integer of 12799
     }
