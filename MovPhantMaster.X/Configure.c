@@ -68,7 +68,8 @@ void configureInitial() {
                                         // Note this gets overwritten in configureDerivedQuantities()
     
     // Timer1 interrupt period sets the update rate of the feedback loop
-    // With instruction cycle at 64 MIPS and prescaler set to 256:1, 2500 is every 10 milliseconds. 500 is every 2 ms.
+    // With instruction cycle at 64 MIPS and prescaler set to 256:1, 2500 is every 10 milliseconds for a half update period.
+    // 500 is every 2 ms.
     // Caution should be used in changing this, as the feedback loop uses velocity as simply the number of counts between
     // reads. This should probably be corrected, though it may involve some division operations that have to be implemented carefully
     // to avoid slowing down the calculation too much.

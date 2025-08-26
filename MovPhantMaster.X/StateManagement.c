@@ -67,6 +67,8 @@ void setLandmarkPosition() {
     
 //    readSecondaryQuadEncoder();
     g_landmark2Position = g_secondaryQuadEncPos;
+    
+    setZeroPosition();      // make the current position the reference too.
 }
 
 void gotoLandmark() {

@@ -23,7 +23,7 @@ void configurePWM1() {
     //set period 
     gs_maxPWMInteger = 12799;            // maximum PWM integer allowed
     PG2PER = gs_maxPWMInteger; //PWM period is PG1PER+1 PWM module clock cycles. Value of 12799 is designed to give period of 12800 / 256 MHz = 50 micro-seconds
-    PG2PHASE = 0; //no offset from start of PWM period
+    PG2PHASE = 2000; // offset from start of PWM period
     PG2DC = 0; //width of pulse in clock cycles. Initial value of zero would give no output
     
     //Set up PWM1 interrupts. PWM interrupts come at the end of each PWM period.
@@ -66,14 +66,16 @@ void configurePWM2() {
 
 void setOnCyclesPWM1(uint16_t nCyclesOn) {
     // sets the number of cycles for the on portion of the pulse for Motor 1. If this is set to the same value that is in
-    // the PG1PER register, a 100% duty cycle pulse is produced.
+    // the PG1PER register, a 100% duty cycle pulse is produced. Note that the 1 in PWM1 is motor 1. The PWM module
+    // for motor 1 is PWM2.
     // INPUT
     // nCyclesOn is the number of PWM clock cycles for the on portion of the pulse. Note that the PWM clock is not the same
     //  as the instruction cycle or the main oscillator. For a configuration of the PWM clock as the PLL post divider output 
     //  (see MCLKSEL setting), the PWM clock runs at twice the main oscillator frequency so that one PWM cycle is half of an 
     //  oscillator cycle.
     
-    PG2DC = nCyclesOn;  // the 1 in PWM1 is Motor 1. The MCU PWM module is PWM2
+    
+    PG2DC = nCyclesOn + PG2PHASE;  // it is OK to exceed PG2PER, it simply results in 100% duty cycle.
 }
 
 void setOnCyclesPWM2(uint16_t nCyclesOn) {
@@ -86,8 +88,6 @@ void setOnCyclesPWM2(uint16_t nCyclesOn) {
     //  oscillator cycle.
     
     PG1DC = nCyclesOn;   // the 2 in PWM2 is Motor 2. The MCU PWM module is PWM1
-    if(nCyclesOn > 0) {
-    }
 }
 
 void startPWM1() {

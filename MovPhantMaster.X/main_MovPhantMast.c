@@ -253,12 +253,16 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
     static int32_t integralErrorLimit = 30000;      // value at which integral error signal is clipped
     
     // slow-start parameters
-    static bool lastEnabledState = false;           // stores state of g_outputEnabled last time this function was entered
-    static int32_t ramped1Demand;                   // actual demand value that will be used to drive motor
-    static uint16_t rampNumerator=0;                // numerator of slow ramp up factor
-    static uint16_t rampDenomCalculated;              // for speed purposes, this is the calculated ramp numerator
-    static uint16_t denomBitShifts=4;               // denominator of ramp up factor, expressed as a number of bit shifts
+//    static bool lastEnabledState = false;           // stores state of g_outputEnabled last time this function was entered
+    static int32_t ramped1Demand;                   // actual demand value that will be used to drive motor 1
+    static int32_t ramped2Demand;                   // actual demand value that will be used to drive motor 2
+    static int16_t rampNumerator=0;                // numerator of slow ramp up factor
+    static int32_t rampDenomCalculated;            // for speed purposes, this is the calculated ramp numerator
+    static uint8_t denomBitShifts=10;               // denominator of ramp up factor, expressed as a number of bit shifts
     static bool fullyRamped = false;                // true if we have finished ramping up the slow start.
+//    static int64_t tmp;
+//    static int32_t tmp2;
+//    static uint16_t rampCntr = 0;
     
     rampDenomCalculated = 1 << denomBitShifts;
     
@@ -302,22 +306,17 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         setOnCyclesPWM1((uint16_t)pwmPosition1);
 
         // ---------------  POSITION FEEDBACK CONTROL ------------------
-        if(g_output1Enabled) {
-            
+        rampNumerator++;
+        if(g_output1Enabled) { 
             if(fullyRamped) {
                 ramped1Demand = g_displacement1Demand;
             }
             else {
-                rampNumerator++;
-                ramped1Demand = g_displacement1Demand * ramped1Demand;  // this is a fast calculation
-                ramped1Demand = ramped1Demand >> denomBitShifts;
-                if(rampNumerator == rampDenomCalculated) {
-                    fullyRamped = true;
-                }
+                ramped1Demand = g_displacement1Demand * rampNumerator;  // this is a fast calculation
+                ramped1Demand = ramped1Demand >> denomBitShifts;        // a fast way to divide by a power of 2 with truncation
             }
             
-            displacement1Error = displacement1 - g_displacement1Demand;
-   //         displacement1Error = displacement1 - ramped1Demand;
+            displacement1Error = displacement1 - ramped1Demand;
             integralDisplacement1Error+= displacement1Error;
             // clip integral error
             if(integralDisplacement1Error > integralErrorLimit) {
@@ -343,7 +342,8 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
             integralDisplacement1Error = 0;
             g_pwm1Cycles = (int16_t)( (int32_t)g_pwm1Cycles*93/100 );   
             g_displacement1Demand = 0;   // This probably doesn't matter anymore and should probably just be set in the secondary and removed from here.
-        
+            rampNumerator=0;
+            fullyRamped = false;
         }
 
         // This is done even if output disabled because g_displacement1Demand will set the future output. The pwm1 cycles are
@@ -351,7 +351,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         sendVariableToSecondary(PWM1_CYCLES, (uint16_t)g_pwm1Cycles);  // send to secondary core
         
         counter++;
-    }
+    } // end of motor 1 loop
     else { // counter==1, MOTOR 2 feedback loop update
         // The first time through this routine, initialize things so that the velocity comes out zero
         if(firstPass) {                 
@@ -399,7 +399,16 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
 
         // ---------------  POSITION FEEDBACK CONTROL ------------------
         if(g_output2Enabled) {
-            displacement2Error = displacement2 - g_displacement2Demand;
+            if(fullyRamped) {
+                ramped2Demand = g_displacement2Demand;
+            }
+            else {
+                ramped2Demand = g_displacement2Demand * rampNumerator;  // this is a fast calculation
+                ramped2Demand = ramped2Demand >> denomBitShifts;        // a fast way to divide by a power of 2 with truncation
+            }
+            
+            displacement2Error = displacement2 - ramped2Demand;
+
             integralDisplacement2Error+= displacement2Error;
             // clip integral error
             if(integralDisplacement2Error > integralErrorLimit) {
@@ -438,6 +447,12 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
             
         sendVariableToSecondary(PWM2_CYCLES, (uint16_t)g_pwm2Cycles);  // send to secondary core
         counter = 0;
+    } // end of motor 2 loop
+    
+    // check if ramping stage is done
+    if(rampNumerator == rampDenomCalculated) {
+        fullyRamped = true;
+        rampNumerator = 0;
     }
     // --------------- END POSITION FEEDBACK CONTROL ------------------  
 

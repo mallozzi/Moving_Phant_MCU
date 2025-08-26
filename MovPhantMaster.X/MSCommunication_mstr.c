@@ -192,6 +192,9 @@ void receive32bVariableFromSecondary() {
     uint16_t fifoVal;
     uint32_t var32;
     
+    // disable timer1 interrupt
+    IEC0bits.T1IE = 0;
+    
     // First entry in FIFO is a Variable type that identifies which variable is being sent.
     while(MSI1FIFOCSbits.RFEMPTY);          // wait for next FIFO data to come through
     whichVar = MRSWFDATA;                    // which variable
@@ -221,6 +224,9 @@ void receive32bVariableFromSecondary() {
             g_secondaryQuadEncPos = var32;
             break;
     }
+    
+    // re-enable timer1 interrupt
+    IEC0bits.T1IE = 1;
 }
 
 void receiveBoolVarFromSecondary() {

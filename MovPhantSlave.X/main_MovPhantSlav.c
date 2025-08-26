@@ -152,7 +152,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
             
             // Make sure MS FIFO is not full, then send the displacement demand back to the primary core for use in feedback calculation
             if(!SI1FIFOCSbits.SWFFULL) {  // FIFO should not fill up, but if a __delay command were put on the master side, it could happen
-                send32bVariableToPrimary(DISPLACEMENT1_DEMAND, (uint16_t)gs_displacement1Demand);
+                send32bVariableToPrimary(DISPLACEMENT1_DEMAND, (uint32_t)gs_displacement1Demand);
             }
             
             wf1_ind++;
@@ -205,7 +205,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
             
             // Make sure MS FIFO is not full, then send the displacement demand back to the primary core for use in feedback calculation
             if(!SI1FIFOCSbits.SWFFULL) {  // FIFO should not fill up, but if a __delay command were put on the master side, it could happen
-                send32bVariableToPrimary(DISPLACEMENT2_DEMAND, (uint16_t)gs_displacement2Demand);
+                send32bVariableToPrimary(DISPLACEMENT2_DEMAND, (uint32_t)gs_displacement2Demand);
             }
             
             wf2_ind++;
