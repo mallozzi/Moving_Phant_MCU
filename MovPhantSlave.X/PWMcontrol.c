@@ -53,7 +53,7 @@ void configurePWM2() {
     //set period 
   //  gs_maxPWMInteger = 12799;            // maximum PWM integer allowed
     PG1PER = gs_maxPWMInteger; //PWM period is PG1PER+1 clock cycles. Value of 12799 is designed to give period of 12800 / 256 MHz = 50 micro-seconds
-    PG1PHASE = 0;   //no offset from start of PWM period
+    PG1PHASE = 2000;   //no offset from start of PWM period
     PG1DC = 0;      //width of pulse in clock cycles. Initial value of zero would give no output
     
     //Make sure PWM2 interrupts are disabled
@@ -87,7 +87,7 @@ void setOnCyclesPWM2(uint16_t nCyclesOn) {
     //  (see MCLKSEL setting), the PWM clock runs at twice the main oscillator frequency so that one PWM cycle is half of an 
     //  oscillator cycle.
     
-    PG1DC = nCyclesOn;   // the 2 in PWM2 is Motor 2. The MCU PWM module is PWM1
+    PG1DC = nCyclesOn + PG1PHASE;   // it is OK to exceed PG1PER, it simply results in 100% duty cycle.
 }
 
 void startPWM1() {

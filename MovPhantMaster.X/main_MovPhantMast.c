@@ -124,6 +124,7 @@ int main(void) {
     uint32_t blinkCounterMax = 500000;       // determines blink rate
     uint32_t readCounter = 0;               // counter for secondary quad encoder read
     uint32_t readCounterMax = 10;          // determines interval to read secondary quad encoder
+    bool outOfBounds = false;               // if proximity sensor detects out of bounds starting state
     
     // Watchdog timer
     volatile unsigned *wdtKey; 
@@ -187,19 +188,41 @@ int main(void) {
          // Master does the configuration on its side, then sends a command to the secondary to do its configuration
          // and start the motion
          if(g_startMotor) {
+             
+             
+            outOfBounds = false;
             configureDerivedQuantities();
-            g_statusFlags = 0;
-            setZeroPosition();
-            g_displacement1Demand = 0;   
-            g_displacement2Demand = 0; 
-            // Temporary - for now, we will just have a single reverse control for both motors. May update later
-            g_reverseDirection2 = g_reverseDirection1;
-            sendParamtersToSecondary();
-            while(!MSI1FIFOCSbits.WFEMPTY);         // wait for secondary to finish reading the FIFO. 
-            enableDriver(true);
-            sendCommandToSecondary(START_MOTION);
-            g_startMotor = false;         // stops code from entering this block until start button pushed again
-            
+            if(g_stepMode) {
+                g_statusFlags = g_statusFlags & 1;      // clear status flags except for proximity sensor error
+            }
+            else {
+                g_statusFlags = 0;                      // clear all status flags
+                // check to make sure proximity sensors are not out of bounds
+                if( (!PORTCbits.RC12) || (!PORTCbits.RC13) ) {                   // low signal is out of bounds
+                    // wait a few microseconds and try again to make sure it wasn't a transient
+                    __delay32(g_OscillatorFreq*2/1000000);
+                    if( (!PORTCbits.RC12) || (!PORTCbits.RC13) ) {
+                        outOfBounds = true;
+                    }
+                }
+                
+            }
+            if(!outOfBounds) {
+                setZeroPosition();
+                g_displacement1Demand = 0;   
+                g_displacement2Demand = 0; 
+                // Temporary - for now, we will just have a single reverse control for both motors. May update later
+                g_reverseDirection2 = g_reverseDirection1;
+                sendParamtersToSecondary();
+                while(!MSI1FIFOCSbits.WFEMPTY);             // wait for secondary to finish reading the FIFO. 
+                enableDriver(true);
+                sendCommandToSecondary(START_MOTION);                  
+            }
+            else {
+                g_statusFlags = g_statusFlags | 1;          // set proximity sensor error status flag
+                
+            }
+            g_startMotor = false;                           // stops code from entering this block until start button pushed again
          }
          
          if(g_gotoLandmark) {
@@ -306,7 +329,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         setOnCyclesPWM1((uint16_t)pwmPosition1);
 
         // ---------------  POSITION FEEDBACK CONTROL ------------------
-        rampNumerator++;
+ //       rampNumerator++;
         if(g_output1Enabled) { 
             if(fullyRamped) {
                 ramped1Demand = g_displacement1Demand;
@@ -342,17 +365,20 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
             integralDisplacement1Error = 0;
             g_pwm1Cycles = (int16_t)( (int32_t)g_pwm1Cycles*93/100 );   
             g_displacement1Demand = 0;   // This probably doesn't matter anymore and should probably just be set in the secondary and removed from here.
-            rampNumerator=0;
-            fullyRamped = false;
+
+            if(!g_output2Enabled) {
+                rampNumerator=0;
+                fullyRamped = false;
+            } // if both motors are disabled
         }
 
         // This is done even if output disabled because g_displacement1Demand will set the future output. The pwm1 cycles are
         // decayed down in the else code above if the output gets turned off.
         sendVariableToSecondary(PWM1_CYCLES, (uint16_t)g_pwm1Cycles);  // send to secondary core
         
-        counter++;
     } // end of motor 1 loop
     else { // counter==1, MOTOR 2 feedback loop update
+ //       LATDbits.LATD10 = 1;
         // The first time through this routine, initialize things so that the velocity comes out zero
         if(firstPass) {                 
             lastPositionEnc2 = g_secondaryQuadEncPos;  // ensures that the velocity will be zero the first time through
@@ -446,8 +472,10 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         // decayed down in the else code above if the output gets turned off.
             
         sendVariableToSecondary(PWM2_CYCLES, (uint16_t)g_pwm2Cycles);  // send to secondary core
-        counter = 0;
     } // end of motor 2 loop
+    rampNumerator++;
+    counter++;
+    counter = counter%2;    // counter should count 0 to 1 repeatedly
     
     // check if ramping stage is done
     if(rampNumerator == rampDenomCalculated) {
@@ -558,9 +586,17 @@ void __attribute__((__interrupt__,no_auto_psv)) _CNBInterrupt(void) {
 void __attribute__((__interrupt__,no_auto_psv)) _CNCInterrupt(void) {
     // Interrupt Service Routine for Change Notice on Proximity Sensor pins
     
+    static bool allowStep = false;
+    // If we tripped a proximity sensor, we want to enable stepping to get back in bounds. The variable allowStep is 
+    // set to true if a proximity sensor was already tripped previously and we are now in stepping mode, so that the
+    // user can use the stepping buttons to come back in bounds.
+    
+    allowStep = (g_statusFlags & 1) && g_stepMode;  // proximity sensor error already set and we are in step mode
+    
     // motor 1 proximity sensor on RC12
     if(CNFCbits.CNFC12) {   
         __delay32(g_OscillatorFreq*2/1000000);      // TEMP: delay a bit to make sure it wasn't a glitch. TO DO: remove after hardware fix
+                
         if(!PORTCbits.RC12) {                       // if it has stayed low
             stopMotion();                           // Stop both motors
             g_statusFlags = g_statusFlags | 1;      // set the error flag for out of range error

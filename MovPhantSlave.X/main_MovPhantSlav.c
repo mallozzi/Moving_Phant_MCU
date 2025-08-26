@@ -81,7 +81,7 @@ int main(void) {
         // blink LED2
         if(blinkCounter > blinkCounterMax) {
             blinkCounter = 0;
-            LATBbits.LATB1 = ~PORTBbits.RB1;
+//            LATBbits.LATB1 = ~PORTBbits.RB1;
         }
         else{
             blinkCounter++;
@@ -163,7 +163,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
     else { // if gs_output1Enabled is false
         waveform1Count = 0;
         wf1_ind = 0;
-        setMotorOutput1(gs_pwm1Cycles);  // if output is disabled, gs_pwm1Cycles will be decayed to zero in T1 interrupt loop in primary core
+        setMotorOutput1(gs_pwm1Cycles);  // if output is disabled, gs_pwm1Cycles will be decayed to zero in Timer1 interrupt loop in primary core
         if(!gs_output2Enabled) {  // is both motors are not enabled, set interrupt count to zero. 
             interruptCount = 0;
         }
@@ -174,7 +174,10 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
         // Every outputUpdatePeriod interrupts update the pwm output. For pwm period of 50 microseconds, this is once every 2.5 milliseconds.
         // Within the loop, alternate updating motor 1 and motor 2 outputs, so that motor 1 is updated at the beginning of an
         // ...update period, and motor 2 is updated halfway through the update period.
+        
+        
         if(interruptCount >= motorUpdateFullInterval) {      // time to update output to motor with whatever is currently requested
+            LATBbits.LATB1 = 1;
             if(!gs_stopMotors) { // normal condition - no call to zero the output position            
                 setMotorOutput2(gs_pwm2Cycles);
             }
@@ -201,7 +204,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
                  //   gs_playSingleWaveformOnly = false;          // reset for future waveforms. 
                 }
             }
-            gs_displacement2Demand = gs_outputWaveform2[wf2_ind]; // Update demand from waveform array. TO DO: make motor 2 waveform array
+            gs_displacement2Demand = gs_outputWaveform2[wf2_ind]; // Update demand from waveform array. 
             
             // Make sure MS FIFO is not full, then send the displacement demand back to the primary core for use in feedback calculation
             if(!SI1FIFOCSbits.SWFFULL) {  // FIFO should not fill up, but if a __delay command were put on the master side, it could happen
@@ -214,9 +217,10 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
 //        
     }
     else { // if gs_output2Enabled is false
+        LATBbits.LATB1 = 0;
         waveform2Count = 0;
         wf2_ind = 0;
-        setMotorOutput2(gs_pwm2Cycles);  // if output is disabled, gs_pwm2Cycles will be decayed to zero in T1 interrupt loop in primary core
+        setMotorOutput2(gs_pwm2Cycles);  // if output is disabled, gs_pwm2Cycles will be decayed to zero in Timer1 interrupt loop in primary core
     } // end Motor 2
     
     interruptCount++;   

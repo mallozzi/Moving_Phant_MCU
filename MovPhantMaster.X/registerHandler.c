@@ -63,12 +63,14 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
 // Sets a register value from an I2C command
     if(regNum == REG_COMMAND) { //Commands go here. What gets done depends upon the dataVal
         if(dataVal == START_MOTION) {
+            g_stepMode = false;
             startMotion();             // in StateManagement.c
         }
         else if(dataVal == STOP_MOTION) {
             stopMotion();              // in StateManagement.c
         }
         else if(dataVal == STEP_HEAD) {
+            g_stepMode = true;
             g_waveformType = 1;
             g_motionAmplitudeMM1 = 5;
             g_motionAmplitudeMM2 = 5;
@@ -79,6 +81,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
             startMotion();
         }
         else if(dataVal == STEP_FOOT) {
+            g_stepMode = true;
             g_waveformType = 1;
             g_motionAmplitudeMM1 = 5;
             g_motionAmplitudeMM2 = 5;
@@ -89,6 +92,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
             startMotion();
         }
         else if(dataVal == STEP_RIGHT) {
+            g_stepMode = true;
             g_waveformType = 1;
             g_motionAmplitudeMM1 = 5;
             g_motionAmplitudeMM2 = 5;
@@ -99,6 +103,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
             startMotion();
         }
         else if(dataVal == STEP_LEFT) {
+            g_stepMode = true;
             g_waveformType = 1;
             g_motionAmplitudeMM1 = 5;
             g_motionAmplitudeMM2 = 5;
