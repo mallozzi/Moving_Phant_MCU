@@ -76,7 +76,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
             g_motionAmplitudeMM2 = 5;
             g_userMotor1Enable = true;
             g_userMotor2Enable = false;
-            g_reverseDirection1 = 0;
+            g_reverseDirection1 = 1;
             g_freqUser = 80;
             startMotion();
         }
@@ -87,7 +87,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
             g_motionAmplitudeMM2 = 5;
             g_userMotor1Enable = true;
             g_userMotor2Enable = false;
-            g_reverseDirection1 = 1;
+            g_reverseDirection1 = 0;
             g_freqUser = 80;
             startMotion();
         }
@@ -98,7 +98,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
             g_motionAmplitudeMM2 = 5;
             g_userMotor1Enable = false;
             g_userMotor2Enable = true;
-            g_reverseDirection1 = 0;
+            g_reverseDirection2 = 1;
             g_freqUser = 80;
             startMotion();
         }
@@ -109,7 +109,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
             g_motionAmplitudeMM2 = 5;
             g_userMotor1Enable = false;
             g_userMotor2Enable = true;
-            g_reverseDirection1 = 1;
+            g_reverseDirection2 = 0;
             g_freqUser = 80;
             startMotion();
         }

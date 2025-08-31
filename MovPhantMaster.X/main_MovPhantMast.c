@@ -212,7 +212,7 @@ int main(void) {
                 g_displacement1Demand = 0;   
                 g_displacement2Demand = 0; 
                 // Temporary - for now, we will just have a single reverse control for both motors. May update later
-                g_reverseDirection2 = g_reverseDirection1;
+ //               g_reverseDirection2 = g_reverseDirection1;
                 sendParamtersToSecondary();
                 while(!MSI1FIFOCSbits.WFEMPTY);             // wait for secondary to finish reading the FIFO. 
                 enableDriver(true);
@@ -279,7 +279,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
 //    static bool lastEnabledState = false;           // stores state of g_outputEnabled last time this function was entered
     static int32_t ramped1Demand;                   // actual demand value that will be used to drive motor 1
     static int32_t ramped2Demand;                   // actual demand value that will be used to drive motor 2
-    static int16_t rampNumerator=0;                // numerator of slow ramp up factor
+    static int16_t rampUpNumerator=0;                // numerator of slow ramp up factor
     static int32_t rampDenomCalculated;            // for speed purposes, this is the calculated ramp numerator
     static uint8_t denomBitShifts=10;               // denominator of ramp up factor, expressed as a number of bit shifts
     static bool fullyRamped = false;                // true if we have finished ramping up the slow start.
@@ -331,11 +331,14 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         // ---------------  POSITION FEEDBACK CONTROL ------------------
  //       rampNumerator++;
         if(g_output1Enabled) { 
+            // Create a version of the demand that is ramped u slowly, then when done uses the orginal demand. Upon
+            // a normal stop situation, it ramps down slowly
             if(fullyRamped) {
                 ramped1Demand = g_displacement1Demand;
             }
             else {
-                ramped1Demand = g_displacement1Demand * rampNumerator;  // this is a fast calculation
+                 
+                ramped1Demand = g_displacement1Demand * rampUpNumerator;  // this is a fast calculation
                 ramped1Demand = ramped1Demand >> denomBitShifts;        // a fast way to divide by a power of 2 with truncation
             }
             
@@ -367,7 +370,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
             g_displacement1Demand = 0;   // This probably doesn't matter anymore and should probably just be set in the secondary and removed from here.
 
             if(!g_output2Enabled) {
-                rampNumerator=0;
+                rampUpNumerator=0;
                 fullyRamped = false;
             } // if both motors are disabled
         }
@@ -429,7 +432,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
                 ramped2Demand = g_displacement2Demand;
             }
             else {
-                ramped2Demand = g_displacement2Demand * rampNumerator;  // this is a fast calculation
+                ramped2Demand = g_displacement2Demand * rampUpNumerator;  // this is a fast calculation
                 ramped2Demand = ramped2Demand >> denomBitShifts;        // a fast way to divide by a power of 2 with truncation
             }
             
@@ -463,7 +466,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
             g_displacement2Demand = 0;   // This probably doesn't matter anymore and should probably just be set in the secondary and removed from here.
             
             if(!g_output1Enabled) {     // if both motors are disabled.
-                rampNumerator = 0;
+                rampUpNumerator = 0;
                 fullyRamped = false;
             }
         }
@@ -473,14 +476,14 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
             
         sendVariableToSecondary(PWM2_CYCLES, (uint16_t)g_pwm2Cycles);  // send to secondary core
     } // end of motor 2 loop
-    rampNumerator++;
+    rampUpNumerator++;
     counter++;
     counter = counter%2;    // counter should count 0 to 1 repeatedly
     
     // check if ramping stage is done
-    if(rampNumerator == rampDenomCalculated) {
+    if(rampUpNumerator == rampDenomCalculated) {
         fullyRamped = true;
-        rampNumerator = 0;
+        rampUpNumerator = 0;
     }
     // --------------- END POSITION FEEDBACK CONTROL ------------------  
 
