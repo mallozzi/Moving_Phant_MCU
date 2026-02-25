@@ -193,7 +193,10 @@ int main(void) {
             outOfBounds = false;
             configureDerivedQuantities();
             if(g_stepMode) {
-                g_statusFlags = g_statusFlags & 1;      // clear status flags except for proximity sensor error
+                g_statusFlags = g_statusFlags & 1;              // clear status flags except for proximity sensor error
+                if( PORTCbits.RC12 && PORTCbits.RC13 ) {        // if we are in bounds, clear the proximity violation
+                    g_statusFlags = g_statusFlags & 0xFFFE;     // clears bit 0                    
+                }
             }
             else {
                 g_statusFlags = 0;                      // clear all status flags
@@ -211,8 +214,6 @@ int main(void) {
                 setZeroPosition();
                 g_displacement1Demand = 0;   
                 g_displacement2Demand = 0; 
-                // Temporary - for now, we will just have a single reverse control for both motors. May update later
- //               g_reverseDirection2 = g_reverseDirection1;
                 sendParamtersToSecondary();
                 while(!MSI1FIFOCSbits.WFEMPTY);             // wait for secondary to finish reading the FIFO. 
                 enableDriver(true);
@@ -597,7 +598,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _CNCInterrupt(void) {
     allowStep = (g_statusFlags & 1) && g_stepMode;  // proximity sensor error already set and we are in step mode
     
     // motor 1 proximity sensor on RC12
-    if(CNFCbits.CNFC12) {   
+    if(CNFCbits.CNFC12 && !allowStep) {             // in stepping mode we allow violation so we can get out of jail
         __delay32(g_OscillatorFreq*2/1000000);      // TEMP: delay a bit to make sure it wasn't a glitch. TO DO: remove after hardware fix
                 
         if(!PORTCbits.RC12) {                       // if it has stayed low
@@ -608,7 +609,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _CNCInterrupt(void) {
     CNFCbits.CNFC12 = 0;
     
     // motor 2 proximity sensor on RC13
-    if(CNFCbits.CNFC13) {
+    if(CNFCbits.CNFC13 && !allowStep) {             // in stepping mode we allow violatin so we can get out of jail
         __delay32(g_OscillatorFreq*2/1000000);      // TEMP: delay a bit to make sure it wasn't a glitch. TO DO: remove after hardware fix
         if(!PORTCbits.RC13) {                        // If it has stayed low
             stopMotion();                           // Stop both motors

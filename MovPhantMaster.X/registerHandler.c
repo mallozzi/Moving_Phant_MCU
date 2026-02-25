@@ -67,13 +67,14 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
             startMotion();             // in StateManagement.c
         }
         else if(dataVal == STOP_MOTION) {
+            g_stopButtonPushed = true;
             stopMotion();              // in StateManagement.c
         }
         else if(dataVal == STEP_HEAD) {
             g_stepMode = true;
             g_waveformType = 1;
             g_motionAmplitudeMM1 = 5;
-            g_motionAmplitudeMM2 = 5;
+            g_motionAmplitudeMM2 = 0;
             g_userMotor1Enable = true;
             g_userMotor2Enable = false;
             g_reverseDirection1 = 1;
@@ -84,7 +85,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
             g_stepMode = true;
             g_waveformType = 1;
             g_motionAmplitudeMM1 = 5;
-            g_motionAmplitudeMM2 = 5;
+            g_motionAmplitudeMM2 = 0;
             g_userMotor1Enable = true;
             g_userMotor2Enable = false;
             g_reverseDirection1 = 0;
@@ -94,8 +95,8 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         else if(dataVal == STEP_RIGHT) {
             g_stepMode = true;
             g_waveformType = 1;
-            g_motionAmplitudeMM1 = 5;
-            g_motionAmplitudeMM2 = 5;
+            g_motionAmplitudeMM1 = 0;
+            g_motionAmplitudeMM2 = 15;
             g_userMotor1Enable = false;
             g_userMotor2Enable = true;
             g_reverseDirection2 = 1;
@@ -105,8 +106,8 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         else if(dataVal == STEP_LEFT) {
             g_stepMode = true;
             g_waveformType = 1;
-            g_motionAmplitudeMM1 = 5;
-            g_motionAmplitudeMM2 = 5;
+            g_motionAmplitudeMM1 = 0;
+            g_motionAmplitudeMM2 = 15;
             g_userMotor1Enable = false;
             g_userMotor2Enable = true;
             g_reverseDirection2 = 0;

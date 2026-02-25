@@ -7,6 +7,7 @@
 uint16_t g_firmwareRev = 13;            // Revision number of firmware
 uint16_t g_statusFlags = 0;             // flags containing status information
 bool g_stepMode = false;                // true if user is stepping rather than running waveform
+bool g_stopButtonPushed = false;        // used to distinguish user stop request from proximity sensor stop request
 
 // *** VARIABLES THAT MUST BE THE SAME IN MASTER AND SLAVE ***
 uint16_t g_maxPWMInteger;        // maximum PWM integer allowed
