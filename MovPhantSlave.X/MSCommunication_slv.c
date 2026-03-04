@@ -7,6 +7,7 @@
 #include "enums_slave.h"
 #include "StateManagement_slv.h"
 #include "motorCntrlSlv.h"
+#include "config_slave.h"
 
 
 void processCommandFromPrimary() {
@@ -79,6 +80,9 @@ void receiveVariableFromPrimary() {
         case ENCODER_STEPS_PER_MM:
             gs_encoderStepsPerMM = fifoVal;
             break;
+        case WAVEFORM_NPTS:
+            allocateArbitraryWaveform(fifoVal);
+            gs_waveformReset = true;
         default:
             break;
     }

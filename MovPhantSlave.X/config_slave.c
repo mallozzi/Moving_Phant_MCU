@@ -224,6 +224,46 @@ int32_t* makeRampWaveform(int32_t stepSize, uint16_t numValues) {
     return waveformArray;
 }
 
+void allocateArbitraryWaveform(uint16_t nPts) {
+    // Allocates the array for an arbitrary waveform that later gets populated from values transmitted from CPU
+    
+    // First free existing waveform memory
+    // free memory from previous waveforms
+    if(gs_outputWaveform1 != NULL) {
+        free(gs_outputWaveform1);
+        gs_outputWaveform1 = NULL;
+    }
+    if(gs_outputWaveform2 != NULL) {
+        free(gs_outputWaveform2);
+        gs_outputWaveform2 = NULL;
+    }
+    
+    // Allocate new arrays
+    int32_t* gs_outputWaveform1 = (int32_t*)malloc(nPts*sizeof(int32_t));
+    int32_t* gs_outputWaveform2 = (int32_t*)malloc(nPts*sizeof(int32_t));
+    
+}
+
+void setWaveformValue(int32_t value, uint16_t whichWaveform) {
+    // Sets a custom waveform data value at a given index. The index is tracked as a static variable.
+    // INPUTS
+    // value is the value of the waveform at the specific indx
+    // whichWaveform is 1 to set Waveform 1 (HF motion), 2 for Waveform 2 (LR motion)
+    static uint16_t indx=0;
+    if(gs_waveformReset) {
+        indx=0;
+        gs_waveformReset = false;      // so that next incoming data value does not reset index
+    }
+    
+    if(whichWaveform==1) {
+        gs_outputWaveform1[indx] = value;
+    }
+    else {
+        gs_outputWaveform2[indx] = value;
+    }
+    indx++;
+}
+
 int32_t* makeWideVelPulseWaveform(int32_t totalSteps, uint16_t numValues) {
     // Allocates an inverted cosine waveform of a given amplitude number of values numValues. 
     // Waveform is one period, starting and ending at 0. The waveform is intended as a velocity
@@ -256,6 +296,7 @@ int32_t* makeWideVelPulseWaveform(int32_t totalSteps, uint16_t numValues) {
     gs_numArrayVals = numValues;
     return waveformArray;  
 }
+
 
 int32_t* makeZeroWaveform(uint16_t numValues) {
     // Creates a waveform of zeros that is useful in bringing output to zero gracefully. Returns a pointer to the 

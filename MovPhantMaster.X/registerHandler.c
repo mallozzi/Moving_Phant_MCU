@@ -36,6 +36,10 @@
 #define REG_MOT1_ENABLED 33                 // register to enable motor 1
 #define REG_MOT2_ENABLED 34                 // register to enable motor 2
 #define REG_STATUS_FLAGS 35                 // get the status flags byte
+#define REG_REC_DATA 36                     // prepare for data transmission from CPU to MCU
+#define REG_WHICH_WAVEFORM 37               // identifies which motor (1 or 2) the data being sent from primary to secondary belongs to
+#define REG_DATA_VAL 38                     // data value transmission from CPU to MCU
+
 
 
 // Value definitions
@@ -201,6 +205,15 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
     else if(regNum == REG_STATUS_FLAGS) {
         g_statusFlags = dataVal;
     }
+    else if(regNum == REG_REC_DATA) {
+        //allocateDataArray();
+    }
+    else if(regNum == REG_WHICH_WAVEFORM) {
+        g_whichWaveform = dataVal;
+    }
+    else if(regNum == REG_DATA_VAL) {
+        // code to handle when a data value comes in
+    }
     
 
     lastValueWritten = dataVal;     // scope is within whole file
@@ -294,6 +307,15 @@ uint16_t getRegisterValue(uint8_t regNum) {
     }
     else if(regNum == REG_STATUS_FLAGS) {
         val = g_statusFlags;
+    }
+    else if(regNum == REG_REC_DATA) {
+        val = lastValueWritten;   // assuming here we never use this for anything other than verifying transmission
+    }
+    else if(regNum == REG_WHICH_WAVEFORM) {
+        val = g_whichWaveform;
+    }
+    else if(regNum == REG_DATA_VAL) {
+        val = lastValueWritten;   // assuming here we never use this for anything other than verifying transmission
     }
     
     return val;

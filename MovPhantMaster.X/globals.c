@@ -48,6 +48,7 @@ uint16_t g_motionAmplitudeMM2;          // amplitude of motion in mm motor 2
 uint32_t g_waveformTimeStep_microS;     // Time between each element of the waveform array in microseconds
 uint16_t g_freqUser;                    // frequency requested by user in cycles / min
 uint16_t g_waveformUpdatePeriod;        // number of PWM interrupts between waveform index updates
+uint16_t g_whichWaveform;               // flag that is 0 for Motor 1, 1 for Motor 2 used for transmitting custom waveform data between cores
 
 //PWM parameters
 int16_t g_pwm1Cycles;                   // Duty cycle parameter for PWM1

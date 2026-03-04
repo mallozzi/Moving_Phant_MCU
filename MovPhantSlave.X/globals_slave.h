@@ -72,6 +72,7 @@ extern volatile bool gs_startMotor;                 // set to true to cause moto
 extern int32_t* gs_outputWaveform1;                 // pointer to output waveform for motor 1
 extern int32_t* gs_outputWaveform2;                 // pointer to output waveform for motor 2
 extern int32_t* gs_zeroWaveform;                    // waveform of zeros useful for bringing output to zero gradually
+extern bool gs_waveformReset;                       // flag to indicate that custom waveform should be reset
 
 
 extern int16_t gs_filtNumerator;                    // low-pass PWM filter parameter defined as integer numerator and denominator

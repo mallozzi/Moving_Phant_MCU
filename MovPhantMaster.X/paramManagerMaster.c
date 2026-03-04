@@ -3,6 +3,5 @@
 #include "paramManagerMaster.h"
 
 
-// Protocol for sending parameters:
-// A register value if sent first through the FIFO, followed by a value. 
+// General Parameter management
 

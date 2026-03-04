@@ -257,5 +257,10 @@ void enableMSFifo() {
     MSI1FIFOCSbits.RFEN = 1;            // enable MSI Master-read FIFO
 }
 
+void initalizeWaveform(uint16_t nPoints) {
+    // Send command to secondary to put the waveform in reset state and allocate memory
+    
+}
+
 
 

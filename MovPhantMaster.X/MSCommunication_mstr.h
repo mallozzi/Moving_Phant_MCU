@@ -35,5 +35,8 @@ void receiveVariableFromSecondary();
 void receive32bVariableFromSecondary();
 void receiveBoolVarFromSecondary();
 
+// Waveform Array management
+void initalizeWaveform(uint16_t nPoints);
+
 #endif	/* MS_COMMUNICATION_H */
 

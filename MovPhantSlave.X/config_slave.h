@@ -34,6 +34,8 @@ int32_t* makeRampWaveform(int32_t amplitude, uint16_t numValues);
 int32_t* makeWideVelPulseWaveform(int32_t amplitude, uint16_t numValues);
 int32_t* makeZeroWaveform(uint16_t numValues);
 int32_t* makeConstWaveform(int32_t value, uint16_t numValues);
+void allocateArbitraryWaveform(uint16_t nPts);
+void setWaveformValue(int32_t value, uint16_t whichWaveform);
 
 
 

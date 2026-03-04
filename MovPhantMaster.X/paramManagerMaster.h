@@ -1,4 +1,4 @@
-// Manages sending parameters back and forth to secondary processor
+// General parameter handling
 
 // This is a guard condition so that contents of this file are not included
 // more than once.  
@@ -6,6 +6,7 @@
 #define	PARAM_MANAGER_H
 
 #include <xc.h> // include processor files - each processor file is guarded.  
+#include <stdint.h>
 
 
 #ifdef	__cplusplus
@@ -35,6 +36,8 @@ enum commands {
     ENABLE_OUTPUT,
     DISABLE_OUTPUT
 };
+
+
 
 #endif	/* PARAM_MANAGER_H */
 

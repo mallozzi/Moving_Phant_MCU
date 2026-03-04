@@ -68,6 +68,7 @@ extern uint32_t g_waveformTimeStep_microS;      // Time between each element of 
 extern uint16_t g_freqUser;                     // frequency requested by user in cycles / min
 extern uint16_t g_motionAmplitudeMM1;           // amplitude of motion in mm motor 1
 extern uint16_t g_motionAmplitudeMM2;           // amplitude of motion in mm motor 2
+extern uint16_t g_whichWaveform;                // flag that is 0 for Motor 1, 1 for Motor 2 used for transmitting custom waveform data between cores
 
 extern uint16_t g_errorFlags;                   // Each bit is an error flag. See globals.c
 extern bool g_faultDetected;
