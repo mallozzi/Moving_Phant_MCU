@@ -23,19 +23,22 @@ extern "C" {
 // These enums must be identical on master and secondary
 
 // Registers
-enum reg {
-    COMMAND,
-    OUTPUT1_ENABLED,
-    OUTPUT2_ENABLED,
-    PWM_MOT1
-};
+//enum reg {
+//    COMMAND,
+//    OUTPUT1_ENABLED,
+//    OUTPUT2_ENABLED,
+//    PWM_MOT1
+//};
+//
+//// Commands
+//enum commands {
+//    START_MOT1,
+//    ENABLE_OUTPUT,
+//    DISABLE_OUTPUT
+//};
 
-// Commands
-enum commands {
-    START_MOT1,
-    ENABLE_OUTPUT,
-    DISABLE_OUTPUT
-};
+void sendDataValToSecondary(uint32_t val);
+void allocateWaveforms(uint16_t nPts);
 
 
 

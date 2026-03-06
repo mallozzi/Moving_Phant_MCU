@@ -83,6 +83,7 @@ void receiveVariableFromPrimary() {
         case WAVEFORM_NPTS:
             allocateArbitraryWaveform(fifoVal);
             gs_waveformReset = true;
+            break;
         default:
             break;
     }
@@ -118,6 +119,12 @@ void receive32bVariableFromPrimary() {
             break;
         case DISPLACEMENT2_DEMAND:
             gs_displacement2Demand = (int32_t)var32;
+            break;
+        case WAVEFORM_DATA_VAL_1:
+            setWaveformValue((int32_t)var32, 1);
+            break;
+        case WAVEFORM_DATA_VAL_2:
+            setWaveformValue((int32_t)var32, 2);
             break;
         default:
             break;

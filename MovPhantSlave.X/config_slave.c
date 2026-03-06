@@ -239,8 +239,8 @@ void allocateArbitraryWaveform(uint16_t nPts) {
     }
     
     // Allocate new arrays
-    int32_t* gs_outputWaveform1 = (int32_t*)malloc(nPts*sizeof(int32_t));
-    int32_t* gs_outputWaveform2 = (int32_t*)malloc(nPts*sizeof(int32_t));
+    gs_outputWaveform1 = (int32_t*)malloc(nPts*sizeof(int32_t));
+    gs_outputWaveform2 = (int32_t*)malloc(nPts*sizeof(int32_t));
     
 }
 
@@ -248,7 +248,7 @@ void setWaveformValue(int32_t value, uint16_t whichWaveform) {
     // Sets a custom waveform data value at a given index. The index is tracked as a static variable.
     // INPUTS
     // value is the value of the waveform at the specific indx
-    // whichWaveform is 1 to set Waveform 1 (HF motion), 2 for Waveform 2 (LR motion)
+    // whichWaveform is 1 to set Motor 1 (HF motion), 2 for Motor 2 (LR motion)
     static uint16_t indx=0;
     if(gs_waveformReset) {
         indx=0;
@@ -258,7 +258,7 @@ void setWaveformValue(int32_t value, uint16_t whichWaveform) {
     if(whichWaveform==1) {
         gs_outputWaveform1[indx] = value;
     }
-    else {
+    else{
         gs_outputWaveform2[indx] = value;
     }
     indx++;

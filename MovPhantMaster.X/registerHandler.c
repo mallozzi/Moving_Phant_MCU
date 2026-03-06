@@ -3,6 +3,7 @@
 #include "StateManagement.h"
 #include "globals.h"
 #include "Configure.h"
+#include "paramManagerMaster.h"
 
 //Definitions of hardware constants that will also be used from master device.
 //These values must match the ones used in the master.
@@ -206,13 +207,13 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         g_statusFlags = dataVal;
     }
     else if(regNum == REG_REC_DATA) {
-        //allocateDataArray();
+        allocateWaveforms(dataVal);    // sends command to secondary to allocate waveforms with num points = dataVal
     }
     else if(regNum == REG_WHICH_WAVEFORM) {
         g_whichWaveform = dataVal;
     }
     else if(regNum == REG_DATA_VAL) {
-        // code to handle when a data value comes in
+        sendDataValToSecondary(dataVal);
     }
     
 
