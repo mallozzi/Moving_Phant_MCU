@@ -210,7 +210,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         allocateWaveforms(dataVal);    // sends command to secondary to allocate waveforms with num points = dataVal
     }
     else if(regNum == REG_WHICH_WAVEFORM) {
-        g_whichWaveform = dataVal;
+        g_whichWaveform = dataVal;    // this should be done before REG_DATA_VAL block
     }
     else if(regNum == REG_DATA_VAL) {
         sendDataValToSecondary(dataVal);

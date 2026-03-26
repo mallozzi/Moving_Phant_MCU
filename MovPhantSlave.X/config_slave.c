@@ -88,43 +88,58 @@ void setUpWaveforms() {
     
     int16_t signedAmplitudeMM;
     
-    // free memory from previous waveforms
-    if(gs_outputWaveform1 != NULL) {
-        free(gs_outputWaveform1);
-        gs_outputWaveform1 = NULL;
-    }
-    if(gs_outputWaveform2 != NULL) {
-        free(gs_outputWaveform2);
-        gs_outputWaveform2 = NULL;
-    }
+    // If we are not using a custom waveform, free memory from previous waveforms. Do not do this for custom
+    // waveforms because the waveform data was set separately
+    if(gs_waveformType < 2) {     // custom waveforms have index 2 or greater
+        if(gs_outputWaveform1 != NULL) {
+            free(gs_outputWaveform1);
+            gs_outputWaveform1 = NULL;
+        }
+        if(gs_outputWaveform2 != NULL) {
+            free(gs_outputWaveform2);
+            gs_outputWaveform2 = NULL;
+        }
     
-    // set up motor 1 waveforms
-    if(gs_reverseDirection1 == 0) {
-       signedAmplitudeMM = (int16_t)gs_motionAmplitudeMM1;     
+        // set up motor 1 waveforms
+        if(gs_reverseDirection1 == 0) {
+           signedAmplitudeMM = (int16_t)gs_motionAmplitudeMM1;     
+        }
+        else {
+            signedAmplitudeMM = -(int16_t)gs_motionAmplitudeMM1; 
+        }
+        if(gs_waveformType == 0) {  // sine waveform
+            gs_outputWaveform1 = designPosSineWaveform(signedAmplitudeMM);      
+        }
+        else if(gs_waveformType == 1) {  //Step waveform
+            gs_outputWaveform1 = designRampWaveform(signedAmplitudeMM);
+        }
+
+        // set up motor 2 waveforms
+        if(gs_reverseDirection2 == 0) {
+           signedAmplitudeMM = (int16_t)gs_motionAmplitudeMM2;     
+        }
+        else {
+            signedAmplitudeMM = -(int16_t)gs_motionAmplitudeMM2; 
+        }
+        if(gs_waveformType == 0) {  // sine waveform
+            gs_outputWaveform2 = designPosSineWaveform(signedAmplitudeMM);      
+        }
+        else if(gs_waveformType == 1) {  //Step waveform
+            gs_outputWaveform2 = designRampWaveform(signedAmplitudeMM);
+        }
     }
-    else {
-        signedAmplitudeMM = -(int16_t)gs_motionAmplitudeMM1; 
-    }
-    if(gs_waveformType == 0) {  // sine waveform
-        gs_outputWaveform1 = designPosSineWaveform(signedAmplitudeMM);      
-    }
-    else if(gs_waveformType == 1) {  //Step waveform
-        gs_outputWaveform1 = designRampWaveform(signedAmplitudeMM);
-    }
-    
-    // set up motor 2 waveforms
-    if(gs_reverseDirection2 == 0) {
-       signedAmplitudeMM = (int16_t)gs_motionAmplitudeMM2;     
-    }
-    else {
-        signedAmplitudeMM = -(int16_t)gs_motionAmplitudeMM2; 
-    }
-    if(gs_waveformType == 0) {  // sine waveform
-        gs_outputWaveform2 = designPosSineWaveform(signedAmplitudeMM);      
-    }
-    else if(gs_waveformType == 1) {  //Step waveform
-        gs_outputWaveform2 = designRampWaveform(signedAmplitudeMM);
-    }
+    else {   // custom waveform.
+        // Apply amplitude scaling in mm and undo the scale factor that was applied by the CPU (HW.WAVEFORM_SCALE_FACTOR)
+        // to reduce digitization error during 16-bit transmission. Here the descaling is applied as a bit shift for speed,
+        // so the scale factor applied by the CPU must be a factor of 2
+        uint16_t scale_bit_shift = 2;     // the HW.WAVEFORM_SCALE_FACTOR applied by the CPU expressed as a number of bit shifts
+        uint16_t ii;
+        for(ii=0; ii<gs_numArrayVals; ii++) {
+            gs_outputWaveform1[ii] = (gs_outputWaveform1[ii] * gs_motionAmplitudeMM1) >> scale_bit_shift;    
+            gs_outputWaveform2[ii] = (gs_outputWaveform2[ii] * gs_motionAmplitudeMM2) >> scale_bit_shift;    
+        }
+        
+    } // if(gs_waveformType)
 }
 
 int32_t* designPosSineWaveform(int16_t mmDisplacementPP) {

@@ -187,10 +187,9 @@ int main(void) {
          // the I2c transmission to finish without having to wait for all the waveform configuration code to run.
          // Master does the configuration on its side, then sends a command to the secondary to do its configuration
          // and start the motion
-         if(g_startMotor) {
+         if(g_startMotor) {             
              
-             
-            outOfBounds = false;
+            outOfBounds = false;                                // even if we are out of bounds we want to be able to walk back in
             configureDerivedQuantities();
             if(g_stepMode) {
                 g_statusFlags = g_statusFlags & 1;              // clear status flags except for proximity sensor error
