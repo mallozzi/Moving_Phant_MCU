@@ -37,7 +37,7 @@ extern "C" {
 //    DISABLE_OUTPUT
 //};
 
-void sendDataValToSecondary(uint32_t val);
+void sendDataValToSecondary(uint16_t val);
 void allocateWaveforms(uint16_t nPts);
 
 

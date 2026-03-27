@@ -6,13 +6,13 @@
 
 
 // General Parameter management
-void sendDataValToSecondary(uint32_t val) {
+void sendDataValToSecondary(uint16_t val) {
     // Sends one 32-bit integer with a waveform data point. 
     if(g_whichWaveform == 1) {
-        send32bVariableToSecondary(WAVEFORM_DATA_VAL_1, val);  // motor 1
+        sendVariableToSecondary(WAVEFORM_DATA_VAL_1, val);  // motor 1
     }
     else {
-        send32bVariableToSecondary(WAVEFORM_DATA_VAL_2, val);  // motor 2
+        sendVariableToSecondary(WAVEFORM_DATA_VAL_2, val);  // motor 2
     }
 }
 

@@ -259,24 +259,35 @@ void allocateArbitraryWaveform(uint16_t nPts) {
     
 }
 
-void setWaveformValue(int32_t value, uint16_t whichWaveform) {
-    // Sets a custom waveform data value at a given index. The index is tracked as a static variable.
+void setWaveformValue(uint16_t value, uint16_t whichWaveform) {
+    // Sets a custom waveform data value at a given index. The index is tracked as a static variable. This function
+    // has to deal carefully with the integer type. The value input comes through as an unsigned integer, but the
+    // bit representation is that of a signed 16-bit integer. It will be assigned to a 32-bit integer, so this conversion
+    // must be done carefully to get the correct result.
     // INPUTS
-    // value is the value of the waveform at the specific indx
+    // value is the value of the waveform at the specific indx.
     // whichWaveform is 1 to set Motor 1 (HF motion), 2 for Motor 2 (LR motion)
     static uint16_t indx=0;
+    int16_t tmp16;
+    
     if(gs_waveformReset) {
         indx=0;
         gs_waveformReset = false;      // so that next incoming data value does not reset index
     }
     
-    if(whichWaveform==1) {
-        gs_outputWaveform1[indx] = value;
-    }
-    else{
-        gs_outputWaveform2[indx] = value;
-    }
+    // Convert unsigned 16-bit input to a signed 16-bit input. Direct conversion to 32-bit signed gives incorrect result
+    tmp16 = (int16_t)value;
+    
+    if(indx < gs_numArrayVals) { // Kludge protection measure: to be improved
+        if(whichWaveform==1) {
+            gs_outputWaveform1[indx] = (int32_t)tmp16;
+        }
+        else{
+            gs_outputWaveform2[indx] = (int32_t)tmp16;
+        }
+    } // TODO: add error signal of some sort if this fails
     indx++;
+
 }
 
 int32_t* makeWideVelPulseWaveform(int32_t totalSteps, uint16_t numValues) {

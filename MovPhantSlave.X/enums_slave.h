@@ -50,7 +50,9 @@ typedef enum {
     ENCODER_STEPS_PER_MM,
     QUAD_ENC_VEL,
     PING_VAR,
-    WAVEFORM_NPTS
+    WAVEFORM_NPTS,
+    WAVEFORM_DATA_VAL_1,
+    WAVEFORM_DATA_VAL_2
 } Variable;
 
 typedef enum {
@@ -65,9 +67,7 @@ typedef enum {
     WAVEFORM_TIMESTEP_MICROS,
     DISPLACEMENT1_DEMAND,
     DISPLACEMENT2_DEMAND,
-    QUAD_ENC_POS,
-    WAVEFORM_DATA_VAL_1,
-    WAVEFORM_DATA_VAL_2
+    QUAD_ENC_POS
 }Variable32;
 
 
