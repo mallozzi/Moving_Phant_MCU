@@ -28,7 +28,7 @@ void configureInitial() {
     LATD = 0;
     
     INTCON1bits.NSTDIS = 1;  //1 to disable nested interrupts
-    IPC4bits.SI2C1IP = 5;    // give I2c a higher interrup priority than Timer1, which has a natural IP of 4
+    IPC4bits.SI2C1IP = 5;    // give I2c a higher interrupt priority than Timer1, which has a natural IP of 4
     
     // LED 1 Pin RD10
     TRISDbits.TRISD10 = 0;

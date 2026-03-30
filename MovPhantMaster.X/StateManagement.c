@@ -22,8 +22,13 @@ void enableDriver(bool enable) {
 void startMotion() {
     // The purpose of this is to have a short function to call from an I2C command
     
+    
     // First issue a stop motion command in case the motion is already happening
     stopMotion();
+    
+    // For diagnostics - turn on LED 1
+  //  LATDbits.LATD10 = 1;
+    
     // delay to  make sure slave core stops output. g_OscillatorFreq / 40000 is about 50 microseconds.
     // Be careful not to make this any longer than it needs to be, or slave-write-master-read FIFO could fill up
     __delay32(g_OscillatorFreq / 10000);   
@@ -35,6 +40,8 @@ void startMotion() {
 void stopMotion() {
     // The purpose of this is to have a short function to call from an I2C command
     sendCommandToSecondary(STOP_MOTION);
+    // For diagnostics - turn off LED 1
+//    LATDbits.LATD10 = 0;
 //    g_outputWaveform = g_zeroWaveform;
 //    g_stopMotionIssued = true;
 //    g_zeroPosOutput = true;

@@ -47,7 +47,7 @@
 
 
 // Register commands. These are what gets passed into the dataVal field of setRegisterValue and determine which command is executed
-#define START_MOTION  1                     // begin pulsing electric field
+#define START_MOTION  199                     // begin pulsing electric field
 #define STOP_MOTION 2                       // stop pulsing electric field
 //#define SET_ZERO_POSITION 3               // sets the current encoder position as zero
 #define STEP_HEAD 4                         // step forward once

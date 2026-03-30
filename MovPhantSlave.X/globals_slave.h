@@ -8,6 +8,8 @@
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include <stdbool.h>
 
+#define MAX_WAVEFORM_SIZE 400            // maximum number of points that can be in a waveform array
+
 
 #ifdef	__cplusplus
 extern "C" {
@@ -69,8 +71,8 @@ extern volatile bool gs_startMotor;                 // set to true to cause moto
 // *** SECONDARY CORE ONLY GLOBAL PARAMETERS *****
 
 // Waveform parameters
-extern int32_t* gs_outputWaveform1;                 // pointer to output waveform for motor 1
-extern int32_t* gs_outputWaveform2;                 // pointer to output waveform for motor 2
+extern int32_t gs_outputWaveform1[MAX_WAVEFORM_SIZE];                 // pointer to output waveform for motor 1
+extern int32_t gs_outputWaveform2[MAX_WAVEFORM_SIZE];                 // pointer to output waveform for motor 2
 extern int32_t* gs_zeroWaveform;                    // waveform of zeros useful for bringing output to zero gradually
 extern bool gs_waveformReset;                       // flag to indicate that custom waveform should be reset
 

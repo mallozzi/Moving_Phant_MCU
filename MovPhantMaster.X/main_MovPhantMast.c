@@ -43,7 +43,7 @@
 #pragma config S1FWDTEN = ON_SW             // Watchdog Timer Enable bit (WDT controlled via SW, use WDTCON.ON bit)
 
 
-
+// Assign secondary core pin ownership
 #pragma config CPRB1 = SLV1                 // LED2 pin
 #pragma config CPRC4 = SLV1                 // PWM_Driver1 pin (motor 1)
 #pragma config CPRC5 = SLV1                 // DIR1 pin (motor 1)
@@ -331,6 +331,10 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         // ---------------  POSITION FEEDBACK CONTROL ------------------
  //       rampNumerator++;
         if(g_output1Enabled) { 
+            
+            // Diagnostic: turn on LED 1 if this code is reached
+            LATDbits.LATD10 = 1;
+            
             // Create a version of the demand that is ramped u slowly, then when done uses the orginal demand. Upon
             // a normal stop situation, it ramps down slowly
             if(fullyRamped) {
@@ -364,6 +368,10 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
 
         }
         else {  // !g_output1Enabled
+            
+            // Diagnostic: turn off LED 1 if this code is reached
+            LATDbits.LATD10 = 0;
+            
             // Decay output voltage gradually. Rate of decay in ms will depend upon T1 interrupt rate
             integralDisplacement1Error = 0;
             g_pwm1Cycles = (int16_t)( (int32_t)g_pwm1Cycles*93/100 );   
@@ -471,9 +479,8 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
             }
         }
 
-        // This is done even if output disabled because g_displacement2Demand will set the future output. The pwm1 cycles are
-        // decayed down in the else code above if the output gets turned off.
-            
+        // This is done even if output disabled because g_displacement2Demand will set the future output. The pwm2 cycles are
+        // decayed down in the else code above if the output gets turned off.            
         sendVariableToSecondary(PWM2_CYCLES, (uint16_t)g_pwm2Cycles);  // send to secondary core
     } // end of motor 2 loop
     rampUpNumerator++;

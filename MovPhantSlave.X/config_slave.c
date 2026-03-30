@@ -91,14 +91,14 @@ void setUpWaveforms() {
     // If we are not using a custom waveform, free memory from previous waveforms. Do not do this for custom
     // waveforms because the waveform data was set separately
     if(gs_waveformType < 2) {     // custom waveforms have index 2 or greater
-        if(gs_outputWaveform1 != NULL) {
-            free(gs_outputWaveform1);
-            gs_outputWaveform1 = NULL;
-        }
-        if(gs_outputWaveform2 != NULL) {
-            free(gs_outputWaveform2);
-            gs_outputWaveform2 = NULL;
-        }
+//        if(gs_outputWaveform1 != NULL) {
+//            free(gs_outputWaveform1);
+//            gs_outputWaveform1 = NULL;
+//        }
+//        if(gs_outputWaveform2 != NULL) {
+//            free(gs_outputWaveform2);
+//            gs_outputWaveform2 = NULL;
+//        }
     
         // set up motor 1 waveforms
         if(gs_reverseDirection1 == 0) {
@@ -108,10 +108,10 @@ void setUpWaveforms() {
             signedAmplitudeMM = -(int16_t)gs_motionAmplitudeMM1; 
         }
         if(gs_waveformType == 0) {  // sine waveform
-            gs_outputWaveform1 = designPosSineWaveform(signedAmplitudeMM);      
+            designPosSineWaveform(signedAmplitudeMM, gs_outputWaveform1);      
         }
         else if(gs_waveformType == 1) {  //Step waveform
-            gs_outputWaveform1 = designRampWaveform(signedAmplitudeMM);
+            designRampWaveform(signedAmplitudeMM, gs_outputWaveform1);
         }
 
         // set up motor 2 waveforms
@@ -122,10 +122,10 @@ void setUpWaveforms() {
             signedAmplitudeMM = -(int16_t)gs_motionAmplitudeMM2; 
         }
         if(gs_waveformType == 0) {  // sine waveform
-            gs_outputWaveform2 = designPosSineWaveform(signedAmplitudeMM);      
+            designPosSineWaveform(signedAmplitudeMM, gs_outputWaveform2);      
         }
         else if(gs_waveformType == 1) {  //Step waveform
-            gs_outputWaveform2 = designRampWaveform(signedAmplitudeMM);
+            designRampWaveform(signedAmplitudeMM, gs_outputWaveform2);
         }
     }
     else {   // custom waveform.
@@ -142,35 +142,33 @@ void setUpWaveforms() {
     } // if(gs_waveformType)
 }
 
-int32_t* designPosSineWaveform(int16_t mmDisplacementPP) {
+void designPosSineWaveform(int16_t mmDisplacementPP, int32_t* waveformArray) {
     // Creates a sine waveform designed to give mmDisplacement as the peak-peak position
     // displacement
     
     int32_t posAmplitudePP;  // encoder units
-    int32_t* waveformArray;
     
     posAmplitudePP = (int32_t)mmDisplacementPP * (int32_t)gs_encoderStepsPerMM;
-    waveformArray = makePosSineWaveform(posAmplitudePP, gs_numArrayVals);
+    makePosSineWaveform(posAmplitudePP, gs_numArrayVals, waveformArray);
 //    setOutputWaveformMotor1(waveformArray);   
     gs_playSingleWaveformOnly = false;   // plays multiple waveforms
-    return waveformArray;
+    return;
 }
 
-int32_t* designRampWaveform(int16_t mmStepSize) {
+void designRampWaveform(int16_t mmStepSize, int32_t* waveformArray) {
     // designs the ramp waveform to step by at total of mmStepSize mm. Plays one waveform only
     // returns waveform array pointer
     
     int32_t stepSizeEncoder;            // number of encoder steps (signed)
-    int32_t* waveformArray;
     
     stepSizeEncoder = (int32_t)mmStepSize * (int32_t)gs_encoderStepsPerMM;
-    waveformArray = makeRampWaveform(stepSizeEncoder, gs_numArrayVals);
+    makeRampWaveform(stepSizeEncoder, gs_numArrayVals, waveformArray);
 //    setOutputWaveformMotor1(waveformArray); 
     gs_playSingleWaveformOnly = true;    // play waveform only once, then stop
-    return waveformArray;
+    return;
 }
 
-int32_t* makePosSineWaveform(int32_t amplitudeEncPP, uint16_t numValues) {
+void makePosSineWaveform(int32_t amplitudeEncPP, uint16_t numValues, int32_t* waveformArray) {
     // Allocates a sine waveform of a given amplitude number of values numValues. Also allocates the global zero waveform of the same length.
     // INPUTS
     // amplitudeEncPP is the peak-to-peak amplitude of the waveform in units of encoder steps
@@ -183,25 +181,23 @@ int32_t* makePosSineWaveform(int32_t amplitudeEncPP, uint16_t numValues) {
     float amplitude;                            // true encoder amplitude rather than peak-to-peak
     
     amplitude = (float)amplitudeEncPP / 2.0;
-    if(gs_zeroWaveform != NULL) {
-        free(gs_zeroWaveform);
-    }
+//    if(gs_zeroWaveform != NULL) {
+//        free(gs_zeroWaveform);
+//    }
     
-    // Allocate memory. Note: to use dynamic memory allocation, a heap must be 
-    //  ...created in the linker. See notes on project
-    int32_t* waveformArray = (int32_t*)malloc(numValues*sizeof(int32_t));
+    // Set waveform values
     for(ii=0; ii<numValues; ii++) {
         x = amplitude * sin(ii*step);
         waveformArray[ii] = (int32_t)(x+0.5);
     }
     
 //    g_zeroWaveform = makeZeroWaveform(numValues);  // create corresponding zero waveform
-    gs_numArrayVals = numValues;
+//    gs_numArrayVals = numValues;
     
-    return waveformArray;  
+    return;  
 }
 
-int32_t* makeRampWaveform(int32_t stepSize, uint16_t numValues) {
+void makeRampWaveform(int32_t stepSize, uint16_t numValues, int32_t* waveformArray) {
     // Creates a waveform meant to move the motor a defined amount. The last 10%
     // of the waveform sits steady to allow the motor to settle.
     // INPUTS
@@ -212,13 +208,10 @@ int32_t* makeRampWaveform(int32_t stepSize, uint16_t numValues) {
     float rampIncrement;
     uint16_t settleInd;         // index where ramping is finished to allow settling time
     
-    if(gs_zeroWaveform != NULL) {
-        free(gs_zeroWaveform);
-    }
+//    if(gs_zeroWaveform != NULL) {
+//        free(gs_zeroWaveform);
+//    }
 
-    // Allocate memory. Note: to use dynamic memory allocation, a heap must be 
-    //  ...created in the linker. See notes on project
-    int32_t* waveformArray = (int32_t*)malloc(numValues*sizeof(int32_t));
     
     settleInd = (uint16_t)(numValues * 0.9);        // float operation instead of multiplying by 9/10 in case someone makes very long array causing overflow
     rampIncrement = (float)(stepSize) / settleInd;
@@ -234,28 +227,35 @@ int32_t* makeRampWaveform(int32_t stepSize, uint16_t numValues) {
         }
     }
     
-    gs_numArrayVals = numValues;
+//    gs_numArrayVals = numValues;
 
-    return waveformArray;
+    return;
 }
 
 void allocateArbitraryWaveform(uint16_t nPts) {
     // Allocates the array for an arbitrary waveform that later gets populated from values transmitted from CPU
+    uint16_t ii;
+    
+    // clear all waveform points
+    for(ii=0; ii<MAX_WAVEFORM_SIZE; ii++){
+        gs_outputWaveform1[ii] = 0;
+        gs_outputWaveform2[ii] = 0;
+    }
     
     // First free existing waveform memory
     // free memory from previous waveforms
-    if(gs_outputWaveform1 != NULL) {
-        free(gs_outputWaveform1);
-        gs_outputWaveform1 = NULL;
-    }
-    if(gs_outputWaveform2 != NULL) {
-        free(gs_outputWaveform2);
-        gs_outputWaveform2 = NULL;
-    }
+//    if(gs_outputWaveform1 != NULL) {
+//        free(gs_outputWaveform1);
+//        gs_outputWaveform1 = NULL;
+//    }
+//    if(gs_outputWaveform2 != NULL) {
+//        free(gs_outputWaveform2);
+//        gs_outputWaveform2 = NULL;
+//    }
     
     // Allocate new arrays
-    gs_outputWaveform1 = (int32_t*)malloc(nPts*sizeof(int32_t));
-    gs_outputWaveform2 = (int32_t*)malloc(nPts*sizeof(int32_t));
+//    gs_outputWaveform1 = (int32_t*)malloc(nPts*sizeof(int32_t));
+//    gs_outputWaveform2 = (int32_t*)malloc(nPts*sizeof(int32_t));
     
 }
 
@@ -268,14 +268,22 @@ void setWaveformValue(uint16_t value, uint16_t whichWaveform) {
     // value is the value of the waveform at the specific indx.
     // whichWaveform is 1 to set Motor 1 (HF motion), 2 for Motor 2 (LR motion)
     static uint16_t indx=0;
+    static uint16_t lastWaveform = 99;      // used to detect when data is being sent to a different waveform. 99 is arbitrary number different from 1 or 2
     int16_t tmp16;
     
     if(gs_waveformReset) {
-        indx=0;
+ //       indx=0;
+        lastWaveform = 99;
         gs_waveformReset = false;      // so that next incoming data value does not reset index
     }
     
-    // Convert unsigned 16-bit input to a signed 16-bit input. Direct conversion to 32-bit signed gives incorrect result
+    if(whichWaveform != lastWaveform) {
+        indx=0;    // start at beginning of array
+        lastWaveform = whichWaveform;    // set for next pass through this function.
+    }
+    
+    // Convert unsigned 16-bit input to a signed 16-bit integer. This preserves bit values. Direct conversion to 32-bit 
+    // signed gives incorrect result
     tmp16 = (int16_t)value;
     
     if(indx < gs_numArrayVals) { // Kludge protection measure: to be improved
@@ -285,66 +293,66 @@ void setWaveformValue(uint16_t value, uint16_t whichWaveform) {
         else{
             gs_outputWaveform2[indx] = (int32_t)tmp16;
         }
-    } // TODO: add error signal of some sort if this fails
+    } // TODO: handle the situation of this test failing
     indx++;
 
 }
 
-int32_t* makeWideVelPulseWaveform(int32_t totalSteps, uint16_t numValues) {
-    // Allocates an inverted cosine waveform of a given amplitude number of values numValues. 
-    // Waveform is one period, starting and ending at 0. The waveform is intended as a velocity
-    // waveform, with the total number of steps targeted to be equal to the totalSteps input
-    // Also allocates the global zero waveform of the same length.
-    // INPUTS
-    // totalSteps is the total encoder steps to take in units of encoder steps. This will be used as a target
-    //      target in calculating the pulse amplitude, assuming this is a velocity waveform
-    uint16_t ii;
-    float x;
-    float step = 2*3.14159265359 / numValues;
-    float amplitude;
-    
-    //amplitude = (float)totalSteps / (g_velReadsPerWfUpdate * numValues);
-    amplitude = (float)totalSteps / ( numValues);
-    
-    if(gs_zeroWaveform != NULL) {
-        free(gs_zeroWaveform);
-    }
-    
-    // Allocate memory. Note: to use dynamic memory allocation, a heap must be 
-    //  ...created in the linker. See notes on project
-    int32_t* waveformArray = (int32_t*)malloc(numValues*sizeof(int32_t));
-    for(ii=0; ii<numValues; ii++) {
-        x = -amplitude * (cos(ii*step)-1.0);
-        waveformArray[ii] = (int32_t)(x+0.5);
-    }
-    
-//    g_zeroWaveform = makeZeroWaveform(numValues);  // create corresponding zero waveform
-    gs_numArrayVals = numValues;
-    return waveformArray;  
-}
+//int32_t* makeWideVelPulseWaveform(int32_t totalSteps, uint16_t numValues) {
+//    // Allocates an inverted cosine waveform of a given amplitude number of values numValues. 
+//    // Waveform is one period, starting and ending at 0. The waveform is intended as a velocity
+//    // waveform, with the total number of steps targeted to be equal to the totalSteps input
+//    // Also allocates the global zero waveform of the same length.
+//    // INPUTS
+//    // totalSteps is the total encoder steps to take in units of encoder steps. This will be used as a target
+//    //      target in calculating the pulse amplitude, assuming this is a velocity waveform
+//    uint16_t ii;
+//    float x;
+//    float step = 2*3.14159265359 / numValues;
+//    float amplitude;
+//    
+//    //amplitude = (float)totalSteps / (g_velReadsPerWfUpdate * numValues);
+//    amplitude = (float)totalSteps / ( numValues);
+//    
+//    if(gs_zeroWaveform != NULL) {
+//        free(gs_zeroWaveform);
+//    }
+//    
+//    // Allocate memory. Note: to use dynamic memory allocation, a heap must be 
+//    //  ...created in the linker. See notes on project
+//    int32_t* waveformArray = (int32_t*)malloc(numValues*sizeof(int32_t));
+//    for(ii=0; ii<numValues; ii++) {
+//        x = -amplitude * (cos(ii*step)-1.0);
+//        waveformArray[ii] = (int32_t)(x+0.5);
+//    }
+//    
+////    g_zeroWaveform = makeZeroWaveform(numValues);  // create corresponding zero waveform
+//    gs_numArrayVals = numValues;
+//    return waveformArray;  
+//}
 
 
-int32_t* makeZeroWaveform(uint16_t numValues) {
-    // Creates a waveform of zeros that is useful in bringing output to zero gracefully. Returns a pointer to the 
-    // newly-allocated array of zeros
-    
-    uint16_t ii;
-    int32_t* waveformArray = (int32_t*)malloc(numValues*sizeof(int32_t));
-    for(ii=0; ii<numValues; ii++) {
-        waveformArray[ii] = 0;
-    }
-    
-    return waveformArray;
-}
+//int32_t* makeZeroWaveform(uint16_t numValues) {
+//    // Creates a waveform of zeros that is useful in bringing output to zero gracefully. Returns a pointer to the 
+//    // newly-allocated array of zeros
+//    
+//    uint16_t ii;
+//    int32_t* waveformArray = (int32_t*)malloc(numValues*sizeof(int32_t));
+//    for(ii=0; ii<numValues; ii++) {
+//        waveformArray[ii] = 0;
+//    }
+//    
+//    return waveformArray;
+//}
 
-int32_t* makeConstWaveform(int32_t value, uint16_t numValues) {
-    // Creates a waveform of constant values 
-    
-    uint16_t ii;
-    int32_t* waveformArray = (int32_t*)malloc(numValues*sizeof(int32_t));
-    for(ii=0; ii<numValues; ii++) {
-        waveformArray[ii] = value;
-    }
-    
-    return waveformArray;
-}
+//int32_t* makeConstWaveform(int32_t value, uint16_t numValues) {
+//    // Creates a waveform of constant values 
+//    
+//    uint16_t ii;
+//    int32_t* waveformArray = (int32_t*)malloc(numValues*sizeof(int32_t));
+//    for(ii=0; ii<numValues; ii++) {
+//        waveformArray[ii] = value;
+//    }
+//    
+//    return waveformArray;
+//}

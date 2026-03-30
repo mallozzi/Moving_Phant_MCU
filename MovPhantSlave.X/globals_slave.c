@@ -47,10 +47,11 @@ volatile bool gs_startMotor;                // set to true to cause motor to sta
 // *** SECONDARY CORE GLOBAL PARAMETERS *****
 
 // Waveform parameters
-int32_t* gs_outputWaveform1 = NULL;         // pointer to output waveform for motor 1
-int32_t* gs_outputWaveform2 = NULL;         // pointer to output waveform for motor 2
-int32_t* gs_zeroWaveform = NULL;            // waveform of zeros useful for bringing output to zero gradually
-bool gs_waveformReset = true;               // true means waveform index should be reset
 
-int16_t gs_filtNumerator;                   // low-pass PWM filter parameter defined as integer numerator and denominator
+int32_t gs_outputWaveform1[MAX_WAVEFORM_SIZE];  // pointer to output waveform for motor 1
+int32_t gs_outputWaveform2[MAX_WAVEFORM_SIZE];  // pointer to output waveform for motor 2
+int32_t* gs_zeroWaveform = NULL;                // waveform of zeros useful for bringing output to zero gradually
+bool gs_waveformReset = true;                   // true means waveform index should be reset
+
+int16_t gs_filtNumerator;                       // low-pass PWM filter parameter defined as integer numerator and denominator
 int16_t gs_filtDenominator; 
