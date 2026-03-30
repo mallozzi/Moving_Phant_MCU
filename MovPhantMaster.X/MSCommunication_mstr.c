@@ -165,6 +165,9 @@ void receiveVariableFromSecondary() {
     // Reads 16-bit variable from Master-Slave Fifo and sets the appropriate primary core variable
     Variable whichVar;
     uint16_t fifoVal;
+    
+    // disable timer1 interrupt
+    IEC0bits.T1IE = 0;
        
     // First entry in FIFO is a Variable type that identifies which variable is being sent.
     while(MSI1FIFOCSbits.RFEMPTY);          // wait for next FIFO data to come through
@@ -184,6 +187,9 @@ void receiveVariableFromSecondary() {
         default:
             break;
     }
+    
+    // re-enable timer1 interrupt
+    IEC0bits.T1IE = 1;
 }
 
 void receive32bVariableFromSecondary() {
@@ -234,6 +240,9 @@ void receiveBoolVarFromSecondary() {
     BoolVariable whichVar;
     bool fifoVal;
     
+    // disable timer1 interrupt
+    IEC0bits.T1IE = 0;
+    
     // First entry in FIFO is a Variable type that identifies which variable is being sent.
     while(MSI1FIFOCSbits.RFEMPTY);          // wait for next FIFO data to come through
     whichVar = MRSWFDATA;                   // which variable
@@ -250,6 +259,9 @@ void receiveBoolVarFromSecondary() {
         default:
             break;
     }
+    
+    // re-enable timer1 interrupt
+    IEC0bits.T1IE = 1;
 }
 
 void enableMSFifo() {

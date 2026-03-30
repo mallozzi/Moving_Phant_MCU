@@ -14,6 +14,7 @@
 #include "config_slave.h"
 #include "enums_slave.h"
 #include "MSCommunication_slv.h"
+#include "StateManagement_slv.h"
 
 
 
@@ -122,6 +123,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
         // Every outputUpdatePeriod interrupts update the pwm output. For pwm period of 50 microseconds, this is once every 2.5 milliseconds.
         // Within the loop, alternate updating motor 1 and motor 2 outputs, so that motor 1 is updated at the beginning of an
         // ...update period, and motor 2 is updated halfway through the update period.
+        //setLED2(1);
         if(interruptCount == motorUpdateHalfInterval) {      // time to update output to motor with whatever is currently requested
             if(!gs_stopMotors) { // normal condition - no call to zero the output position            
                 setMotorOutput1(gs_pwm1Cycles);
@@ -161,6 +163,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
 //        
     }
     else { // if gs_output1Enabled is false
+        //setLED2(0);
         waveform1Count = 0;
         wf1_ind = 0;
         setMotorOutput1(gs_pwm1Cycles);  // if output is disabled, gs_pwm1Cycles will be decayed to zero in Timer1 interrupt loop in primary core
@@ -178,6 +181,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
         
         if(interruptCount >= motorUpdateFullInterval) {      // time to update output to motor with whatever is currently requested
  //           LATBbits.LATB1 = 1;
+ //           setLED2(1);
             if(!gs_stopMotors) { // normal condition - no call to zero the output position            
                 setMotorOutput2(gs_pwm2Cycles);
             }

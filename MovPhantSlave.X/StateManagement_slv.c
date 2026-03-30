@@ -13,6 +13,7 @@
 void startMotion() {
     
     // Note: parameters from master must be transmitted before calling this function
+    setLED2(1);
     setUpWaveforms();
     gs_stopMotors = false;
     gs_resetWaveform = true;
@@ -28,5 +29,10 @@ void startMotion() {
 void stopMotion() {
     // The purpose of this is to have a short function to call from an I2C command
     gs_stopMotors = true;
+    setLED2(0);
     
+}
+
+void setLED2(uint16_t onoff) {
+    LATBbits.LATB1 = onoff;
 }

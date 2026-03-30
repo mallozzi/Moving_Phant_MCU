@@ -188,7 +188,7 @@ int main(void) {
          // Master does the configuration on its side, then sends a command to the secondary to do its configuration
          // and start the motion
          if(g_startMotor) {             
-             
+             setLED1(1);
             outOfBounds = false;                                // even if we are out of bounds we want to be able to walk back in
             configureDerivedQuantities();
             if(g_stepMode) {
@@ -333,7 +333,8 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         if(g_output1Enabled) { 
             
             // Diagnostic: turn on LED 1 if this code is reached
-            LATDbits.LATD10 = 1;
+ //           setLED1(1);
+           // LATDbits.LATD10 = 1;
             
             // Create a version of the demand that is ramped u slowly, then when done uses the orginal demand. Upon
             // a normal stop situation, it ramps down slowly
@@ -370,7 +371,8 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         else {  // !g_output1Enabled
             
             // Diagnostic: turn off LED 1 if this code is reached
-            LATDbits.LATD10 = 0;
+            setLED1(0);
+          //  LATDbits.LATD10 = 0;
             
             // Decay output voltage gradually. Rate of decay in ms will depend upon T1 interrupt rate
             integralDisplacement1Error = 0;

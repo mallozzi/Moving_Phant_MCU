@@ -21,6 +21,7 @@ extern "C" {
 
 void startMotion();
 void stopMotion();
+void setLED2(uint16_t onoff);
 
 
 #endif	/* STATE_MNGMNT_SLV_H */

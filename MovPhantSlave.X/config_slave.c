@@ -139,6 +139,8 @@ void setUpWaveforms() {
             gs_outputWaveform2[ii] = (gs_outputWaveform2[ii] * gs_motionAmplitudeMM2) >> scale_bit_shift;    
         }
         
+        gs_playSingleWaveformOnly = false;   // plays multiple waveforms
+        
     } // if(gs_waveformType)
 }
 
@@ -191,6 +193,11 @@ void makePosSineWaveform(int32_t amplitudeEncPP, uint16_t numValues, int32_t* wa
         waveformArray[ii] = (int32_t)(x+0.5);
     }
     
+    // Zero out the remaining array elements
+    for(ii=numValues; ii<MAX_WAVEFORM_SIZE; ii++) {
+        waveformArray[ii] = 0;
+    }
+    
 //    g_zeroWaveform = makeZeroWaveform(numValues);  // create corresponding zero waveform
 //    gs_numArrayVals = numValues;
     
@@ -227,6 +234,11 @@ void makeRampWaveform(int32_t stepSize, uint16_t numValues, int32_t* waveformArr
         }
     }
     
+    // Zero out the remaining array elements
+    for(ii=numValues; ii<MAX_WAVEFORM_SIZE; ii++) {
+        waveformArray[ii] = 0;
+    }
+    
 //    gs_numArrayVals = numValues;
 
     return;
@@ -241,6 +253,8 @@ void allocateArbitraryWaveform(uint16_t nPts) {
         gs_outputWaveform1[ii] = 0;
         gs_outputWaveform2[ii] = 0;
     }
+    
+    gs_numArrayVals = nPts;
     
     // First free existing waveform memory
     // free memory from previous waveforms
@@ -277,6 +291,7 @@ void setWaveformValue(uint16_t value, uint16_t whichWaveform) {
         gs_waveformReset = false;      // so that next incoming data value does not reset index
     }
     
+    // if we are starting transmission on different waveform than the last transmission, reset the waveform index
     if(whichWaveform != lastWaveform) {
         indx=0;    // start at beginning of array
         lastWaveform = whichWaveform;    // set for next pass through this function.

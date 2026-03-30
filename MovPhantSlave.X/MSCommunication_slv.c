@@ -15,6 +15,8 @@ void processCommandFromPrimary() {
     static uint32_t var32;
 //    static int16_t var16;
     
+    IEC4bits.PWM2IE = 0;                    // Disable PWM2 interrupt
+    
     while(SI1FIFOCSbits.SRFEMPTY);          // wait for next FIFO data to come through
     fifoCmd = SRMWFDATA;
     if(fifoCmd == START_MOTION) {
@@ -28,12 +30,16 @@ void processCommandFromPrimary() {
         send32bVariableToPrimary(QUAD_ENC_POS, var32);
     }
     
+    IEC4bits.PWM2IE = 1;                    // Re-enable PWM2 interrupt
+    
 }
 
 void receiveVariableFromPrimary() {
     // Reads 16-bit variable from Master-Slave Fifo and sets the appropriate secondary core variable
     Variable whichVar;
     uint16_t fifoVal;
+    
+    IEC4bits.PWM2IE = 0;                    // Disable PWM2 interrupt
     
     // First entry in FIFO is a Variable type that identifies which variable is being sent.
     while(SI1FIFOCSbits.SRFEMPTY);          // wait for next FIFO data to come through
@@ -93,6 +99,8 @@ void receiveVariableFromPrimary() {
         default:
             break;
     }
+    
+    IEC4bits.PWM2IE = 1;                    // Re-enable PWM2 interrupt
 }
 
 void receive32bVariableFromPrimary() {
@@ -100,6 +108,8 @@ void receive32bVariableFromPrimary() {
     Variable32 whichVar;
     uint16_t fifoVal;
     uint32_t var32;
+    
+    IEC4bits.PWM2IE = 0;                    // Disable PWM2 interrupt
     
     // First entry in FIFO is a Variable type that identifies which variable is being sent.
     while(SI1FIFOCSbits.SRFEMPTY);          // wait for next FIFO data to come through
@@ -135,12 +145,16 @@ void receive32bVariableFromPrimary() {
         default:
             break;
     }
+    
+    IEC4bits.PWM2IE = 1;                    // Re-enable PWM2 interrupt
 }
 
 void receiveBoolVarFromPrimary() {
     // Reads boolean variable from Master-Slave Fifo and sets the appropriate secondary core variable
     BoolVariable whichVar;
     bool fifoVal;
+    
+    IEC4bits.PWM2IE = 0;                    // Disable PWM2 interrupt
     
     // First entry in FIFO is a Variable type that identifies which variable is being sent.
     while(SI1FIFOCSbits.SRFEMPTY);          // wait for next FIFO data to come through
@@ -166,6 +180,8 @@ void receiveBoolVarFromPrimary() {
         default:
             break;
     }
+    
+    IEC4bits.PWM2IE = 1;                    // Re-enable PWM2 interrupt
 }
 
 void processPingRequest() {
