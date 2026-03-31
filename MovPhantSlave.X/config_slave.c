@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "config_slave.h"
 #include "globals_slave.h"
+#include "StateManagement_slv.h"
 
 void configSlaveInitial() {
     
@@ -248,8 +249,12 @@ void allocateArbitraryWaveform(uint16_t nPts) {
     // Allocates the array for an arbitrary waveform that later gets populated from values transmitted from CPU
     uint16_t ii;
     
+    
     // clear all waveform points
     for(ii=0; ii<MAX_WAVEFORM_SIZE; ii++){
+        if(ii > 200) {
+           // setLED2(1);
+        }
         gs_outputWaveform1[ii] = 0;
         gs_outputWaveform2[ii] = 0;
     }
@@ -308,8 +313,15 @@ void setWaveformValue(uint16_t value, uint16_t whichWaveform) {
         else{
             gs_outputWaveform2[indx] = (int32_t)tmp16;
         }
-    } // TODO: handle the situation of this test failing
-    indx++;
+        if(indx > 200) {
+            setLED2(1);
+        }
+        indx++;
+    } 
+    else {      // TODO: handle the situation of this test failing
+      //  setLED2(1);
+    }
+    
 
 }
 

@@ -209,13 +209,17 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         g_statusFlags = dataVal;
     }
     else if(regNum == REG_REC_DATA) {
+        IEC0bits.T1IE = 0;                  // Disable Timer1 interrupt temporarily 
         allocateWaveforms(dataVal);    // sends command to secondary to allocate waveforms with num points = dataVal
+        IEC0bits.T1IE = 1;                  // Re-enable Timer1 interrupt
     }
     else if(regNum == REG_WHICH_WAVEFORM) {
         g_whichWaveform = dataVal;    // this should be done before REG_DATA_VAL block
     }
     else if(regNum == REG_DATA_VAL) {
+        IEC0bits.T1IE = 0;                  // Disable Timer1 interrupt temporarily 
         sendDataValToSecondary(dataVal);
+        IEC0bits.T1IE = 1;                  // Re-enable Timer1 interrupt
     }
     
 

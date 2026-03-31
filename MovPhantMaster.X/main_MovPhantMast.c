@@ -103,7 +103,7 @@ int main(void) {
     configureQuadEncoder();
 
 
-    INTCON2bits.GIE  = 1;    //global interrupt enable
+   // INTCON2bits.GIE  = 1;    //global interrupt enable
     
     _program_secondary(1,0,MovPhantSlave);
     _start_secondary();
@@ -121,15 +121,18 @@ int main(void) {
     // Make RB11 digital input for pushbutton
  //   TRISBbits.TRISB11 = 1;
     uint32_t blinkCounter=0;                // counter for LED blink
-    uint32_t blinkCounterMax = 500000;       // determines blink rate
+    uint32_t blinkCounterMax = 500000;      // determines blink rate
     uint32_t readCounter = 0;               // counter for secondary quad encoder read
-    uint32_t readCounterMax = 10;          // determines interval to read secondary quad encoder
+    uint32_t readCounterMax = 10;           // determines interval to read secondary quad encoder
     bool outOfBounds = false;               // if proximity sensor detects out of bounds starting state
     
     // Watchdog timer
     volatile unsigned *wdtKey; 
     wdtKey = (&WDTCONH);
+    
+    readSecondaryQuadEncoder();             // Perform initial read of secondary quadrature encoder
 
+    INTCON2bits.GIE  = 1;    //global interrupt enable
     while(1) {
         // IMPORTANT NOTE ABOUT DELAYS IN THIS LOOP:
         // Substantial delays should not be put in the main while loop, as the design of the 
@@ -174,8 +177,10 @@ int main(void) {
         // Read the secondary quadrature encoder position with every pass. The position is updated in the 
         // ...g_secondaryQuadEncPos variable very frequently and is therefore up to date wherever else it is needed,
         // ...as this main loop executes very quickly when no interrupt service routine is executing.
-        if(readCounter > readCounterMax) {
+        if(readCounter > readCounterMax && g_output2Enabled) {
+            INTCON2bits.GIE  = 0;    //global interrupt disable toi avoid fifo conflicts
             readSecondaryQuadEncoder();
+            INTCON2bits.GIE  = 1;    //global interrupt enable
             readCounter=0;
         }
         else{
@@ -188,7 +193,7 @@ int main(void) {
          // Master does the configuration on its side, then sends a command to the secondary to do its configuration
          // and start the motion
          if(g_startMotor) {             
-             setLED1(1);
+            // setLED1(1);
             outOfBounds = false;                                // even if we are out of bounds we want to be able to walk back in
             configureDerivedQuantities();
             if(g_stepMode) {
@@ -371,7 +376,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         else {  // !g_output1Enabled
             
             // Diagnostic: turn off LED 1 if this code is reached
-            setLED1(0);
+           // setLED1(0);
           //  LATDbits.LATD10 = 0;
             
             // Decay output voltage gradually. Rate of decay in ms will depend upon T1 interrupt rate

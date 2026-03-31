@@ -11,7 +11,7 @@
 void sendCommandToSecondary(Command whichCommand) {
     // Sends a command to the secondary through the MS FIFO. It is important not to
     // allow FIFO writes to get interrupted or else the data stream can be corrupted
-    
+        
     IEC0bits.T1IE = 0;                  // Disable Timer1 interrupt temporarily
             
     // Send register that identifies it as a command.

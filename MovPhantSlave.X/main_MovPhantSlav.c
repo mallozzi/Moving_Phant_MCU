@@ -163,7 +163,6 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
 //        
     }
     else { // if gs_output1Enabled is false
-        //setLED2(0);
         waveform1Count = 0;
         wf1_ind = 0;
         setMotorOutput1(gs_pwm1Cycles);  // if output is disabled, gs_pwm1Cycles will be decayed to zero in Timer1 interrupt loop in primary core

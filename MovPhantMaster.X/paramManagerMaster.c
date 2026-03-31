@@ -17,5 +17,6 @@ void sendDataValToSecondary(uint16_t val) {
 }
 
 void allocateWaveforms(uint16_t nPts) {
+    setLED1(1);
     sendVariableToSecondary(WAVEFORM_NPTS, nPts);
 }

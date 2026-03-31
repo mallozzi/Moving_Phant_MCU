@@ -40,6 +40,7 @@ void startMotion() {
 void stopMotion() {
     // The purpose of this is to have a short function to call from an I2C command
     sendCommandToSecondary(STOP_MOTION);
+    setLED1(0);
     // For diagnostics - turn off LED 1
 //    LATDbits.LATD10 = 0;
 //    g_outputWaveform = g_zeroWaveform;

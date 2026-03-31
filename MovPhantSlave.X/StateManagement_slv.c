@@ -13,7 +13,7 @@
 void startMotion() {
     
     // Note: parameters from master must be transmitted before calling this function
-    setLED2(1);
+    //setLED2(1);
     setUpWaveforms();
     gs_stopMotors = false;
     gs_resetWaveform = true;
