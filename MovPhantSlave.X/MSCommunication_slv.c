@@ -83,8 +83,11 @@ void receiveVariableFromPrimary() {
         case FREQ_USER:
             gs_freqUser = fifoVal;
             break;
-        case ENCODER_STEPS_PER_MM:
-            gs_encoderStepsPerMM = fifoVal;
+        case ENCODER_STEPS_PER_MM_1:
+            gs_encoderStepsPerMM_1 = fifoVal;
+            break;
+        case ENCODER_STEPS_PER_MM_2:
+            gs_encoderStepsPerMM_2 = fifoVal;
             break;
         case WAVEFORM_NPTS:
             allocateArbitraryWaveform(fifoVal);

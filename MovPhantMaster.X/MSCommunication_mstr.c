@@ -150,7 +150,10 @@ void sendParamtersToSecondary() {
     sendVariableToSecondary(FREQ_USER, g_freqUser);
     __delay32(g_OscillatorFreq / 40000);
     
-    sendVariableToSecondary(ENCODER_STEPS_PER_MM, g_encoderStepsPerMM);
+    sendVariableToSecondary(ENCODER_STEPS_PER_MM_1, g_encoderStepsPerMM_1);
+    __delay32(g_OscillatorFreq / 40000);
+    
+    sendVariableToSecondary(ENCODER_STEPS_PER_MM_2, g_encoderStepsPerMM_2);
     __delay32(g_OscillatorFreq / 40000);
     
     sendBoolVarToSecondary(USER_MOT1_ENABLED, g_userMotor1Enable);

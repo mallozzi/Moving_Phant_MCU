@@ -13,33 +13,34 @@
 #define REG_FIRMWARE_REV 2                  // firmware revision
 #define REG_MOTION_AMPLITUDE_1 10           // amplitude (peak-to-peak) in mm of motor 1
 #define REG_WAVEFORM_TYPE   11              // waveform type
-#define REG_STEPS_PER_MM_1 12               // steps per mm
-#define REG_MAX_MOTION_AMP_1 13             // maximum allowable motion amplitude in motor 1
-#define REG_FREQ 14                         // register for frequency
-#define REG_REVERSE1 15                     // register to reverse motion direction motor 1
-#define REG_PROP_NUM1 16                    // register to set numerator of proportional feedback constant motor 1
-#define REG_PROP_DEN1 17                    // register to set denominator of proportional feedback constant motor 1
-#define REG_INT_NUM1 18                     // register to set numerator of integral feedback constant motor 1
-#define REG_INT_DEN1 19                     // register to set denominator of integral feedback constant motor 1
-#define REG_DER_NUM1 20                     // register to set numerator of derivative feedback constant motor 1
-#define REG_DER_DEN1 21                     // register to set denominator of derivative feedback constant motor 1
-#define REG_PWM_POS1_OFFSET 22              // register to set pwm position offset motor 1
-#define REG_PWM_VEL_OFFSET 23               // register to set pwm velocity offset motor 1 or motor 2
-#define REG_PROP_NUM2 24                    // register to set numerator of proportional feedback constant motor 2
-#define REG_PROP_DEN2 25                    // register to set denominator of proportional feedback constant motor 2
-#define REG_INT_NUM2 26                     // register to set numerator of integral feedback constant motor 2
-#define REG_INT_DEN2 27                     // register to set denominator of integral feedback constant motor 2
-#define REG_DER_NUM2 28                     // register to set numerator of derivative feedback constant motor 2
-#define REG_DER_DEN2 29                     // register to set denominator of derivative feedback constant motor 2
-#define REG_PWM_POS2_OFFSET 30              // register to set pwm position offset motor 2
-#define REG_MOTION_AMPLITUDE_2 31           // amplitude (peak-to-peak) in mm of motor 2
-#define REG_REVERSE2 32                     // register to reverse motion direction motor 2
-#define REG_MOT1_ENABLED 33                 // register to enable motor 1
-#define REG_MOT2_ENABLED 34                 // register to enable motor 2
-#define REG_STATUS_FLAGS 35                 // get the status flags byte
-#define REG_REC_DATA 36                     // prepare for data transmission from CPU to MCU
-#define REG_WHICH_WAVEFORM 37               // identifies which motor (1 or 2) the data being sent from primary to secondary belongs to
-#define REG_DATA_VAL 38                     // data value transmission from CPU to MCU
+#define REG_STEPS_PER_MM_1 12               // steps per mm motor 1 (HF)
+#define REG_STEPS_PER_MM_2 13               // steps per mm motor 1 (HF)
+#define REG_MAX_MOTION_AMP_1 14             // maximum allowable motion amplitude in motor 1
+#define REG_FREQ 15                         // register for frequency
+#define REG_REVERSE1 16                     // register to reverse motion direction motor 1
+#define REG_PROP_NUM1 17                    // register to set numerator of proportional feedback constant motor 1
+#define REG_PROP_DEN1 18                    // register to set denominator of proportional feedback constant motor 1
+#define REG_INT_NUM1 19                     // register to set numerator of integral feedback constant motor 1
+#define REG_INT_DEN1 20                     // register to set denominator of integral feedback constant motor 1
+#define REG_DER_NUM1 21                     // register to set numerator of derivative feedback constant motor 1
+#define REG_DER_DEN1 22                     // register to set denominator of derivative feedback constant motor 1
+#define REG_PWM_POS1_OFFSET 23              // register to set pwm position offset motor 1
+#define REG_PWM_VEL_OFFSET 24               // register to set pwm velocity offset motor 1 or motor 2
+#define REG_PROP_NUM2 25                    // register to set numerator of proportional feedback constant motor 2
+#define REG_PROP_DEN2 26                    // register to set denominator of proportional feedback constant motor 2
+#define REG_INT_NUM2 27                     // register to set numerator of integral feedback constant motor 2
+#define REG_INT_DEN2 28                     // register to set denominator of integral feedback constant motor 2
+#define REG_DER_NUM2 29                     // register to set numerator of derivative feedback constant motor 2
+#define REG_DER_DEN2 30                     // register to set denominator of derivative feedback constant motor 2
+#define REG_PWM_POS2_OFFSET 31              // register to set pwm position offset motor 2
+#define REG_MOTION_AMPLITUDE_2 32           // amplitude (peak-to-peak) in mm of motor 2
+#define REG_REVERSE2 33                     // register to reverse motion direction motor 2
+#define REG_MOT1_ENABLED 34                 // register to enable motor 1
+#define REG_MOT2_ENABLED 35                 // register to enable motor 2
+#define REG_STATUS_FLAGS 36                 // get the status flags byte
+#define REG_REC_DATA 37                     // prepare for data transmission from CPU to MCU
+#define REG_WHICH_WAVEFORM 38               // identifies which motor (1 or 2) the data being sent from primary to secondary belongs to
+#define REG_DATA_VAL 39                     // data value transmission from CPU to MCU
 
 
 
@@ -134,7 +135,10 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         g_maxDisplacementMM = dataVal;  
     }
     else if(regNum == REG_STEPS_PER_MM_1) {
-        g_encoderStepsPerMM = dataVal;
+        g_encoderStepsPerMM_1 = dataVal;
+    }
+    else if(regNum == REG_STEPS_PER_MM_2) {
+        g_encoderStepsPerMM_2 = dataVal;
     }
     else if(regNum == REG_WAVEFORM_TYPE) {
         g_waveformType = dataVal;
@@ -241,7 +245,10 @@ uint16_t getRegisterValue(uint8_t regNum) {
         val = g_maxDisplacementMM;
     }
     else if (regNum == REG_STEPS_PER_MM_1) {
-        val = g_encoderStepsPerMM;
+        val = g_encoderStepsPerMM_1;
+    }
+    else if (regNum == REG_STEPS_PER_MM_2) {
+        val = g_encoderStepsPerMM_2;
     }
     else if(regNum == REG_WAVEFORM_TYPE) {
         val = g_waveformType;

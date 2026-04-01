@@ -130,9 +130,10 @@ int main(void) {
     volatile unsigned *wdtKey; 
     wdtKey = (&WDTCONH);
     
+    INTCON2bits.GIE  = 0;                   // disable global interrupts
     readSecondaryQuadEncoder();             // Perform initial read of secondary quadrature encoder
-
-    INTCON2bits.GIE  = 1;    //global interrupt enable
+    INTCON2bits.GIE  = 1;                   //global interrupt enable
+    
     while(1) {
         // IMPORTANT NOTE ABOUT DELAYS IN THIS LOOP:
         // Substantial delays should not be put in the main while loop, as the design of the 
@@ -178,7 +179,7 @@ int main(void) {
         // ...g_secondaryQuadEncPos variable very frequently and is therefore up to date wherever else it is needed,
         // ...as this main loop executes very quickly when no interrupt service routine is executing.
         if(readCounter > readCounterMax && g_output2Enabled) {
-            INTCON2bits.GIE  = 0;    //global interrupt disable toi avoid fifo conflicts
+            INTCON2bits.GIE  = 0;    //global interrupt disable to avoid fifo conflicts
             readSecondaryQuadEncoder();
             INTCON2bits.GIE  = 1;    //global interrupt enable
             readCounter=0;
@@ -320,7 +321,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         }
         // Convert displacement to a pwm output for external position analog signal output.
         // This is not part of the feedback calculation, just an external signal for monitoring position
-        pwmPosition1 = ( __builtin_divsd(displacement1, g_encoderToPwmDenom) + (int32_t)g_pwm1ZeroOffset );
+        pwmPosition1 = ( __builtin_divsd(displacement1, g_encoderToPwmDenom_1) + (int32_t)g_pwm1ZeroOffset );
         
         // clip the output if it goes out of bounds
         if(pwmPosition1 < 0) {
@@ -428,7 +429,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         }
         // Convert displacement to a pwm output for external position analog signal output.
         // This is not part of the feedback calculation, just an external signal for monitoring position
-        pwmPosition2 = ( __builtin_divsd(displacement2, g_encoderToPwmDenom) + (int32_t)g_pwm2ZeroOffset );
+        pwmPosition2 = ( __builtin_divsd(displacement2, g_encoderToPwmDenom_2) + (int32_t)g_pwm2ZeroOffset );
         
         // clip the output if it goes out of bounds
         if(pwmPosition2 < 0) {

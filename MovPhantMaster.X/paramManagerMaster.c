@@ -3,6 +3,7 @@
 #include "paramManagerMaster.h"
 #include "enums.h"
 #include "MSCommunication_mstr.h"
+#include "StateManagement.h"
 
 
 // General Parameter management
@@ -17,6 +18,5 @@ void sendDataValToSecondary(uint16_t val) {
 }
 
 void allocateWaveforms(uint16_t nPts) {
-    setLED1(1);
     sendVariableToSecondary(WAVEFORM_NPTS, nPts);
 }

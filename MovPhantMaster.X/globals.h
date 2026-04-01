@@ -78,7 +78,8 @@ extern bool g_faultDetected;
 extern uint16_t g_pwm1ZeroOffset;               // offset for motor 1 position output. This will be the pwm output for zero position
 extern uint16_t g_pwm2ZeroOffset;               // offset for motor 2 position output. This will be the pwm output for zero speed
 extern uint16_t g_pwm3ZeroOffset;               // offset for velocity output. This will be the pwm output for zero speed
-extern int16_t g_encoderToPwmDenom;             // divisor for position encoder steps to pwm output for analog position output pwm (pwm2))
+extern int16_t g_encoderToPwmDenom_1;           // divisor for position encoder steps to pwm output for analog position output pwm (pwm2) for motor 1)
+extern int16_t g_encoderToPwmDenom_2;           // divisor for position encoder steps to pwm output for analog position output pwm (pwm2) for motor 2)
 
 // Timer1 interrupt period sets the update rate of the feedback loop
 extern uint16_t g_feedbackHalfUpdatePeriod;     // Timer1 interrupt period in units of Timer1 cycles. Feedback output for each motor is updated every two of these periods
@@ -109,7 +110,8 @@ extern volatile int32_t g_displacement2Demand;   // Demand for encoder displacem
 // Quadrature Encoder parameters
 extern uint32_t g_encoder1ZeroPos;              // quadrature encoder zero position. This is a short-term reference position
 extern uint32_t g_encoder2ZeroPos;              // quadrature encoder zero position. This is a short-term reference position
-extern uint16_t g_encoderStepsPerMM;            // Number of encoder steps per mm of travel
+extern uint16_t g_encoderStepsPerMM_1;          // Number of encoder steps per mm of travel motor 1 (HF)
+extern uint16_t g_encoderStepsPerMM_2;          // Number of encoder steps per mm of travel motor 2 (LR)
 extern uint32_t g_landmark1Position;            // Position of Landmark for motor 1 in encoder units
 extern uint32_t g_landmark2Position;            // Position of Landmark for motor 2 in encoder units
 

@@ -33,7 +33,8 @@ uint32_t gs_waveformTimeStep_microS;        // Time between each element of the 
 
 
 // Quadrature Encoder parameters
-uint16_t gs_encoderStepsPerMM;               // Number of encoder steps per mm of travel
+uint16_t gs_encoderStepsPerMM_1;               // Number of encoder steps per mm of travel for motor 1 (HF)
+uint16_t gs_encoderStepsPerMM_2;               // Number of encoder steps per mm of travel for motor 2 (LR)
 
 // Commands and other output-related variables
 volatile bool gs_stopMotors;                // variable to cause zero voltage output when true

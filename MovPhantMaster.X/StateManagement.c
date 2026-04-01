@@ -87,9 +87,12 @@ void gotoLandmark() {
     uint16_t posLowByte;
     uint32_t posHighByte;
     uint32_t currentPosition;
-    int32_t encoderSteps;
-    int16_t travelDistMM;       // signed distance to travel in mm
-    int16_t encoderStepsPerMM; 
+    int32_t encoderSteps1;
+    int32_t encoderSteps2;
+    int16_t travelDistMM1;       // signed distance to travel in mm motor 1
+    int16_t travelDistMM2;       // signed distance to travel in mm motor 2
+    int16_t encoderStepsPerMM1; 
+    int16_t encoderStepsPerMM2; 
     
     // Motor 1
     // ...Read current position
@@ -98,33 +101,32 @@ void gotoLandmark() {
     currentPosition = (posHighByte << 16) + posLowByte;
     
     // ...figure out how far to travel
-    encoderStepsPerMM = (int16_t)g_encoderStepsPerMM;           
-    encoderSteps = g_landmark1Position - currentPosition;
-    travelDistMM = (int16_t)( (encoderSteps + encoderStepsPerMM/2) / encoderStepsPerMM );
+    encoderStepsPerMM1 = (int16_t)g_encoderStepsPerMM_1;           
+    encoderSteps1 = g_landmark1Position - currentPosition;
+    travelDistMM1 = (int16_t)( (encoderSteps1 + encoderStepsPerMM1/2) / encoderStepsPerMM1 );
     
-    if(travelDistMM >= 0) {
-        g_motionAmplitudeMM1 = (uint16_t)travelDistMM;
+    if(travelDistMM1 >= 0) {
+        g_motionAmplitudeMM1 = (uint16_t)travelDistMM1;
         g_reverseDirection1 = 0;
     }
     else {
-        g_motionAmplitudeMM1 = (uint16_t)(-travelDistMM);
+        g_motionAmplitudeMM1 = (uint16_t)(-travelDistMM1);
         g_reverseDirection1 = 1;
     }
     
     // Motor 2
-    // ... read current position
-//    readSecondaryQuadEncoder();         // encoder position is in g_secondaryQuadEncPos
     
     // ... figure out how far to travel
-    encoderSteps = g_landmark2Position - g_secondaryQuadEncPos;
-    travelDistMM = (int16_t)( (encoderSteps + encoderStepsPerMM/2) / encoderStepsPerMM );
+    encoderStepsPerMM2 = (int16_t)g_encoderStepsPerMM_2;
+    encoderSteps2 = g_landmark2Position - g_secondaryQuadEncPos;
+    travelDistMM2 = (int16_t)( (encoderSteps2 + encoderStepsPerMM2/2) / encoderStepsPerMM2 );
     
-    if(travelDistMM >= 0) {
-        g_motionAmplitudeMM2 = (uint16_t)travelDistMM;
+    if(travelDistMM2 >= 0) {
+        g_motionAmplitudeMM2 = (uint16_t)travelDistMM2;
         g_reverseDirection2 = 0;
     }
     else {
-        g_motionAmplitudeMM2 = (uint16_t)(-travelDistMM);
+        g_motionAmplitudeMM2 = (uint16_t)(-travelDistMM2);
         g_reverseDirection2 = 1;
     }
  

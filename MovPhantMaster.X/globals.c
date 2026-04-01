@@ -58,7 +58,8 @@ int16_t g_pwm2Cycles;                   // Duty cycle parameter for PWM1
 uint16_t g_pwm1ZeroOffset;               // offset for motor 1 position output. This will be the pwm output for zero position
 uint16_t g_pwm2ZeroOffset;               // offset for velocity output. This will be the pwm output for zero speed. 
 uint16_t g_pwm3ZeroOffset;
-int16_t g_encoderToPwmDenom;             // divisor for position encoder steps to pwm output for analog position output pwm (pwm2))
+int16_t g_encoderToPwmDenom_1;             // divisor for position encoder steps to pwm output for analog position output pwm for motor 1)
+int16_t g_encoderToPwmDenom_2;             // divisor for position encoder steps to pwm output for analog position output pwm for motor 2)
 
 // Timer1 interrupt period sets the update rate of the feedback loop
 uint16_t g_feedbackHalfUpdatePeriod;    // Timer1 interrupt period in units of Timer1 cycles. Feedback output for each motor is updated every two of these periods
@@ -67,7 +68,8 @@ uint16_t g_timer1Prescale;              // Pre-scale factor in Timer1 configurat
 // Quadrature Encoder parameters
 uint32_t g_encoder1ZeroPos;              // quadrature encoder zero position
 uint32_t g_encoder2ZeroPos;              // quadrature encoder zero position
-uint16_t g_encoderStepsPerMM;            // Number of encoder steps per mm of travel
+uint16_t g_encoderStepsPerMM_1;          // Number of encoder steps per mm of travel motor 1 (HF)
+uint16_t g_encoderStepsPerMM_2;          // Number of encoder steps per mm of travel motor 2 (LR)
 uint32_t g_landmark1Position;            // Position of Landmark for motor 1 in encoder units
 uint32_t g_landmark2Position;            // Position of Landmark for motor 2 in encoder units
 

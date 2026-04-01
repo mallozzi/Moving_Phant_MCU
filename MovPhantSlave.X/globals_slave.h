@@ -56,7 +56,8 @@ extern volatile int32_t gs_displacement2Demand;     // Demand for encoder displa
 
 
 // Quadrature Encoder parameters
-extern uint16_t gs_encoderStepsPerMM;               // Number of encoder steps per mm of travel
+extern uint16_t gs_encoderStepsPerMM_1;             // Number of encoder steps per mm of travel for motor 1 (HF)
+extern uint16_t gs_encoderStepsPerMM_2;             // Number of encoder steps per mm of travel for motor 2 (LR)
 
 // Commands and other output-related variables
 extern volatile bool gs_stopMotors;              // variable to cause zero voltage output when true

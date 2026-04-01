@@ -64,8 +64,9 @@ void configureInitial() {
     g_pwm1ZeroOffset = 6756;
     g_pwm2ZeroOffset = 6756;
     g_pwm3ZeroOffset = 6758;
-    g_encoderToPwmDenom = 50;           // Encoder has 4000 steps per turn of motor (not geared output shaft). 
-                                        // Note this gets overwritten in configureDerivedQuantities()
+    g_encoderToPwmDenom_1 = 50;          // Overwritten in configureDerivedQuantities()
+    g_encoderToPwmDenom_2 = 50;          // Overwritten in configureDerivedQuantities()
+                                          
     
     // Timer1 interrupt period sets the update rate of the feedback loop
     // With instruction cycle at 64 MIPS and prescaler set to 256:1, 2500 is every 10 milliseconds for a half update period.
@@ -103,8 +104,9 @@ void configureInitial() {
     
     g_displacement1Demand = 0;       // Set the demand to the current position so that no initial output is created from feedback loop
     g_displacement2Demand = 0;       // Set the demand to the current position so that no initial output is created from feedback loop
-    g_encoderStepsPerMM = 500;
-    g_maxDisplacementMM = 50;       // This will be overwritten by software
+    g_encoderStepsPerMM_1 = 500;     // overwritten by software
+    g_encoderStepsPerMM_2 = 500;     // overwritten by software
+    g_maxDisplacementMM = 50;        // This will be overwritten by software
  
     // Feedback Parameters. For safety, initialize for no signal. Will be replaced at runtime
     g_propConstNum1 = 0;
@@ -269,7 +271,8 @@ void configureDerivedQuantities() {
     }
     
     // Configures the PWM-output-to-position encoder for analog output signal
-    g_encoderToPwmDenom = (int16_t)(  (float)(g_maxDisplacementMM) * (float)(g_encoderStepsPerMM) / (float)g_maxPWMInteger + 0.5);
+    g_encoderToPwmDenom_1 = (int16_t)(  (float)(g_maxDisplacementMM) * (float)(g_encoderStepsPerMM_1) / (float)g_maxPWMInteger + 0.5);
+    g_encoderToPwmDenom_2 = (int16_t)(  (float)(g_maxDisplacementMM) * (float)(g_encoderStepsPerMM_2) / (float)g_maxPWMInteger + 0.5);
     
     // Calculates the time between each step in the waveform playout. Depends upon configuration of the PWM and the number of interrupts.
     // This will determine how many points are in the waveform array
