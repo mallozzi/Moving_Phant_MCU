@@ -10,6 +10,7 @@
 //    return result;
 //}
 
+
 int16_t MultiplyByFraction(int16_t input, int16_t numerator, int16_t denominator) {
     // Multiplies the input by the fraction numerator/denominator. Uses hardware implementations,
     // which are extremely fast.

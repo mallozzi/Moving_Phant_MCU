@@ -21,7 +21,7 @@ void setMotorOutput1(int16_t pwmSignedDutyCycleInt) {
     static uint16_t pwmDutyCycleInt=0;
     static int16_t oldSignedPwmDutyCycleInt=0;
     
-    // Low-pass filter the changes
+    // Low-pass filter the changes. See notes on discrete low-pass filtering.
     newPwmVal = MultiplyByFraction(oldPwmVal-oldSignedPwmDutyCycleInt, gs_filtNumerator, gs_filtDenominator) + oldSignedPwmDutyCycleInt;
     oldPwmVal = newPwmVal;
     oldSignedPwmDutyCycleInt = pwmSignedDutyCycleInt;
@@ -61,7 +61,7 @@ void setMotorOutput2(int16_t pwmSignedDutyCycleInt) {
     static uint16_t pwmDutyCycleInt=0;
     static int16_t oldSignedPwmDutyCycleInt=0;
     
-    // Low-pass filter the changes
+    // Low-pass filter the changes. See notes on discrete low-pass filtering.
     newPwmVal = MultiplyByFraction(oldPwmVal-oldSignedPwmDutyCycleInt, gs_filtNumerator, gs_filtDenominator) + oldSignedPwmDutyCycleInt;
     oldPwmVal = newPwmVal;
     oldSignedPwmDutyCycleInt = pwmSignedDutyCycleInt;

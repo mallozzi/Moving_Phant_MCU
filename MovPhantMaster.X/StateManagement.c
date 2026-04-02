@@ -26,8 +26,9 @@ void startMotion() {
     // First issue a stop motion command in case the motion is already happening
     stopMotion();
     
-    // For diagnostics - turn on LED 1
-  //  LATDbits.LATD10 = 1;
+    INTCON2bits.GIE  = 0;                   // disable global interrupts
+    readSecondaryQuadEncoder();             // Perform initial read of secondary quadrature encoder
+    INTCON2bits.GIE  = 1;                   //global interrupt enable
     
     // delay to  make sure slave core stops output. g_OscillatorFreq / 40000 is about 50 microseconds.
     // Be careful not to make this any longer than it needs to be, or slave-write-master-read FIFO could fill up

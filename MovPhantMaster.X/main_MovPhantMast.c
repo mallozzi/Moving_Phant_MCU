@@ -134,6 +134,7 @@ int main(void) {
     readSecondaryQuadEncoder();             // Perform initial read of secondary quadrature encoder
     INTCON2bits.GIE  = 1;                   //global interrupt enable
     
+    
     while(1) {
         // IMPORTANT NOTE ABOUT DELAYS IN THIS LOOP:
         // Substantial delays should not be put in the main while loop, as the design of the 
@@ -178,7 +179,7 @@ int main(void) {
         // Read the secondary quadrature encoder position with every pass. The position is updated in the 
         // ...g_secondaryQuadEncPos variable very frequently and is therefore up to date wherever else it is needed,
         // ...as this main loop executes very quickly when no interrupt service routine is executing.
-        if(readCounter > readCounterMax && g_output2Enabled) {
+        if(readCounter > readCounterMax) {
             INTCON2bits.GIE  = 0;    //global interrupt disable to avoid fifo conflicts
             readSecondaryQuadEncoder();
             INTCON2bits.GIE  = 1;    //global interrupt enable
@@ -338,10 +339,6 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
  //       rampNumerator++;
         if(g_output1Enabled) { 
             
-            // Diagnostic: turn on LED 1 if this code is reached
- //           setLED1(1);
-           // LATDbits.LATD10 = 1;
-            
             // Create a version of the demand that is ramped u slowly, then when done uses the orginal demand. Upon
             // a normal stop situation, it ramps down slowly
             if(fullyRamped) {
@@ -376,13 +373,10 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         }
         else {  // !g_output1Enabled
             
-            // Diagnostic: turn off LED 1 if this code is reached
-           // setLED1(0);
-          //  LATDbits.LATD10 = 0;
-            
             // Decay output voltage gradually. Rate of decay in ms will depend upon T1 interrupt rate
             integralDisplacement1Error = 0;
-            g_pwm1Cycles = (int16_t)( (int32_t)g_pwm1Cycles*93/100 );   
+           // g_pwm1Cycles = (int16_t)( (int32_t)g_pwm1Cycles*98/100 );   original
+            g_pwm1Cycles = __builtin_divsd((int32_t)g_pwm1Cycles*98, 100);   // multiplies g_pwm1Cycles by 98/100
             g_displacement1Demand = 0;   // This probably doesn't matter anymore and should probably just be set in the secondary and removed from here.
 
             if(!g_output2Enabled) {
@@ -478,7 +472,8 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         else {  // !g_output2Enabled
             // Decay output voltage gradually. Rate of decay in ms will depend upon T1 interrupt rate
             integralDisplacement2Error = 0;
-            g_pwm2Cycles = (int16_t)( (int32_t)g_pwm2Cycles*93/100 );   
+            //g_pwm2Cycles = (int16_t)( (int32_t)g_pwm2Cycles*98/100 );   //original
+            g_pwm2Cycles = __builtin_divsd((int32_t)g_pwm2Cycles*98, 100);    // multiplies g_pwm2Cycles by 98/100
             g_displacement2Demand = 0;   // This probably doesn't matter anymore and should probably just be set in the secondary and removed from here.
             
             if(!g_output1Enabled) {     // if both motors are disabled.

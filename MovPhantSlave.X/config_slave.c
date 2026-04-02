@@ -87,7 +87,8 @@ void configureQuadEncoder() {
 void setUpWaveforms() {
     //
     
-    int16_t signedAmplitudeMM;
+    int16_t signedAmplitudeMM1;
+    int16_t signedAmplitudeMM2;
     
     // If we are not using a custom waveform, free memory from previous waveforms. Do not do this for custom
     // waveforms because the waveform data was set separately
@@ -103,30 +104,30 @@ void setUpWaveforms() {
     
         // set up motor 1 waveforms
         if(gs_reverseDirection1 == 0) {
-           signedAmplitudeMM = (int16_t)gs_motionAmplitudeMM1;     
+           signedAmplitudeMM1 = (int16_t)gs_motionAmplitudeMM1;     
         }
         else {
-            signedAmplitudeMM = -(int16_t)gs_motionAmplitudeMM1; 
+            signedAmplitudeMM1 = -(int16_t)gs_motionAmplitudeMM1; 
         }
         if(gs_waveformType == 0) {  // sine waveform
-            designPosSineWaveform2(signedAmplitudeMM, gs_encoderStepsPerMM_1, gs_outputWaveform1);      
+            designPosSineWaveform2(signedAmplitudeMM1, gs_encoderStepsPerMM_1, gs_outputWaveform1);      
         }
         else if(gs_waveformType == 1) {  //Step waveform
-            designRampWaveform2(signedAmplitudeMM, gs_encoderStepsPerMM_1, gs_outputWaveform1);
+            designRampWaveform2(signedAmplitudeMM1, gs_encoderStepsPerMM_1, gs_outputWaveform1);
         }
 
         // set up motor 2 waveforms
         if(gs_reverseDirection2 == 0) {
-           signedAmplitudeMM = (int16_t)gs_motionAmplitudeMM2;     
+           signedAmplitudeMM2 = (int16_t)gs_motionAmplitudeMM2;     
         }
         else {
-            signedAmplitudeMM = -(int16_t)gs_motionAmplitudeMM2; 
+            signedAmplitudeMM2 = -(int16_t)gs_motionAmplitudeMM2; 
         }
         if(gs_waveformType == 0) {  // sine waveform
-            designPosSineWaveform2(signedAmplitudeMM, gs_encoderStepsPerMM_2, gs_outputWaveform2);    
+            designPosSineWaveform2(signedAmplitudeMM2, gs_encoderStepsPerMM_2, gs_outputWaveform2);    
         }
         else if(gs_waveformType == 1) {  //Step waveform
-            designRampWaveform2(signedAmplitudeMM, gs_encoderStepsPerMM_2, gs_outputWaveform2);      
+            designRampWaveform2(signedAmplitudeMM2, gs_encoderStepsPerMM_2, gs_outputWaveform2);      
         }
     }
     else {   // custom waveform.
