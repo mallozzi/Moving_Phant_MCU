@@ -184,7 +184,7 @@ void designPosSineWaveform2(int16_t mmDisplacementPP, uint16_t encoderStepsPerMM
 //    posAmplitudePP = (int32_t)mmDisplacementPP * (int32_t)gs_encoderStepsPerMM_1;
 //    makePosSineWaveform(posAmplitudePP, gs_numArrayVals, waveformArray);
 ////    setOutputWaveformMotor1(waveformArray);   
-//    gs_playSingleWaveformOnly =aveforms false;   // plays multiple w
+//    gs_playSingleWaveformOnly = false;   // plays multiple waveforms
 //    return;
 //}
 
@@ -269,39 +269,39 @@ void designRampWaveform2(int16_t mmStepSize, uint16_t encoderStepsPerMM, int32_t
 //    return;  
 //}
 
-void makeRampWaveform(int32_t stepSize, uint16_t numValues, int32_t* waveformArray) {
-    // Creates a waveform meant to move the motor a defined amount. The last 10%
-    // of the waveform sits steady to allow the motor to settle.
-    // INPUTS
-    // stepSize is the number of encoder steps to move the motor
-    // numValues is the number of values in the array
-    uint16_t ii;
-    float rampValue;
-    float rampIncrement;
-    uint16_t settleInd;         // index where ramping is finished to allow settling time
-
-    
-    settleInd = (uint16_t)(numValues * 0.9);        // float operation instead of multiplying by 9/10 in case someone makes very long array causing overflow
-    rampIncrement = (float)(stepSize) / settleInd;
-    rampValue = 0;
-    
-    for(ii=0; ii<numValues; ii++) {
-        if(ii < settleInd) {
-            waveformArray[ii] = rampValue;
-            rampValue+= rampIncrement;
-        }
-        else {
-            waveformArray[ii] = rampValue;          // constant for last portion of array
-        }
-    }
-    
-    // Zero out the remaining array elements
-    for(ii=numValues; ii<MAX_WAVEFORM_SIZE; ii++) {
-        waveformArray[ii] = 0;
-    }
-
-    return;
-}
+//void makeRampWaveform(int32_t stepSize, uint16_t numValues, int32_t* waveformArray) {
+//    // Creates a waveform meant to move the motor a defined amount. The last 10%
+//    // of the waveform sits steady to allow the motor to settle.
+//    // INPUTS
+//    // stepSize is the number of encoder steps to move the motor
+//    // numValues is the number of values in the array
+//    uint16_t ii;
+//    float rampValue;
+//    float rampIncrement;
+//    uint16_t settleInd;         // index where ramping is finished to allow settling time
+//
+//    
+//    settleInd = (uint16_t)(numValues * 0.9);        // float operation instead of multiplying by 9/10 in case someone makes very long array causing overflow
+//    rampIncrement = (float)(stepSize) / settleInd;
+//    rampValue = 0;
+//    
+//    for(ii=0; ii<numValues; ii++) {
+//        if(ii < settleInd) {
+//            waveformArray[ii] = rampValue;
+//            rampValue+= rampIncrement;
+//        }
+//        else {
+//            waveformArray[ii] = rampValue;          // constant for last portion of array
+//        }
+//    }
+//    
+//    // Zero out the remaining array elements
+//    for(ii=numValues; ii<MAX_WAVEFORM_SIZE; ii++) {
+//        waveformArray[ii] = 0;
+//    }
+//
+//    return;
+//}
 
 void allocateArbitraryWaveform(uint16_t nPts) {
     // Allocates the array for an arbitrary waveform that later gets populated from values transmitted from CPU

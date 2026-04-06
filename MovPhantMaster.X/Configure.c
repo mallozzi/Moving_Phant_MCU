@@ -87,9 +87,10 @@ void configureInitial() {
     g_reverseDirection2 = 0;            // 0 for forward motion sign, 1 for reverse motion sign
     g_freqUser = 20;                    // cycles per minute. Will be overwritten by software.
     
-    // Quadrature Encoders. Initialize to halfway through their range and set landmarks to this position.
+    // Quadrature Encoders. Initialize to halfway through their range and set landmarks to this position. Set to halfway 
+    // to max 32-bit unsigned. Leaves plenty of room in either direction without rollover
     // ...motor 1
-    g_encoder1ZeroPos = 0x7FFF;      // set to halfway to max 32-bit unsigned. Leaves plenty of room in either direction without rollover
+    g_encoder1ZeroPos = 0x7FFF;       
     g_encoder1ZeroPos = (g_encoder1ZeroPos << 16);
     g_landmark1Position = g_encoder1ZeroPos;    
     // write zero position offset to position counter - Not necessary anymore, since we initialize position to 0x7FFF in quad 
@@ -171,13 +172,7 @@ void configureQuadEncoder() {
     // counter is 32 bits, so halfway through in hex is 0x7FFF FFFF
     POS1CNTH = 0x0100;      // This line seems unnecessary and may be a relic of testing. Test without it at some point
     POS1HLD = 0x7FFF;       // Write high bit to Position 1 Counter Hold Register
-    POS1CNTL = 0x0000;      // This write transfers POS1HLD into POS1CNTLH
-    
-    // Here POS1CNTH should be 0x7FFF
-    // TO DO: this line was not commented in Mov1a prototype....I believe it was a relic of a test and
-    // should be deleted once things are working
-//    POS1HLD = 0x0300;  // reset it to some other number
-       
+    POS1CNTL = 0x0000;      // This write transfers POS1HLD into POS1CNTLH     
 
 }
 

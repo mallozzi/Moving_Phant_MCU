@@ -198,6 +198,9 @@ int main(void) {
             // setLED1(1);
             outOfBounds = false;                                // even if we are out of bounds we want to be able to walk back in
             configureDerivedQuantities();
+            
+            // Clear status flags except proximity sensor violations. In step mode, we clear that too so that we can
+            // step our way back in bounds. If not in step mode, proximity sensors are read and status flag set accordingly
             if(g_stepMode) {
                 g_statusFlags = g_statusFlags & 1;              // clear status flags except for proximity sensor error
                 if( PORTCbits.RC12 && PORTCbits.RC13 ) {        // if we are in bounds, clear the proximity violation
@@ -213,9 +216,10 @@ int main(void) {
                     if( (!PORTCbits.RC12) || (!PORTCbits.RC13) ) {
                         outOfBounds = true;
                     }
-                }
-                
+                }                
             }
+            
+            // Set up parameters and send command to secondary to start motion
             if(!outOfBounds) {
                 setZeroPosition();
                 g_displacement1Demand = 0;   
@@ -226,12 +230,13 @@ int main(void) {
                 sendCommandToSecondary(START_MOTION);                  
             }
             else {
-                g_statusFlags = g_statusFlags | 1;          // set proximity sensor error status flag
-                
+                g_statusFlags = g_statusFlags | 1;          // set proximity sensor error status flag               
             }
+            
             g_startMotor = false;                           // stops code from entering this block until start button pushed again
          }
          
+        // If going to landmark was requested
          if(g_gotoLandmark) {
              gotoLandmark();
              g_gotoLandmark = false;

@@ -53,15 +53,16 @@ void stopMotion() {
 
 
 void setZeroPosition() {
-    // Reads the current encoder position register and sets that as the new zero
+    // Reads the current encoder position and sets as the new zero for each motor
     uint16_t posLowByte;
     uint32_t posHighByte;
     
+    // Motor 1
     posLowByte = POS1CNTL; // Should load POS1CNTH into POS1HLD
     posHighByte = POS1HLD;
     g_encoder1ZeroPos = (posHighByte << 16) + posLowByte;  
     
-    // Encoder 2 position is always kept up to date from reading it from the secondary
+    // Motor 2. Encoder 2 position is always kept up to date from reading it from the secondary
     g_encoder2ZeroPos = g_secondaryQuadEncPos;
 }
 
@@ -75,7 +76,7 @@ void setLandmarkPosition() {
     posHighByte = POS1HLD;
     g_landmark1Position = (posHighByte << 16) + posLowByte;
     
-//    readSecondaryQuadEncoder();
+    // Encoder 2 position is always kept up to date from reading it from the secondary
     g_landmark2Position = g_secondaryQuadEncPos;
     
     setZeroPosition();      // make the current position the reference too.
@@ -88,6 +89,7 @@ void gotoLandmark() {
     uint16_t posLowByte;
     uint32_t posHighByte;
     uint32_t currentPosition;
+    int32_t currentPositionSigned;
     int32_t encoderSteps1;
     int32_t encoderSteps2;
     int16_t travelDistMM1;       // signed distance to travel in mm motor 1
@@ -100,11 +102,13 @@ void gotoLandmark() {
     posLowByte = POS1CNTL; // Should load POS1CNTH into POS1HLD
     posHighByte = POS1HLD;
     currentPosition = (posHighByte << 16) + posLowByte;
+    currentPositionSigned = (int32_t)currentPosition;        // value will never be big enough to wrap bits
     
     // ...figure out how far to travel
     encoderStepsPerMM1 = (int16_t)g_encoderStepsPerMM_1;           
-    encoderSteps1 = g_landmark1Position - currentPosition;
-    travelDistMM1 = (int16_t)( (encoderSteps1 + encoderStepsPerMM1/2) / encoderStepsPerMM1 );
+    encoderSteps1 = (int32_t)g_landmark1Position - currentPositionSigned;
+    travelDistMM1 = __builtin_divsd(encoderSteps1 + encoderStepsPerMM1/2, encoderStepsPerMM1);  // use built in to get the rounding toward zero rather than neg infinity
+   // travelDistMM1 = (int16_t)( (encoderSteps1 + encoderStepsPerMM1/2) / encoderStepsPerMM1 );
     
     if(travelDistMM1 >= 0) {
         g_motionAmplitudeMM1 = (uint16_t)travelDistMM1;
@@ -117,10 +121,12 @@ void gotoLandmark() {
     
     // Motor 2
     
+    // Quad encoder for motor 2 is read constantly so does not have to be read here.
     // ... figure out how far to travel
     encoderStepsPerMM2 = (int16_t)g_encoderStepsPerMM_2;
-    encoderSteps2 = g_landmark2Position - g_secondaryQuadEncPos;
-    travelDistMM2 = (int16_t)( (encoderSteps2 + encoderStepsPerMM2/2) / encoderStepsPerMM2 );
+    encoderSteps2 = (int32_t)g_landmark2Position - (int32_t)g_secondaryQuadEncPos;
+    travelDistMM2 = __builtin_divsd(encoderSteps2 + encoderStepsPerMM2/2, encoderStepsPerMM2);  // use built in to get the rounding toward zero rather than neg infinity
+    //travelDistMM2 = (int16_t)( (encoderSteps2 + encoderStepsPerMM2/2) / encoderStepsPerMM2 );
     
     if(travelDistMM2 >= 0) {
         g_motionAmplitudeMM2 = (uint16_t)travelDistMM2;
