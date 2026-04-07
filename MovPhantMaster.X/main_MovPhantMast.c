@@ -114,9 +114,7 @@ int main(void) {
     g_pwm1Cycles = 0;  // begin with no output
     g_pwm2Cycles = 0;  // begin with no output
     startTimer1(g_feedbackHalfUpdatePeriod);  // argument determines Timer1 interrupt interval in units of Timer1 periods
-    
- //   __delay32(g_OscillatorFreq*2);
-    
+      
     //uint16_t val=0;
     // Make RB11 digital input for pushbutton
  //   TRISBbits.TRISB11 = 1;
@@ -124,7 +122,11 @@ int main(void) {
     uint32_t blinkCounterMax = 500000;      // determines blink rate
     uint32_t readCounter = 0;               // counter for secondary quad encoder read
     uint32_t readCounterMax = 10;           // determines interval to read secondary quad encoder
+    
+    // Proximity Sensor variables
     bool outOfBounds = false;               // if proximity sensor detects out of bounds starting state
+    uint16_t nProxFails = 0;                // counter for successive proximity sensor failures
+    uint16_t proxSenseFailThresh = 20;       // number of successive proximity sensor failure measurements to trigger error
     
     // Watchdog timer
     volatile unsigned *wdtKey; 
@@ -144,7 +146,6 @@ int main(void) {
         // a write is made each time the waveform index is advanced in the PWM1 interrupt loop. If that gets
         // stuck waiting for the master to read off its FIFO, the master write FIFO could then fill up as a result
         // and both cores would just wait for one another.
-  //      __delay32(g_OscillatorFreq/2);
         
         // clear watchdog timer
         *wdtKey = 0x5743;  // clear WDT by performing a 16-bit write to WDTCON
@@ -176,7 +177,7 @@ int main(void) {
  //           __delay32(100);
         }
         
-        // Read the secondary quadrature encoder position with every pass. The position is updated in the 
+        // Read the secondary quadrature encoder position. The position is updated in the 
         // ...g_secondaryQuadEncPos variable very frequently and is therefore up to date wherever else it is needed,
         // ...as this main loop executes very quickly when no interrupt service routine is executing.
         if(readCounter > readCounterMax) {
@@ -188,7 +189,26 @@ int main(void) {
         else{
             readCounter++;
         }
-//        __delay32(2000);
+
+        // Check for proximity sensor failure
+        if(PORTCbits.RC12 && PORTCbits.RC13) {    // if neither sensor detects violation
+            nProxFails = 0;     // reset counter
+            outOfBounds = false;
+            g_statusFlags = g_statusFlags & 0xFFFE;     // clears bit 0  
+        }
+        else{
+            nProxFails++;
+            // check if number of successive failures is over threshold and trigger error if so 
+            if(nProxFails >= proxSenseFailThresh) {
+                // If either motor is enabled, and we are not in step mode, stop motion and set error flag
+                if((g_output1Enabled || g_output2Enabled) && !g_stepMode) {
+                    stopMotion();         
+                    g_statusFlags = g_statusFlags | 1;      // set the error flag for out of range error
+                }             
+                outOfBounds = true;                      // this is used internally by the MCU code rather than the error flag, which is for the CPU
+                nProxFails = proxSenseFailThresh;        // so that counter doesn't roll over and reset itself
+            }
+        }
          
          // The purpose of starting the motor this way rather than calling a function from registerHandler is to allow
          // the I2c transmission to finish without having to wait for all the waveform configuration code to run.
@@ -196,31 +216,31 @@ int main(void) {
          // and start the motion
          if(g_startMotor) {             
             // setLED1(1);
-            outOfBounds = false;                                // even if we are out of bounds we want to be able to walk back in
+          //  outOfBounds = false;                                // even if we are out of bounds we want to be able to walk back in
             configureDerivedQuantities();
             
             // Clear status flags except proximity sensor violations. In step mode, we clear that too so that we can
             // step our way back in bounds. If not in step mode, proximity sensors are read and status flag set accordingly
-            if(g_stepMode) {
-                g_statusFlags = g_statusFlags & 1;              // clear status flags except for proximity sensor error
-                if( PORTCbits.RC12 && PORTCbits.RC13 ) {        // if we are in bounds, clear the proximity violation
-                    g_statusFlags = g_statusFlags & 0xFFFE;     // clears bit 0                    
-                }
-            }
-            else {
-                g_statusFlags = 0;                      // clear all status flags
-                // check to make sure proximity sensors are not out of bounds
-                if( (!PORTCbits.RC12) || (!PORTCbits.RC13) ) {                   // low signal is out of bounds
-                    // wait a few microseconds and try again to make sure it wasn't a transient
-                    __delay32(g_OscillatorFreq*2/1000000);
-                    if( (!PORTCbits.RC12) || (!PORTCbits.RC13) ) {
-                        outOfBounds = true;
-                    }
-                }                
-            }
+//            if(g_stepMode) {
+//                g_statusFlags = g_statusFlags & 1;              // clear status flags except for proximity sensor error
+//                if( PORTCbits.RC12 && PORTCbits.RC13 ) {        // if we are in bounds, clear the proximity violation
+//                    g_statusFlags = g_statusFlags & 0xFFFE;     // clears bit 0                    
+//                }
+//            }
+//            else {
+//                g_statusFlags = 0;                      // clear all status flags
+//                // check to make sure proximity sensors are not out of bounds
+//                if( (!PORTCbits.RC12) || (!PORTCbits.RC13) ) {                   // low signal is out of bounds
+//                    // wait a few microseconds and try again to make sure it wasn't a transient
+//                    __delay32(g_OscillatorFreq*2/1000000);
+//                    if( (!PORTCbits.RC12) || (!PORTCbits.RC13) ) {
+//                        outOfBounds = true;
+//                    }
+//                }                
+//            }
             
             // Set up parameters and send command to secondary to start motion
-            if(!outOfBounds) {
+            if(!outOfBounds || g_stepMode) {    // if we are in bounds or we are in step mode
                 setZeroPosition();
                 g_displacement1Demand = 0;   
                 g_displacement2Demand = 0; 
@@ -229,9 +249,9 @@ int main(void) {
                 enableDriver(true);
                 sendCommandToSecondary(START_MOTION);                  
             }
-            else {
-                g_statusFlags = g_statusFlags | 1;          // set proximity sensor error status flag               
-            }
+//            else {
+//                g_statusFlags = g_statusFlags | 1;          // set proximity sensor error status flag               
+//            }
             
             g_startMotor = false;                           // stops code from entering this block until start button pushed again
          }

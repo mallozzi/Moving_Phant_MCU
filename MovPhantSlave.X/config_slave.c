@@ -104,10 +104,10 @@ void setUpWaveforms() {
     
         // set up motor 1 waveforms
         if(gs_reverseDirection1 == 0) {
-           signedAmplitudeMM1 = (int16_t)gs_motionAmplitudeMM1;     
+           signedAmplitudeMM1 = -(int16_t)gs_motionAmplitudeMM1;     
         }
         else {
-            signedAmplitudeMM1 = -(int16_t)gs_motionAmplitudeMM1; 
+            signedAmplitudeMM1 = (int16_t)gs_motionAmplitudeMM1; 
         }
         if(gs_waveformType == 0) {  // sine waveform
             designPosSineWaveform2(signedAmplitudeMM1, gs_encoderStepsPerMM_1, gs_outputWaveform1);      

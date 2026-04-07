@@ -203,7 +203,7 @@ void configureInterruptOnChange() {
     CNEN0Bbits.CNEN0B15 = 0;        // with CNEN1B15, configure to detect negative only transitions
     CNEN1Bbits.CNEN1B15 = 1;        // with CNEN0B15, configure to detect negative only transitions
     CNFBbits.CNFB15 = 0;            // clear pin-specific change flag
-    IEC0bits.CNBIE = 1;             // enable interrupts for PORTB pins
+    IEC0bits.CNBIE = 0;             // enable interrupts for PORTB pins (set to 1)
     IFS0bits.CNBIF = 0;             // clear interrupt flag for PORTB
     
     // Proximity Sensor for motor 1 on RC12
@@ -213,7 +213,7 @@ void configureInterruptOnChange() {
     CNEN0Cbits.CNEN0C12 = 0;        // with CNEN1C12, configure to detect negative only transitions
     CNEN1Cbits.CNEN1C12 = 1;        // with CNEN0C12, configure to detect negative only transitions
     CNFCbits.CNFC12 = 0;            // clear pin-specific change flag
-    IEC1bits.CNCIE = 1;             // enable interrupts for PORTC pins
+    IEC1bits.CNCIE = 0;             // enable interrupts for PORTC pins (set to 1)
     IFS1bits.CNCIF = 0;             // clear interrupt flag for PORTC
     
     // Proximity Sensor for motor 2 on RC13

@@ -112,11 +112,11 @@ void gotoLandmark() {
     
     if(travelDistMM1 >= 0) {
         g_motionAmplitudeMM1 = (uint16_t)travelDistMM1;
-        g_reverseDirection1 = 0;
+        g_reverseDirection1 = 1;
     }
     else {
         g_motionAmplitudeMM1 = (uint16_t)(-travelDistMM1);
-        g_reverseDirection1 = 1;
+        g_reverseDirection1 = 0;
     }
     
     // Motor 2
@@ -139,7 +139,13 @@ void gotoLandmark() {
  
     // common to both motors
     g_waveformType = 1;  // Ramp
-    g_freqUser = 30;     // do it in 2 seconds (30 cycles / min)
+    if(g_motionAmplitudeMM1 > 10 || g_motionAmplitudeMM2 > 3) {
+        g_freqUser = 15;     // do it in 4 seconds (15 cycles / min)
+    }
+    else {
+        g_freqUser = 30;     // do it in 2 seconds (30 cycles / min)
+    }
+        
     
     //enable both motors
     g_userMotor1Enable = true;
