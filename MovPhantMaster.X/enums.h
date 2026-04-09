@@ -71,6 +71,12 @@ typedef enum {
     QUAD_ENC_POS
 }Variable32;
 
+// THE ENUMS BELOW EXIST ONLY ON THE PRIMARY CORE
+typedef enum {    
+    PROXIMITY_ERROR=0,
+    MOTORS_STOPPED          // Both motors are in stopped state (for any reason)
+}StatusBit;
+
 
 #endif	/* ENUMS_H */
 

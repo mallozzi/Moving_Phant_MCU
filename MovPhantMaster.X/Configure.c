@@ -265,7 +265,7 @@ void configureDerivedQuantities() {
         g_waveformUpdatePeriod = 1600; // targets 80 ms update period assuming PWM1 max integer of 12799
     }
     
-    // Configures the PWM-output-to-position encoder for analog output signal
+    // Configures the PWM-output-to-position encoder for analog output signal. This denominator maps a max pp displacement 
     g_encoderToPwmDenom_1 = (int16_t)(  (float)(g_maxDisplacementMM) * (float)(g_encoderStepsPerMM_1) / (float)g_maxPWMInteger + 0.5);
     g_encoderToPwmDenom_2 = (int16_t)(  (float)(g_maxDisplacementMM) * (float)(g_encoderStepsPerMM_2) / (float)g_maxPWMInteger + 0.5);
     

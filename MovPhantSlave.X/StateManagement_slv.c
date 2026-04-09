@@ -29,7 +29,6 @@ void startMotion() {
 void stopMotion() {
     // The purpose of this is to have a short function to call from an I2C command
     gs_stopMotors = true;
-    setLED2(0);
     
 }
 

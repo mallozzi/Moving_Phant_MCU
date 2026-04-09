@@ -7,6 +7,7 @@
 #include "Configure.h"
 #include "MSCommunication_mstr.h"
 #include "motorCntrlMstr.h"
+#include "enums.h"
 
 void enableDriver(bool enable) {
     // Sends signal to bring driver chip out of sleep mode or put it in sleep mode. Input is true to enable, false to put in sleep.
@@ -26,14 +27,15 @@ void startMotion() {
     // First issue a stop motion command in case the motion is already happening
     stopMotion();
     
-    INTCON2bits.GIE  = 0;                   // disable global interrupts
-    readSecondaryQuadEncoder();             // Perform initial read of secondary quadrature encoder
-    INTCON2bits.GIE  = 1;                   //global interrupt enable
+//    INTCON2bits.GIE  = 0;                   // disable global interrupts
+//    readSecondaryQuadEncoder();             // Perform initial read of secondary quadrature encoder
+//    INTCON2bits.GIE  = 1;                   //global interrupt enable
     
     // delay to  make sure slave core stops output. g_OscillatorFreq / 40000 is about 50 microseconds.
     // Be careful not to make this any longer than it needs to be, or slave-write-master-read FIFO could fill up
     __delay32(g_OscillatorFreq / 10000);   
     g_stopButtonPushed = false;
+    g_statusFlags = 0;    // Clear status flags
     g_startMotor = true;
 
 }
@@ -154,8 +156,37 @@ void gotoLandmark() {
     g_gotoLandmark = false;    // so this function is not executed again
     g_startMotor = true;
     
+    clearStatusFlag(MOTORS_STOPPED);
+    
 }
 
 void setLED1(uint16_t onoff) {
     LATDbits.LATD10 = onoff;
+}
+
+void setStatusFlag(StatusBit whichFlag) {
+    // sets one bit of the status flag integer
+    uint16_t bitPattern;
+    
+    bitPattern = 1 << whichFlag;
+    g_statusFlags = g_statusFlags | bitPattern;
+}
+
+void clearStatusFlag(StatusBit whichFlag) {
+    // clears one bit of the status flag integer
+    uint16_t bitPattern;
+    
+    bitPattern = ~(1 << whichFlag);        // all bits are 1 except the whichFlag bit
+    g_statusFlags = g_statusFlags & bitPattern;
+}
+
+bool getStatusFlag(StatusBit whichFlag) {
+    // gets one bit of the status flag integer, returning a true if the bit is set, false otherwise
+    uint16_t bitPattern;
+    bool flagSet;
+    
+    bitPattern = (1 << whichFlag);        // all bits are 1 except the whichFlag bit
+    flagSet = (bool)(g_statusFlags & bitPattern);
+    
+    return flagSet;
 }

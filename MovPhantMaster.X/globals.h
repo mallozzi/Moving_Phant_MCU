@@ -22,7 +22,7 @@ extern "C" {
 
 extern unsigned long int g_OscillatorFreq;  //Oscillator frequency
 extern uint16_t g_firmwareRev;              // Revision number of firmware
-extern uint16_t g_statusFlags;              // flags containing status information
+extern volatile uint16_t g_statusFlags;     // flags containing status information
 extern bool g_stepMode;                     // true if user is stepping rather than running waveform
 extern bool g_stopButtonPushed;             // used to distinguish user stop request from proximity sensor stop request
 

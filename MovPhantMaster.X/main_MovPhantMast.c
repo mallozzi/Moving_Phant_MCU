@@ -136,6 +136,7 @@ int main(void) {
     readSecondaryQuadEncoder();             // Perform initial read of secondary quadrature encoder
     INTCON2bits.GIE  = 1;                   //global interrupt enable
     
+    setStatusFlag(PROXIMITY_ERROR);
     
     while(1) {
         // IMPORTANT NOTE ABOUT DELAYS IN THIS LOOP:
@@ -194,7 +195,8 @@ int main(void) {
         if(PORTCbits.RC12 && PORTCbits.RC13) {    // if neither sensor detects violation
             nProxFails = 0;     // reset counter
             outOfBounds = false;
-            g_statusFlags = g_statusFlags & 0xFFFE;     // clears bit 0  
+   //         clearStatusFlag(PROXIMITY_ERROR);
+       //     g_statusFlags = g_statusFlags & 0xFFFE;     // clears bit 0  
         }
         else{
             nProxFails++;
@@ -202,8 +204,9 @@ int main(void) {
             if(nProxFails >= proxSenseFailThresh) {
                 // If either motor is enabled, and we are not in step mode, stop motion and set error flag
                 if((g_output1Enabled || g_output2Enabled) && !g_stepMode) {
-                    stopMotion();         
-                    g_statusFlags = g_statusFlags | 1;      // set the error flag for out of range error
+                    stopMotion();       
+                    setStatusFlag(PROXIMITY_ERROR);
+                   // g_statusFlags = g_statusFlags | 1;      // set the error flag for out of range error
                 }             
                 outOfBounds = true;                      // this is used internally by the MCU code rather than the error flag, which is for the CPU
                 nProxFails = proxSenseFailThresh;        // so that counter doesn't roll over and reset itself
@@ -214,9 +217,9 @@ int main(void) {
          // the I2c transmission to finish without having to wait for all the waveform configuration code to run.
          // Master does the configuration on its side, then sends a command to the secondary to do its configuration
          // and start the motion
-         if(g_startMotor) {             
-            // setLED1(1);
+         if(g_startMotor) { 
           //  outOfBounds = false;                                // even if we are out of bounds we want to be able to walk back in
+            __delay32(g_OscillatorFreq/500);                    // wait a few ms to make sure all I2C activity has completed
             configureDerivedQuantities();
             
             // Clear status flags except proximity sensor violations. In step mode, we clear that too so that we can
@@ -247,6 +250,7 @@ int main(void) {
                 sendParamtersToSecondary();
                 while(!MSI1FIFOCSbits.WFEMPTY);             // wait for secondary to finish reading the FIFO. 
                 enableDriver(true);
+                
                 sendCommandToSecondary(START_MOTION);                  
             }
 //            else {
@@ -407,6 +411,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
             if(!g_output2Enabled) {
                 rampUpNumerator=0;
                 fullyRamped = false;
+                setStatusFlag(MOTORS_STOPPED);
             } // if both motors are disabled
         }
 
@@ -576,6 +581,8 @@ void __attribute__((__interrupt__,no_auto_psv)) _SI2C1Interrupt(void) {
             msb = val;
             dataByte16 = (msb << 8) + lsb;      // construct 16-bit number
             
+            I2C1CONLbits.SCLREL = 1;        //release clock
+            
             // *******************************
             // Custom Code to do something with the data that came in
             setRegisterValue(registerNumber, dataByte16);  
@@ -598,15 +605,18 @@ void __attribute__((__interrupt__,no_auto_psv)) _SI2C1Interrupt(void) {
            msb = (val & 0xFF00) >> 8;      // most significant bits
            I2C1TRN = (uint8_t)lsb;         // load lsb data into transmit buffer
            index = index+1;
+           __delay32(50); 
        }
        else if(index==2) {
            I2C1TRN = (uint8_t)msb;         // load msb data into transmit buffer
            index = 0;  //reset index
+           __delay32(50); 
        }
     }
-
-    IFS1bits.SI2C1IF = 0;
+    
     I2C1CONLbits.SCLREL = 1;        //release clock
+    IFS1bits.SI2C1IF = 0;
+    
 }
 
 

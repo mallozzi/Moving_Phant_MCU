@@ -906,6 +906,8 @@
         <property key="periphComp5.gte" value="gt"/>
         <property key="periphComp6.gte" value="gt"/>
         <property key="poweroptions.powerenable" value="false"/>
+        <property key="programmerToGoFilePath"
+                  value="C:/RichMPlab/MovingPhantMCU/MovPhantMaster.X/debug/default/MovPhantMaster_ptg"/>
         <property key="programmerToGoImageName" value="MovPhantMaster_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>

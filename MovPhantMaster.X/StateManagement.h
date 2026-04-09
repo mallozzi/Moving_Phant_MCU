@@ -34,6 +34,7 @@
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include <stdint.h>
 #include <stdbool.h>
+#include "enums.h"
 
 // TODO Insert appropriate #include <>
 
@@ -83,6 +84,9 @@ void setZeroPosition();
 void setLandmarkPosition();
 void gotoLandmark();
 void setLED1(uint16_t onoff);
+void setStatusFlag(StatusBit whichFlag);
+void clearStatusFlag(StatusBit whichFlag);
+bool getStatusFlag(StatusBit whichFlag);
 
 
 
