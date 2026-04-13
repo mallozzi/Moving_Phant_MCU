@@ -374,7 +374,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
             
             // Create a version of the demand that is ramped u slowly, then when done uses the orginal demand. Upon
             // a normal stop situation, it ramps down slowly
-            if(fullyRamped) {
+            if(fullyRamped || g_stepMode) {                             // don't ramp in step mode
                 ramped1Demand = g_displacement1Demand;
             }
             else {
@@ -475,7 +475,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
             clearStatusFlag(MOTORS_STOPPED);
             motorRunning = true;
             
-            if(fullyRamped) {
+            if(fullyRamped || g_stepMode) {                             // don't ramp in step mode
                 ramped2Demand = g_displacement2Demand;
             }
             else {
