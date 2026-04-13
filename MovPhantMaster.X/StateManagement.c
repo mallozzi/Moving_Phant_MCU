@@ -35,15 +35,16 @@ void startMotion() {
     // Be careful not to make this any longer than it needs to be, or slave-write-master-read FIFO could fill up
     __delay32(g_OscillatorFreq / 10000);   
     g_stopButtonPushed = false;
-    g_statusFlags = 0;    // Clear status flags
+    g_statusFlags = 0;    // Clear status flags  
     g_startMotor = true;
+    g_landmarkMode = false;
 
 }
 
 void stopMotion() {
     // The purpose of this is to have a short function to call from an I2C command
     sendCommandToSecondary(STOP_MOTION);
-    setLED1(0);
+    g_landmarkMode = false;
     // For diagnostics - turn off LED 1
 //    LATDbits.LATD10 = 0;
 //    g_outputWaveform = g_zeroWaveform;
@@ -154,13 +155,16 @@ void gotoLandmark() {
     g_userMotor2Enable = true;
     
     g_gotoLandmark = false;    // so this function is not executed again
+    g_landmarkMode = true;
     g_startMotor = true;
     
     clearStatusFlag(MOTORS_STOPPED);
+    clearStatusFlag(PROXIMITY_ERROR);   // allow going to landmark even if we have proximity error
     
 }
 
 void setLED1(uint16_t onoff) {
+    // input 1 for on, 0 for off
     LATDbits.LATD10 = onoff;
 }
 

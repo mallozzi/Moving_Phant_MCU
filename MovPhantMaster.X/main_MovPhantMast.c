@@ -160,6 +160,9 @@ int main(void) {
             blinkCounter++;
         }
         
+        // Temp - turn on LED1 if stop flag is enabled
+        setLED1(getStatusFlag(MOTORS_STOPPED));
+        
         // Monitor Master-Secondary Read Fifo for incoming transmission
         while(!MSI1FIFOCSbits.RFEMPTY) {  // read until the read FIFO is empty
             
@@ -195,18 +198,15 @@ int main(void) {
         if(PORTCbits.RC12 && PORTCbits.RC13) {    // if neither sensor detects violation
             nProxFails = 0;     // reset counter
             outOfBounds = false;
-   //         clearStatusFlag(PROXIMITY_ERROR);
-       //     g_statusFlags = g_statusFlags & 0xFFFE;     // clears bit 0  
         }
         else{
             nProxFails++;
             // check if number of successive failures is over threshold and trigger error if so 
             if(nProxFails >= proxSenseFailThresh) {
-                // If either motor is enabled, and we are not in step mode, stop motion and set error flag
-                if((g_output1Enabled || g_output2Enabled) && !g_stepMode) {
+                // If either motor is enabled, and we are not in step mode or landmark mode, stop motion and set error flag
+                if((g_output1Enabled || g_output2Enabled) && !g_stepMode && !g_landmarkMode) {
                     stopMotion();       
                     setStatusFlag(PROXIMITY_ERROR);
-                   // g_statusFlags = g_statusFlags | 1;      // set the error flag for out of range error
                 }             
                 outOfBounds = true;                      // this is used internally by the MCU code rather than the error flag, which is for the CPU
                 nProxFails = proxSenseFailThresh;        // so that counter doesn't roll over and reset itself
@@ -243,7 +243,7 @@ int main(void) {
 //            }
             
             // Set up parameters and send command to secondary to start motion
-            if(!outOfBounds || g_stepMode) {    // if we are in bounds or we are in step mode
+            if(!outOfBounds || g_stepMode || g_landmarkMode) {    // if we are in bounds or we are in step mode or landmark mode
                 setZeroPosition();
                 g_displacement1Demand = 0;   
                 g_displacement2Demand = 0; 
@@ -253,9 +253,10 @@ int main(void) {
                 
                 sendCommandToSecondary(START_MOTION);                  
             }
-//            else {
-//                g_statusFlags = g_statusFlags | 1;          // set proximity sensor error status flag               
-//            }
+            else if(outOfBounds && !(g_stepMode || g_landmarkMode)) {  // if we are out of bounds and are not in step or landmark mode
+                setStatusFlag(PROXIMITY_ERROR);
+            }
+
             
             g_startMotor = false;                           // stops code from entering this block until start button pushed again
          }
@@ -319,6 +320,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
     static int32_t rampDenomCalculated;            // for speed purposes, this is the calculated ramp numerator
     static uint8_t denomBitShifts=10;               // denominator of ramp up factor, expressed as a number of bit shifts
     static bool fullyRamped = false;                // true if we have finished ramping up the slow start.
+    static bool motorRunning = false;               // true if either motor is running. Used to detect when a motor just stopped rather than already being in stopped state
 //    static int64_t tmp;
 //    static int32_t tmp2;
 //    static uint16_t rampCntr = 0;
@@ -367,6 +369,8 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         // ---------------  POSITION FEEDBACK CONTROL ------------------
  //       rampNumerator++;
         if(g_output1Enabled) { 
+            clearStatusFlag(MOTORS_STOPPED);
+            motorRunning = true;
             
             // Create a version of the demand that is ramped u slowly, then when done uses the orginal demand. Upon
             // a normal stop situation, it ramps down slowly
@@ -408,11 +412,11 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
             g_pwm1Cycles = __builtin_divsd((int32_t)g_pwm1Cycles*98, 100);   // multiplies g_pwm1Cycles by 98/100
             g_displacement1Demand = 0;   // This probably doesn't matter anymore and should probably just be set in the secondary and removed from here.
 
-            if(!g_output2Enabled) {
+            if(!g_output2Enabled) { // if both motors are disabled
                 rampUpNumerator=0;
                 fullyRamped = false;
                 setStatusFlag(MOTORS_STOPPED);
-            } // if both motors are disabled
+            } 
         }
 
         // This is done even if output disabled because g_displacement1Demand will set the future output. The pwm1 cycles are
@@ -468,6 +472,9 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
 
         // ---------------  POSITION FEEDBACK CONTROL ------------------
         if(g_output2Enabled) {
+            clearStatusFlag(MOTORS_STOPPED);
+            motorRunning = true;
+            
             if(fullyRamped) {
                 ramped2Demand = g_displacement2Demand;
             }
@@ -509,6 +516,10 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
             if(!g_output1Enabled) {     // if both motors are disabled.
                 rampUpNumerator = 0;
                 fullyRamped = false;
+                if(motorRunning) {
+                    g_landmarkMode = false;    // Turn off landmark mode only if we just stopped both motors
+                }
+                motorRunning = false;
             }
         }
 

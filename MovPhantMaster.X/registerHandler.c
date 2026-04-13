@@ -70,12 +70,10 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
     if(regNum == REG_COMMAND) { //Commands go here. What gets done depends upon the dataVal
         if(dataVal == START_MOTION) {
             g_stepMode = false;
-            //setLED1(1);
             startMotion();             // in StateManagement.c
         }
         else if(dataVal == STOP_MOTION) {
             g_stopButtonPushed = true;
-            //setLED1(0);
             stopMotion();              // in StateManagement.c
         }
         else if(dataVal == STEP_HEAD) {

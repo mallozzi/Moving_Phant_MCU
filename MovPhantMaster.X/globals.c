@@ -7,6 +7,7 @@
 uint16_t g_firmwareRev = 2;             // Revision number of firmware
 volatile uint16_t g_statusFlags = 0;    // flags containing status information. See bit codes at end of file
 bool g_stepMode = false;                // true if user is stepping rather than running waveform
+bool g_landmarkMode = false;            // true if user requested to go to landmark
 bool g_stopButtonPushed = false;        // used to distinguish user stop request from proximity sensor stop request
 
 // *** VARIABLES THAT MUST BE THE SAME IN MASTER AND SLAVE ***
