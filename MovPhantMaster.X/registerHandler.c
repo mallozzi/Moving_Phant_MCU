@@ -78,7 +78,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         }
         else if(dataVal == STEP_HEAD) {
             g_stepMode = true;
-            g_waveformType = 1;
+            g_waveformType = 2;
             g_motionAmplitudeMM1 = 3;
             g_motionAmplitudeMM2 = 0;
             g_userMotor1Enable = true;
@@ -89,7 +89,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         }
         else if(dataVal == STEP_FOOT) {
             g_stepMode = true;
-            g_waveformType = 1;
+            g_waveformType = 2;
             g_motionAmplitudeMM1 = 3;
             g_motionAmplitudeMM2 = 0;
             g_userMotor1Enable = true;
@@ -100,7 +100,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         }
         else if(dataVal == STEP_RIGHT) {
             g_stepMode = true;
-            g_waveformType = 1;
+            g_waveformType = 2;
             g_motionAmplitudeMM1 = 0;
             g_motionAmplitudeMM2 = 2;
             g_userMotor1Enable = false;
@@ -111,7 +111,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
         }
         else if(dataVal == STEP_LEFT) {
             g_stepMode = true;
-            g_waveformType = 1;
+            g_waveformType = 2;
             g_motionAmplitudeMM1 = 0;
             g_motionAmplitudeMM2 = 2;
             g_userMotor1Enable = false;

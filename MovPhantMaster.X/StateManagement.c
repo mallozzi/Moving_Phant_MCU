@@ -141,7 +141,7 @@ void gotoLandmark() {
     }
  
     // common to both motors
-    g_waveformType = 1;  // Ramp
+    g_waveformType = 2;  // Ramp
     if(g_motionAmplitudeMM1 > 10 || g_motionAmplitudeMM2 > 3) {
         g_freqUser = 15;     // do it in 4 seconds (15 cycles / min)
     }
