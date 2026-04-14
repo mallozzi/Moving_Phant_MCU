@@ -25,10 +25,10 @@ void configureQuadEncoder();
 //void setOutputWaveformMotor1(int32_t* waveformArray);
 
 void setUpWaveforms();
-void designPosSineWaveform2(int16_t mmDisplacementPP, uint16_t encoderStepsPerMM, int32_t* waveformArray);
-void designRampWaveform2(int16_t mmStepSize, uint16_t encoderStepsPerMM, int32_t* waveformArray);
+void designPosSineWaveform(int16_t mmDisplacementPP, uint16_t encoderStepsPerMM, int32_t* waveformArray);
+void designSin4Waveform(int16_t mmDisplacementPP, uint16_t encoderStepsPerMM, int32_t* waveformArray);
+void designRampWaveform(int16_t mmStepSize, uint16_t encoderStepsPerMM, int32_t* waveformArray);
 
-//void makeRampWaveform(int32_t amplitude, uint16_t numValues, int32_t* waveformArray);
 void allocateArbitraryWaveform(uint16_t nPts);
 void setWaveformValue(uint16_t value, uint16_t whichWaveform);
 

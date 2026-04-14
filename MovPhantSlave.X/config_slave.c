@@ -76,14 +76,6 @@ void configureQuadEncoder() {
     POS1CNTL = 0x0000;    
 }
 
-//void setOutputWaveformMotor1(int32_t* waveformArray) {
-//    // Sets the output waveform array to waveformArray. 
-//    if(gs_outputWaveform1 != NULL) {
-//        free(gs_outputWaveform1);
-//    }
-//    gs_outputWaveform1 = waveformArray;
-//}
-
 void setUpWaveforms() {
     //
     
@@ -92,15 +84,7 @@ void setUpWaveforms() {
     
     // If we are not using a custom waveform, free memory from previous waveforms. Do not do this for custom
     // waveforms because the waveform data was set separately
-    if(gs_waveformType < 2) {     // custom waveforms have index 2 or greater
-//        if(gs_outputWaveform1 != NULL) {
-//            free(gs_outputWaveform1);
-//            gs_outputWaveform1 = NULL;
-//        }
-//        if(gs_outputWaveform2 != NULL) {
-//            free(gs_outputWaveform2);
-//            gs_outputWaveform2 = NULL;
-//        }
+    if(gs_waveformType < 3) {     // custom waveforms have index 3 or greater
     
         // set up motor 1 waveforms
         if(gs_reverseDirection1 == 0) {
@@ -110,10 +94,13 @@ void setUpWaveforms() {
             signedAmplitudeMM1 = (int16_t)gs_motionAmplitudeMM1; 
         }
         if(gs_waveformType == 0) {  // sine waveform
-            designPosSineWaveform2(signedAmplitudeMM1, gs_encoderStepsPerMM_1, gs_outputWaveform1);      
+            designPosSineWaveform(signedAmplitudeMM1, gs_encoderStepsPerMM_1, gs_outputWaveform1);      
         }
         else if(gs_waveformType == 1) {  //Step waveform
-            designRampWaveform2(signedAmplitudeMM1, gs_encoderStepsPerMM_1, gs_outputWaveform1);
+            designSin4Waveform(signedAmplitudeMM1, gs_encoderStepsPerMM_1, gs_outputWaveform1);
+        }
+        else if(gs_waveformType == 2) {  //Step waveform
+            designRampWaveform(signedAmplitudeMM1, gs_encoderStepsPerMM_1, gs_outputWaveform1);
         }
 
         // set up motor 2 waveforms
@@ -124,10 +111,13 @@ void setUpWaveforms() {
             signedAmplitudeMM2 = -(int16_t)gs_motionAmplitudeMM2; 
         }
         if(gs_waveformType == 0) {  // sine waveform
-            designPosSineWaveform2(signedAmplitudeMM2, gs_encoderStepsPerMM_2, gs_outputWaveform2);    
+            designPosSineWaveform(signedAmplitudeMM2, gs_encoderStepsPerMM_2, gs_outputWaveform2);    
         }
         else if(gs_waveformType == 1) {  //Step waveform
-            designRampWaveform2(signedAmplitudeMM2, gs_encoderStepsPerMM_2, gs_outputWaveform2);      
+            designSin4Waveform(signedAmplitudeMM2, gs_encoderStepsPerMM_2, gs_outputWaveform2);
+        }
+        else if(gs_waveformType == 2) {  //Step waveform
+            designRampWaveform(signedAmplitudeMM2, gs_encoderStepsPerMM_2, gs_outputWaveform2);      
         }
     }
     else {   // custom waveform.
@@ -147,7 +137,7 @@ void setUpWaveforms() {
     } // if(gs_waveformType)
 }
 
-void designPosSineWaveform2(int16_t mmDisplacementPP, uint16_t encoderStepsPerMM, int32_t* waveformArray) {
+void designPosSineWaveform(int16_t mmDisplacementPP, uint16_t encoderStepsPerMM, int32_t* waveformArray) {
     // Creates a sine waveform designed to give mmDisplacement as the peak-peak position
     // displacement
     
@@ -172,23 +162,37 @@ void designPosSineWaveform2(int16_t mmDisplacementPP, uint16_t encoderStepsPerMM
     }
     
     gs_playSingleWaveformOnly = false;   // plays multiple waveforms
-//    return;
 }
 
-//void designPosSineWaveform(int16_t mmDisplacementPP, int32_t* waveformArray) {
-//    // Creates a sine waveform designed to give mmDisplacement as the peak-peak position
-//    // displacement
-//    
-//    int32_t posAmplitudePP;  // encoder units
-//    
-//    posAmplitudePP = (int32_t)mmDisplacementPP * (int32_t)gs_encoderStepsPerMM_1;
-//    makePosSineWaveform(posAmplitudePP, gs_numArrayVals, waveformArray);
-////    setOutputWaveformMotor1(waveformArray);   
-//    gs_playSingleWaveformOnly = false;   // plays multiple waveforms
-//    return;
-//}
+void designSin4Waveform(int16_t mmDisplacementPP, uint16_t encoderStepsPerMM, int32_t* waveformArray) {
+    // Makes a sin^4 waveform, shifted so that it is symmetric along the vertical axis and starts from zero
+    
+    int32_t posAmplitudePP;  // encoder units
+    uint16_t ii;
+    float x, y;
+    float step = 2*3.14159265359 / gs_numArrayVals;
+    float amplitudePP;                          // float version of pp amplitude in encoder units
+    float phaseOffset = 0.99894;                // phase offset in radians to make sin^4 start at 0
+    
+    posAmplitudePP = (int32_t)mmDisplacementPP * (int32_t)encoderStepsPerMM;   // do this first in integer arithmetic for speed
+    amplitudePP = (float)posAmplitudePP;
+    
+    // Set waveform values
+    for(ii=0; ii<gs_numArrayVals; ii++) {
+        x = sin(ii*step + phaseOffset);
+        y = (x*x*x*x) - 0.5;                                    // 4th power and shift for symmetry along vertical axis
+        waveformArray[ii] = (int32_t)(amplitudePP*y+0.5);       // 0.5 addition is to round to nearest encoder step
+    }
+    
+    // Zero out the remaining array elements
+    for(ii=gs_numArrayVals; ii<MAX_WAVEFORM_SIZE; ii++) {
+        waveformArray[ii] = 0;
+    }
+    
+    gs_playSingleWaveformOnly = false;   // plays multiple waveforms
+}
 
-void designRampWaveform2(int16_t mmStepSize, uint16_t encoderStepsPerMM, int32_t* waveformArray) {
+void designRampWaveform(int16_t mmStepSize, uint16_t encoderStepsPerMM, int32_t* waveformArray) {
     // designs the ramp waveform to step by at total of mmStepSize mm. Plays one waveform only
     // returns waveform array pointer
     
@@ -218,90 +222,11 @@ void designRampWaveform2(int16_t mmStepSize, uint16_t encoderStepsPerMM, int32_t
     for(ii=gs_numArrayVals; ii<MAX_WAVEFORM_SIZE; ii++) {
         waveformArray[ii] = 0;
     }
-    
-    
+       
     gs_playSingleWaveformOnly = true;    // play waveform only once, then stop
     
-  //  makeRampWaveform(stepSizeEncoder, gs_numArrayVals, waveformArray);
-//    setOutputWaveformMotor1(waveformArray); 
-//    gs_playSingleWaveformOnly = true;    // play waveform only once, then stop
     return;
 }
-
-//void designRampWaveform(int16_t mmStepSize, int32_t* waveformArray) {
-//    // designs the ramp waveform to step by at total of mmStepSize mm. Plays one waveform only
-//    // returns waveform array pointer
-//    
-//    int32_t stepSizeEncoder;            // number of encoder steps (signed)
-//    
-//    stepSizeEncoder = (int32_t)mmStepSize * (int32_t)gs_encoderStepsPerMM_1;
-//    makeRampWaveform(stepSizeEncoder, gs_numArrayVals, waveformArray);
-////    setOutputWaveformMotor1(waveformArray); 
-//    gs_playSingleWaveformOnly = true;    // play waveform only once, then stop
-//    return;
-//}
-
-//void makePosSineWaveform(int32_t amplitudeEncPP, uint16_t numValues, int32_t* waveformArray) {
-//    // Allocates a sine waveform of a given amplitude number of values numValues. Also allocates the global zero waveform of the same length.
-//    // INPUTS
-//    // amplitudeEncPP is the peak-to-peak amplitude of the waveform in units of encoder steps
-//    // numValues is the number of values in the array.
-//    // OUTPUT
-//    // waveformArray is an array of int32_t with the waveform values
-//    uint16_t ii;
-//    float x;
-//    float step = 2*3.14159265359 / numValues;
-//    float amplitude;                            // true encoder amplitude rather than peak-to-peak
-//    
-//    amplitude = (float)amplitudeEncPP / 2.0;
-//    
-//    // Set waveform values
-//    for(ii=0; ii<numValues; ii++) {
-//        x = amplitude * sin(ii*step);
-//        waveformArray[ii] = (int32_t)(x+0.5);
-//    }
-//    
-//    // Zero out the remaining array elements
-//    for(ii=numValues; ii<MAX_WAVEFORM_SIZE; ii++) {
-//        waveformArray[ii] = 0;
-//    }
-//    
-//    return;  
-//}
-
-//void makeRampWaveform(int32_t stepSize, uint16_t numValues, int32_t* waveformArray) {
-//    // Creates a waveform meant to move the motor a defined amount. The last 10%
-//    // of the waveform sits steady to allow the motor to settle.
-//    // INPUTS
-//    // stepSize is the number of encoder steps to move the motor
-//    // numValues is the number of values in the array
-//    uint16_t ii;
-//    float rampValue;
-//    float rampIncrement;
-//    uint16_t settleInd;         // index where ramping is finished to allow settling time
-//
-//    
-//    settleInd = (uint16_t)(numValues * 0.9);        // float operation instead of multiplying by 9/10 in case someone makes very long array causing overflow
-//    rampIncrement = (float)(stepSize) / settleInd;
-//    rampValue = 0;
-//    
-//    for(ii=0; ii<numValues; ii++) {
-//        if(ii < settleInd) {
-//            waveformArray[ii] = rampValue;
-//            rampValue+= rampIncrement;
-//        }
-//        else {
-//            waveformArray[ii] = rampValue;          // constant for last portion of array
-//        }
-//    }
-//    
-//    // Zero out the remaining array elements
-//    for(ii=numValues; ii<MAX_WAVEFORM_SIZE; ii++) {
-//        waveformArray[ii] = 0;
-//    }
-//
-//    return;
-//}
 
 void allocateArbitraryWaveform(uint16_t nPts) {
     // Allocates the array for an arbitrary waveform that later gets populated from values transmitted from CPU
