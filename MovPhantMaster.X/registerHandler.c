@@ -102,7 +102,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
             g_stepMode = true;
             g_waveformType = 2;
             g_motionAmplitudeMM1 = 0;
-            g_motionAmplitudeMM2 = 2;
+            g_motionAmplitudeMM2 = 1;
             g_userMotor1Enable = false;
             g_userMotor2Enable = true;
             g_reverseDirection2 = 1;
@@ -113,7 +113,7 @@ void setRegisterValue(uint8_t regNum, uint16_t dataVal) {
             g_stepMode = true;
             g_waveformType = 2;
             g_motionAmplitudeMM1 = 0;
-            g_motionAmplitudeMM2 = 2;
+            g_motionAmplitudeMM2 = 1;
             g_userMotor1Enable = false;
             g_userMotor2Enable = true;
             g_reverseDirection2 = 0;
