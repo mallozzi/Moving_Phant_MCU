@@ -170,9 +170,9 @@ void designSin4Waveform(int16_t mmDisplacementPP, uint16_t encoderStepsPerMM, in
     int32_t posAmplitudePP;  // encoder units
     uint16_t ii;
     float x, y;
-    float step = 2*3.14159265359 / gs_numArrayVals;
-    float amplitudePP;                          // float version of pp amplitude in encoder units
-    float phaseOffset = 0.99894;                // phase offset in radians to make sin^4 start at 0
+    float step = 3.14159265359 / gs_numArrayVals;   // step is half of what it would be for sin because sin^4 has half the repetition period that sin does
+    float amplitudePP;                              // float version of pp amplitude in encoder units
+    float phaseOffset = 0.99894;                    // phase offset in radians to make sin^4 start at 0
     
     posAmplitudePP = (int32_t)mmDisplacementPP * (int32_t)encoderStepsPerMM;   // do this first in integer arithmetic for speed
     amplitudePP = (float)posAmplitudePP;
