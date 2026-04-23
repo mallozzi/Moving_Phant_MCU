@@ -338,8 +338,8 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
             speed1Register = ~speed1Register + 1;   // two's complement
             velocity1 = -(int16_t)speed1Register;
         }
-        // Set velocity PWM for analog output. Velocity is pwm3 module. 
-        setOnCyclesPWM3((uint16_t)(velocity1 + g_pwm3ZeroOffset));
+        // Set velocity PWM for analog output. Velocity is pwm3 module.  Uncomment the line beow to read motor 1 velocity
+       // setOnCyclesPWM3((uint16_t)(velocity1 + g_pwm3ZeroOffset));
 
         // Read position register and update pwm position output
         posLowByte = POS1CNTL; // Should load POS1CNTH into POS1HLD
@@ -422,6 +422,9 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         // This is done even if output disabled because g_displacement1Demand will set the future output. The pwm1 cycles are
         // decayed down in the else code above if the output gets turned off.
         sendVariableToSecondary(PWM1_CYCLES, (uint16_t)g_pwm1Cycles);  // send to secondary core
+        
+        // Temporary to view pwm1 output from velocity test point
+        setOnCyclesPWM3((uint16_t)g_pwm1Cycles);
         
     } // end of motor 1 loop
     else { // counter==1, MOTOR 2 feedback loop update
