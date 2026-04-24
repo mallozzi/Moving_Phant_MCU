@@ -424,7 +424,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         sendVariableToSecondary(PWM1_CYCLES, (uint16_t)g_pwm1Cycles);  // send to secondary core
         
         // Temporary to view pwm1 output from velocity test point
-        setOnCyclesPWM3((uint16_t)g_pwm1Cycles);
+        setOnCyclesPWM3((uint16_t)(abs(g_pwm1Cycles)));
         
     } // end of motor 1 loop
     else { // counter==1, MOTOR 2 feedback loop update
