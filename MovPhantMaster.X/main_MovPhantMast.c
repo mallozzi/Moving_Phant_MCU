@@ -11,6 +11,7 @@
 #include "enums.h"
 #include "motorCntrlMstr.h"
 #include "StateManagement.h"
+#include <stdlib.h>
 
 // FOSCSEL
 #pragma config FNOSC = FRC                  // Oscillator Source Selection (Internal Fast RC (FRC))
@@ -74,6 +75,7 @@ int main(void) {
     //frequency is then (8 MHz)*128/4/1 = 256 MHz. The Oscillator frequency is half this, or 128 MHz, and the instruction
     //cycle is two oscillator cycles, or 64 MIPS. This choice is designed for convenience so that for a Timer1 prescaler of 256, 
     //there is sort of a 'round' number of Timer1 cycles in a second of 250,000
+    
     PLLFBDbits.PLLFBDIV = 128;
     PLLDIVbits.POST1DIV = 4;
     PLLDIVbits.POST2DIV = 1;
@@ -282,6 +284,11 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
     // NOTE: This ISR should be disabled during Master-Slave FIFO writes, as it also triggers writes to the FIFO
     //       that could interfere.
     
+   // The Timer1 interrupt interval is set by the global variable g_feedbackHalfUpdatePeriod. For the value of 
+   // g_feedbackHalfUpdatePeriod=500, with oscillator set at 128 MHz and Timer1 prescaler at 256, this leads to a
+   // Timer1 interrupt every 2 ms. Each motor feedback loop is updated on every other interrupt, so that the
+   // feedback loop gets updated every 4 ms for each motor.
+    
     static uint16_t counter = 0;                    // Counts interrupts to manage alternating motor updates.
     static bool firstPass = true;                   // identifies the first time the ISR is called for variable initialization purposes
     
@@ -299,6 +306,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
     //feedback control parameters for motor 2
     static int32_t displacement2;                   //position relative to zero position
     static int16_t pwmPosition2;                    // pwm output corresponding to the position
+    static int16_t pwmDemand=0;                       // temporary variable so we can output the demand function
     static uint32_t lastPositionEnc2;                // stores previous position of quad encoder 2 for velocity calculation
     
     // Position feedback error parameters for motor 1
@@ -471,7 +479,12 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
         }
 
         // set the position PWM output
-        setOnCyclesPWM2((uint16_t)pwmPosition2);
+     //   setOnCyclesPWM2((uint16_t)pwmPosition2);   // this is the normal line to be restored
+        
+        // Temp code to output the demand function instead of the position of motor 2
+        pwmDemand = ( __builtin_divsd(ramped2Demand, g_encoderToPwmDenom_2) + (int32_t)g_pwm2ZeroOffset );
+        setOnCyclesPWM2((uint16_t)pwmDemand);
+        // End Temp code. All temp code can be deleted, and then restore the line with setOnCyclesPWM2((uint16_t)pwmPosition2) just above 
 
         // ---------------  POSITION FEEDBACK CONTROL ------------------
         if(g_output2Enabled) {
