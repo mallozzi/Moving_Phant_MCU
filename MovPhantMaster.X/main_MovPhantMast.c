@@ -482,7 +482,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
      //   setOnCyclesPWM2((uint16_t)pwmPosition2);   // this is the normal line to be restored
         
         // Temp code to output the demand function instead of the position of motor 2
-        pwmDemand = ( __builtin_divsd(ramped2Demand, g_encoderToPwmDenom_2) + (int32_t)g_pwm2ZeroOffset );
+        pwmDemand = ( __builtin_divsd(ramped1Demand, g_encoderToPwmDenom_2) + (int32_t)g_pwm2ZeroOffset );
         setOnCyclesPWM2((uint16_t)pwmDemand);
         // End Temp code. All temp code can be deleted, and then restore the line with setOnCyclesPWM2((uint16_t)pwmPosition2) just above 
 
@@ -521,7 +521,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
                 g_pwm2Cycles = g_motorTestPwm;
             }
 
-        }
+        } // g_output2Enabled
         else {  // !g_output2Enabled
             // Decay output voltage gradually. Rate of decay in ms will depend upon T1 interrupt rate
             integralDisplacement2Error = 0;
