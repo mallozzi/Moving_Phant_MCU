@@ -75,14 +75,12 @@ int main(void) {
             else if (fifoReg == REG_PING) {
                 processPingRequest();
             }
-            
-            
+             
         }
         
         // blink LED2
         if(blinkCounter > blinkCounterMax) {
             blinkCounter = 0;
-//            LATBbits.LATB1 = ~PORTBbits.RB1;
         }
         else{
             blinkCounter++;
@@ -120,10 +118,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
     
     // Motor 1 
     if(gs_output1Enabled) {  // if output is enabled use waveform
-        // Every outputUpdatePeriod interrupts update the pwm output. For pwm period of 50 microseconds, this is once every 2.5 milliseconds.
-        // Within the loop, alternate updating motor 1 and motor 2 outputs, so that motor 1 is updated at the beginning of an
-        // ...update period, and motor 2 is updated halfway through the update period.
-        //setLED2(1);
+        
         if(interruptCount == motorUpdateHalfInterval) {      // time to update output to motor with whatever is currently requested
             if(!gs_stopMotors) { // normal condition - no call to zero the output position            
                 setMotorOutput1(gs_pwm1Cycles);
@@ -134,8 +129,9 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
             }
         }
 
-        // increment the waveform index in the waveform array every 10 milliseconds. For a pwm period of 50 microseconds, this means 
-        // we need to update every waveformUpdatePeriod=200 interrupts
+        // increment the waveform index in the waveform array. Each time waveform1Count hits gs_waveformUpdatePeriod, the next value
+        // in the waveform array is loaded into the variable for the demand. For a pwm interrupt period of 50 microseconds, this means 
+        // we need to update every waveformUpdatePeriod=200 interrupts to get an update rate of 10 ms, for example.
         waveform1Count++;                                       // this is really counting interrupts
         if(waveform1Count >= gs_waveformUpdatePeriod) {         // time to update what is requested (next element in waveform array)           
             // TO DO NOTE: I BELIEVE THIS IS NO LONGER NECESSARY SINCE WE RESET THE WAVEFORM INDEX (wf1_ind) UPON TERMINATION OF THE LOOP. DOUBLE CHECK AND DELETE
@@ -161,7 +157,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
             waveform1Count = 0;
         }
 //        
-    }
+    } // end of loop if motor1 output is enabled
     else { // if gs_output1Enabled is false
         waveform1Count = 0;
         wf1_ind = 0;
@@ -224,6 +220,14 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
         wf2_ind = 0;
         setMotorOutput2(gs_pwm2Cycles);  // if output is disabled, gs_pwm2Cycles will be decayed to zero in Timer1 interrupt loop in primary core
     } // end Motor 2
+    
+    // If none of the previous control blocks are active on this interrupt, read the quad encoder and send to primary
+    bool nothingElseHappened = (interruptCount != motorUpdateFullInterval) && (interruptCount != motorUpdateFullInterval) && 
+                               (waveform1Count != gs_waveformUpdatePeriod) && (waveform2Count != gs_waveformUpdatePeriod);
+    if(nothingElseHappened ) {
+        uint32_t quadEncPos = readQuadEncoderPos();
+        send32bVariableToPrimary(QUAD_ENC_POS, quadEncPos);
+    }
     
     interruptCount++;   
     // Once a full cycle of motor and waveform updates has been completed, reset the interrupt counter

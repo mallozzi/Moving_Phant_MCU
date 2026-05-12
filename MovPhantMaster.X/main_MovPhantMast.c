@@ -187,9 +187,9 @@ int main(void) {
         // ...g_secondaryQuadEncPos variable very frequently and is therefore up to date wherever else it is needed,
         // ...as this main loop executes very quickly when no interrupt service routine is executing.
         if(readCounter > readCounterMax) {
-            INTCON2bits.GIE  = 0;    //global interrupt disable to avoid fifo conflicts
-            readSecondaryQuadEncoder();
-            INTCON2bits.GIE  = 1;    //global interrupt enable
+           // INTCON2bits.GIE  = 0;    //global interrupt disable to avoid fifo conflicts
+          //  readSecondaryQuadEncoder();
+          //  INTCON2bits.GIE  = 1;    //global interrupt enable
             readCounter=0;
         }
         else{
@@ -223,26 +223,6 @@ int main(void) {
           //  outOfBounds = false;                                // even if we are out of bounds we want to be able to walk back in
             __delay32(g_OscillatorFreq/500);                    // wait a few ms to make sure all I2C activity has completed
             configureDerivedQuantities();
-            
-            // Clear status flags except proximity sensor violations. In step mode, we clear that too so that we can
-            // step our way back in bounds. If not in step mode, proximity sensors are read and status flag set accordingly
-//            if(g_stepMode) {
-//                g_statusFlags = g_statusFlags & 1;              // clear status flags except for proximity sensor error
-//                if( PORTCbits.RC12 && PORTCbits.RC13 ) {        // if we are in bounds, clear the proximity violation
-//                    g_statusFlags = g_statusFlags & 0xFFFE;     // clears bit 0                    
-//                }
-//            }
-//            else {
-//                g_statusFlags = 0;                      // clear all status flags
-//                // check to make sure proximity sensors are not out of bounds
-//                if( (!PORTCbits.RC12) || (!PORTCbits.RC13) ) {                   // low signal is out of bounds
-//                    // wait a few microseconds and try again to make sure it wasn't a transient
-//                    __delay32(g_OscillatorFreq*2/1000000);
-//                    if( (!PORTCbits.RC12) || (!PORTCbits.RC13) ) {
-//                        outOfBounds = true;
-//                    }
-//                }                
-//            }
             
             // Set up parameters and send command to secondary to start motion
             if(!outOfBounds || g_stepMode || g_landmarkMode) {    // if we are in bounds or we are in step mode or landmark mode
