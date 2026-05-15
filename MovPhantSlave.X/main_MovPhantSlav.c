@@ -226,7 +226,9 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
                                (waveform1Count != gs_waveformUpdatePeriod) && (waveform2Count != gs_waveformUpdatePeriod);
     if(nothingElseHappened ) {
         uint32_t quadEncPos = readQuadEncoderPos();
-        send32bVariableToPrimary(QUAD_ENC_POS, quadEncPos);
+        if(!SI1FIFOCSbits.SWFFULL) {  // FIFO should not fill up, but if a __delay command were put on the master side, it could happen
+            send32bVariableToPrimary(QUAD_ENC_POS, quadEncPos);
+        }
     }
     
     interruptCount++;   

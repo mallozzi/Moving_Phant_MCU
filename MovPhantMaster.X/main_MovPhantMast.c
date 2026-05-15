@@ -122,6 +122,7 @@ int main(void) {
  //   TRISBbits.TRISB11 = 1;
     uint32_t blinkCounter=0;                // counter for LED blink
     uint32_t blinkCounterMax = 500000;      // determines blink rate
+    uint8_t ledBlinkState = 0;              // keeps track of on/off state of led blinker if in use
     uint32_t readCounter = 0;               // counter for secondary quad encoder read
     uint32_t readCounterMax = 10;           // determines interval to read secondary quad encoder
     
@@ -155,7 +156,13 @@ int main(void) {
         
         // Blink LED 1
         if(blinkCounter == blinkCounterMax) {
- //           LATDbits.LATD10 = ~PORTDbits.RD10;
+            if(ledBlinkState == 0) {
+                ledBlinkState = 1;
+            }
+            else {
+                ledBlinkState = 0;
+            }
+            setLED1(ledBlinkState);
             blinkCounter = 0;
         }
         else {
