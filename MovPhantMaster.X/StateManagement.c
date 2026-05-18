@@ -194,3 +194,13 @@ bool getStatusFlag(StatusBit whichFlag) {
     
     return flagSet;
 }
+
+void setDiag1(uint16_t onoff) {
+    // Set diagnostic pin 1. onoff = 1 for on, 0 for off
+    LATAbits.LATA4 = onoff;
+}
+
+void setFaultPin(uint16_t onoff) {
+    // Set fault pin. onoff = 1 for on, 0 for off
+    LATBbits.LATB0 = onoff;
+}

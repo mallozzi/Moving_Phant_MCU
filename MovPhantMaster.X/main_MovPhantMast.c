@@ -121,7 +121,8 @@ int main(void) {
     // Make RB11 digital input for pushbutton
  //   TRISBbits.TRISB11 = 1;
     uint32_t blinkCounter=0;                // counter for LED blink
-    uint32_t blinkCounterMax = 500000;      // determines blink rate
+   // uint32_t blinkCounterMax = 500000;      // determines blink rate
+    uint32_t blinkCounterMax = 2000000;      // determines blink rate
     uint8_t ledBlinkState = 0;              // keeps track of on/off state of led blinker if in use
     uint32_t readCounter = 0;               // counter for secondary quad encoder read
     uint32_t readCounterMax = 10;           // determines interval to read secondary quad encoder
@@ -140,6 +141,9 @@ int main(void) {
     INTCON2bits.GIE  = 1;                   //global interrupt enable
     
     setStatusFlag(PROXIMITY_ERROR);
+    
+    //temporary variables for diagnostics
+    bool fifoOverflowed;
     
     while(1) {
         // IMPORTANT NOTE ABOUT DELAYS IN THIS LOOP:
@@ -162,15 +166,19 @@ int main(void) {
             else {
                 ledBlinkState = 0;
             }
-            setLED1(ledBlinkState);
+    //        setLED1(ledBlinkState);
             blinkCounter = 0;
+            setLED1(0);   // turn off as part of some diagnostics on fifo overflow
         }
         else {
             blinkCounter++;
         }
         
-        // Temp - turn on LED1 if stop flag is enabled
-        //setLED1(getStatusFlag(MOTORS_STOPPED));
+        // Temp - test for fifo overflow as diagnostic
+        if(MSI1FIFOCSbits.RFOF) {
+            setLED1(1);
+            fifoOverflowed = true;
+        }
         
         // Monitor Master-Secondary Read Fifo for incoming transmission
         while(!MSI1FIFOCSbits.RFEMPTY) {  // read until the read FIFO is empty
@@ -275,6 +283,9 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
    // g_feedbackHalfUpdatePeriod=500, with oscillator set at 128 MHz and Timer1 prescaler at 256, this leads to a
    // Timer1 interrupt every 2 ms. Each motor feedback loop is updated on every other interrupt, so that the
    // feedback loop gets updated every 4 ms for each motor.
+    
+    // Temp Diagnostic for timing
+    setDiag1(1);
     
     static uint16_t counter = 0;                    // Counts interrupts to manage alternating motor updates.
     static bool firstPass = true;                   // identifies the first time the ISR is called for variable initialization purposes
@@ -543,6 +554,9 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
 
     
     IFS0bits.T1IF = 0;
+    
+    // Temp Diagnostic for timing
+    setDiag1(0);
 
 }
 
@@ -552,6 +566,11 @@ void __attribute__((__interrupt__,no_auto_psv)) _SI2C1Interrupt(void) {
     // In the write request, the register value is then followed immediately by the 16-bit data value (with the additional I2C acknowledge bit).
     // In the read request, after the register value write request, the address is sent again with a read request. This code then sends back
     // the 16-bit data value in response, with the least significant 8 bits first, followed by the most significant 8 bits.
+    
+    // Temp Diagnostic for timing
+    setFaultPin(1);
+    
+    
     uint16_t val=0;
     static uint16_t tmp=0;
     static uint16_t index=0;
@@ -630,6 +649,9 @@ void __attribute__((__interrupt__,no_auto_psv)) _SI2C1Interrupt(void) {
     
     I2C1CONLbits.SCLREL = 1;        //release clock
     IFS1bits.SI2C1IF = 0;
+    
+    // Temp Diagnostic for timing
+    setFaultPin(0);
     
 }
 

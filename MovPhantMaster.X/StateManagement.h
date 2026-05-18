@@ -87,6 +87,8 @@ void setLED1(uint16_t onoff);
 void setStatusFlag(StatusBit whichFlag);
 void clearStatusFlag(StatusBit whichFlag);
 bool getStatusFlag(StatusBit whichFlag);
+void setDiag1(uint16_t onoff);
+void setFaultPin(uint16_t onoff);
 
 
 

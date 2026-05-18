@@ -33,19 +33,21 @@ void configureInitial() {
     // LED 1 Pin RD10
     TRISDbits.TRISD10 = 0;
     
-    // Configure the fault input and sleep output pins
+    // Configure IO pins
     // RA0 is fault input from driver
     TRISAbits.TRISA0 = 1;       // nFault1 input
     TRISCbits.TRISC0 = 1;       // nFault2 input
     TRISDbits.TRISD1 = 0;       // nSleep output
+    TRISAbits.TRISA4 = 0;       // diagnostic pin 1 output
+    TRISBbits.TRISB0 = 0;       // Fault output pin
     
     // Set motor drivers to sleep mode by default. 
     enableDriver(false);
     //LATDbits.LATD1 = 0;        // default to sleep mode so that it must be actively enabled to turn motor
     
     // Configure Fault output pin RB0
-    TRISBbits.TRISB0 = 0;
-    LATBbits.LATB0 = 0;
+    
+    //LATBbits.LATB0 = 0;
     
     // set motor and goto landmark actions to non-starting state
     g_startMotor = false;
