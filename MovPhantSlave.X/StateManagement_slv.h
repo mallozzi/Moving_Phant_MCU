@@ -23,6 +23,10 @@ void startMotion();
 void stopMotion();
 void setLED2(uint16_t onoff);
 
+// diagnostic pins if they are set for secondary core ownership
+void setDiag1_slv(uint16_t onoff);
+void setFaultPin_slv(uint16_t onoff);
+
 
 #endif	/* STATE_MNGMNT_SLV_H */
 

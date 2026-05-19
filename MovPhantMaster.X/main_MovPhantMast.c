@@ -53,6 +53,11 @@
 #pragma config CPRB11 = SLV1                // Quad Encode A module RB11 port
 #pragma config CPRB13 = SLV1                // Quad Encode B module RB13 port
 
+// Diagnostic pins
+#pragma config CPRB0 = SLV1
+#pragma config CPRA4 = SLV1
+
+
 #include "globals.h"
 #include "Configure.h"
 #include "Timer1.h"
@@ -284,8 +289,6 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
    // Timer1 interrupt every 2 ms. Each motor feedback loop is updated on every other interrupt, so that the
    // feedback loop gets updated every 4 ms for each motor.
     
-    // Temp Diagnostic for timing
-    setDiag1(1);
     
     static uint16_t counter = 0;                    // Counts interrupts to manage alternating motor updates.
     static bool firstPass = true;                   // identifies the first time the ISR is called for variable initialization purposes
@@ -555,8 +558,6 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
     
     IFS0bits.T1IF = 0;
     
-    // Temp Diagnostic for timing
-    setDiag1(0);
 
 }
 
@@ -566,9 +567,6 @@ void __attribute__((__interrupt__,no_auto_psv)) _SI2C1Interrupt(void) {
     // In the write request, the register value is then followed immediately by the 16-bit data value (with the additional I2C acknowledge bit).
     // In the read request, after the register value write request, the address is sent again with a read request. This code then sends back
     // the 16-bit data value in response, with the least significant 8 bits first, followed by the most significant 8 bits.
-    
-    // Temp Diagnostic for timing
-    setFaultPin(1);
     
     
     uint16_t val=0;
@@ -649,9 +647,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _SI2C1Interrupt(void) {
     
     I2C1CONLbits.SCLREL = 1;        //release clock
     IFS1bits.SI2C1IF = 0;
-    
-    // Temp Diagnostic for timing
-    setFaultPin(0);
+
     
 }
 

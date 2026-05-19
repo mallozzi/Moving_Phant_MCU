@@ -35,3 +35,15 @@ void stopMotion() {
 void setLED2(uint16_t onoff) {
     LATBbits.LATB1 = onoff;
 }
+
+//Diagnostic output pins. Must be set to secondary core ownership to use
+
+void setDiag1_slv(uint16_t onoff) {
+    // Set diagnostic pin 1. onoff = 1 for on, 0 for off. Pin must be set to be owned by secondary core.
+    LATAbits.LATA4 = onoff;
+}
+
+void setFaultPin_slv(uint16_t onoff) {
+    // Set fault pin. onoff = 1 for on, 0 for off. Pin must be set to be owned by secondary core.
+    LATBbits.LATB0 = onoff;
+}

@@ -226,8 +226,12 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWM2Interrupt(void)
                                (waveform1Count != gs_waveformUpdatePeriod) && (waveform2Count != gs_waveformUpdatePeriod);
     if(nothingElseHappened ) {
         uint32_t quadEncPos = readQuadEncoderPos();
-        if(!SI1FIFOCSbits.SWFFULL) {  // FIFO may fill up if an I2c transmission is happening, interrupting the main loop in the master.
+        if(!SI1FIFOCSbits.SWFFULL) {  // Not doing this somehow affects I2C transmission, leading to NACK errors. I don't understand why, as the FIFO gets read many times per I2c interrupt. I2c ISR only lasts about 1 microsecond.
             send32bVariableToPrimary(QUAD_ENC_POS, quadEncPos);
+            setFaultPin_slv(0);
+        }
+        else {
+            setFaultPin_slv(1);
         }
     }
     

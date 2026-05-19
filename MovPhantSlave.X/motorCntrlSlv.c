@@ -21,6 +21,8 @@ void setMotorOutput1(int16_t pwmSignedDutyCycleInt) {
     static uint16_t pwmDutyCycleInt=0;
     static int16_t oldSignedPwmDutyCycleInt=0;
     
+    setDiag1_slv(1);
+    
     // Low-pass filter the changes. See notes on discrete low-pass filtering.
     newPwmVal = MultiplyByFraction(oldPwmVal-oldSignedPwmDutyCycleInt, gs_filtNumerator, gs_filtDenominator) + oldSignedPwmDutyCycleInt;
     oldPwmVal = newPwmVal;
@@ -46,6 +48,8 @@ void setMotorOutput1(int16_t pwmSignedDutyCycleInt) {
     LATCbits.LATC5 = dir;              // set direction. Do this directly for maximal speed rather than call function
     setOnCyclesPWM1(pwmDutyCycleInt);   // sets motor output voltage. PWM1 is motor1, so this actually sets the pwm 2 module
     INTCON2bits.GIE = 1;                // re-enable global interrupt 
+    
+    setDiag1_slv(0);
     
 }
 
